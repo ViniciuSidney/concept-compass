@@ -12,13 +12,38 @@ const ICON_PATHS = Object.freeze({
   menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
   close: ['m6 6 12 12', 'M18 6 6 18'],
   arrow: ['m9 18 6-6-6-6'],
+  'chevron-right': ['m9 18 6-6-6-6'],
   layers: ['m12 2 9 5-9 5-9-5 9-5Z', 'm3 12 9 5 9-5', 'm3 17 9 5 9-5'],
+  more: ['M5 12h.01', 'M12 12h.01', 'M19 12h.01'],
+  check: ['m5 12 4 4L19 6'],
+  warning: [
+    'M10.3 3.7 2.6 17a2 2 0 0 0 1.73 3h15.34a2 2 0 0 0 1.73-3L13.7 3.7a2 2 0 0 0-3.4 0Z',
+    'M12 9v4',
+    'M12 17h.01',
+  ],
+  info: ['M12 11v5', 'M12 8h.01', 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
+  inbox: ['M4 4h16v13a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V4Z', 'M4 14h4l2 3h4l2-3h4'],
+  edit: ['M12 20h9', 'M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4L16.5 3.5Z'],
+  trash: ['M3 6h18', 'M8 6V4h8v2', 'M19 6l-1 14H6L5 6', 'M10 11v5', 'M14 11v5'],
+  copy: ['M8 8h11v11H8V8Z', 'M5 16H4V5h11v1'],
+  sun: [
+    'M12 3v2',
+    'M12 19v2',
+    'M3 12h2',
+    'M19 12h2',
+    'm5.64 5.64 1.42 1.42',
+    'm16.94 16.94 1.42 1.42',
+    'm5.64 18.36 1.42-1.42',
+    'm16.94 7.06 1.42-1.42',
+    'M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+  ],
+  moon: ['M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z'],
+  monitor: ['M4 4h16v12H4V4Z', 'M8 20h8', 'M12 16v4'],
+  panel: ['M4 4h16v16H4V4Z', 'M15 4v16'],
+  bell: ['M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9', 'M13.73 21a2 2 0 0 1-3.46 0'],
 });
-
 export function createIcon(documentObject, name, { size = 20, className = '' } = {}) {
-  const paths = ICON_PATHS[name] ?? ICON_PATHS.layers;
   const svg = documentObject.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('width', String(size));
   svg.setAttribute('height', String(size));
@@ -29,16 +54,11 @@ export function createIcon(documentObject, name, { size = 20, className = '' } =
   svg.setAttribute('stroke-linejoin', 'round');
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
-
-  if (className) {
-    svg.setAttribute('class', className);
-  }
-
-  for (const pathDefinition of paths) {
+  if (className) svg.setAttribute('class', className);
+  for (const definition of ICON_PATHS[name] ?? ICON_PATHS.layers) {
     const path = documentObject.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', pathDefinition);
+    path.setAttribute('d', definition);
     svg.append(path);
   }
-
   return svg;
 }

@@ -1,1 +1,13 @@
-/* Temas explícitos Claro, Escuro e Sistema serão implementados no M9/M10. */
+:root,
+:root[data-theme='light'],
+:root[data-theme='dark'] {
+  transition: color-scheme var(--transition-fast);
+}
+:root[data-theme='dark'] .app-topbar,
+:root[data-theme='dark'] .surface-card,
+:root[data-theme='dark'] .showcase-card,
+:root[data-theme='dark'] .state-card,
+:root[data-theme='dark'] .modal,
+:root[data-theme='dark'] .side-panel {
+  box-shadow: none;
+}
