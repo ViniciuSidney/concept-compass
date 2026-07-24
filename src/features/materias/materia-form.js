@@ -21,6 +21,7 @@ export function createMateriaFormModal(
 ) {
   const editing = Boolean(materia);
   const form = documentObject.createElement('form');
+  form.id = createComponentId('materia-form');
   const generalError = documentObject.createElement('div');
   const nameField = createTextField(documentObject, {
     name: 'nome',
@@ -49,6 +50,7 @@ export function createMateriaFormModal(
   });
   const footer = documentObject.createElement('div');
 
+  submitButton.setAttribute('form', form.id);
   form.className = 'entity-form materia-form';
   form.noValidate = true;
   generalError.className = 'form-general-error';
