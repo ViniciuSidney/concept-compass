@@ -1,16 +1,25 @@
 import { createPagePlaceholder } from '../../ui/states/page-placeholder.js';
-
-export function createConfiguracoesPage(documentObject) {
-  return createPagePlaceholder(documentObject, {
+import { createM3Showcase } from './m3-showcase.js';
+export function createConfiguracoesPage(documentObject, _route, context) {
+  const page = createPagePlaceholder(documentObject, {
     eyebrow: 'Preferências e segurança',
     title: 'Configurações',
     description:
-      'A aparência, os backups e a recuperação de dados serão implementados de forma segura no M9.',
+      'A estrutura visual está pronta. A persistência das preferências, backups e recuperação será implementada no M9.',
     icon: 'settings',
+    status: 'Validação do M3',
     details: [
       'Rota oficial: #/configuracoes',
-      'Nenhuma preferência é persistida ainda',
+      'Os temas podem ser visualizados, mas ainda não são persistidos',
       'Autor oficial: Vinícius Sidney',
     ],
   });
+  page.append(
+    createM3Showcase(documentObject, {
+      themeController: context.themeController,
+      showToast: context.appShell.showToast,
+      overlayManager: context.overlayManager,
+    }),
+  );
+  return page;
 }
