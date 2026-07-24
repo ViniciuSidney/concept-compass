@@ -1,0 +1,11 @@
+{
+  "name": "Organizador de Conteúdos",
+  "short_name": "Conteúdos",
+  "description": "Organize estudos em Matérias, Temas e Assuntos.",
+  "lang": "pt-BR",
+  "start_url": "./#/",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#4f46e5",
+  "icons": []
+}

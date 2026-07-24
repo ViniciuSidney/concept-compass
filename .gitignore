@@ -1,0 +1,36 @@
+# Dependências
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cobertura e relatórios
+coverage/
+reports/
+
+# Arquivos locais e temporários
+.env
+.env.*
+!.env.example
+*.tmp
+*.temp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Dados e backups reais
+backups/
+*.real-data.json
+organizador-conteudos-backup-*.json
+
+# Artefatos compactados
+dist/
+*.zip
