@@ -1,5 +1,7 @@
+import { createBadge } from '../components/badge.js';
+import { createButtonLink } from '../components/button.js';
+import { createPageHeader } from '../components/page-header.js';
 import { createIcon } from '../icons/icon.js';
-
 export function createPagePlaceholder(
   documentObject,
   {
@@ -7,70 +9,54 @@ export function createPagePlaceholder(
     title,
     description,
     icon = 'layers',
-    status = 'Estrutura provisória do M1',
+    status = 'Estrutura provisória',
     details = [],
     action = null,
+    breadcrumb = null,
   },
 ) {
   const page = documentObject.createElement('section');
-  const header = documentObject.createElement('header');
-  const headingGroup = documentObject.createElement('div');
-  const eyebrowElement = documentObject.createElement('p');
-  const titleElement = documentObject.createElement('h1');
-  const descriptionElement = documentObject.createElement('p');
-  const statusElement = documentObject.createElement('span');
+  const header = createPageHeader(documentObject, {
+    eyebrow,
+    title,
+    description,
+    breadcrumb,
+    actions: createBadge(documentObject, { label: status, tone: 'primary' }),
+  });
   const card = documentObject.createElement('article');
-  const iconWrapper = documentObject.createElement('span');
-  const cardContent = documentObject.createElement('div');
-  const cardTitle = documentObject.createElement('h2');
-  const cardText = documentObject.createElement('p');
-
+  const iconBox = documentObject.createElement('span');
+  const content = documentObject.createElement('div');
+  const h2 = documentObject.createElement('h2');
+  const p = documentObject.createElement('p');
   page.className = 'page-placeholder';
-  header.className = 'page-header';
-  headingGroup.className = 'page-header__content';
-  eyebrowElement.className = 'page-header__eyebrow';
-  eyebrowElement.textContent = eyebrow;
-  titleElement.textContent = title;
-  descriptionElement.textContent = description;
-  statusElement.className = 'status-chip';
-  statusElement.textContent = status;
-
-  headingGroup.append(eyebrowElement, titleElement, descriptionElement);
-  header.append(headingGroup, statusElement);
-
-  card.className = 'foundation-card';
-  iconWrapper.className = 'foundation-card__icon';
-  iconWrapper.append(createIcon(documentObject, icon, { size: 26 }));
-  cardContent.className = 'foundation-card__content';
-  cardTitle.textContent = 'Fundação preparada';
-  cardText.textContent =
-    'Esta rota já funciona dentro do AppShell. O conteúdo definitivo será implementado no marco correspondente.';
-  cardContent.append(cardTitle, cardText);
-
-  if (details.length > 0) {
+  card.className = 'surface-card foundation-card';
+  iconBox.className = 'foundation-card__icon';
+  iconBox.append(createIcon(documentObject, icon, { size: 26 }));
+  content.className = 'foundation-card__content';
+  h2.textContent = 'Fundação preparada';
+  p.textContent =
+    'Esta rota funciona dentro do AppShell e já utiliza os componentes globais do M3. O conteúdo definitivo será implementado no marco correspondente.';
+  content.append(h2, p);
+  if (details.length) {
     const list = documentObject.createElement('ul');
     list.className = 'foundation-card__list';
-
     for (const detail of details) {
-      const item = documentObject.createElement('li');
-      item.textContent = detail;
-      list.append(item);
+      const li = documentObject.createElement('li');
+      li.textContent = detail;
+      list.append(li);
     }
-
-    cardContent.append(list);
+    content.append(list);
   }
-
-  if (action) {
-    const actionLink = documentObject.createElement('a');
-    actionLink.className = 'button button--primary';
-    actionLink.href = action.href;
-    actionLink.textContent = action.label;
-    actionLink.append(createIcon(documentObject, 'arrow', { size: 18 }));
-    cardContent.append(actionLink);
-  }
-
-  card.append(iconWrapper, cardContent);
+  if (action)
+    content.append(
+      createButtonLink(documentObject, {
+        href: action.href,
+        label: action.label,
+        icon: 'arrow',
+        iconPosition: 'end',
+      }),
+    );
+  card.append(iconBox, content);
   page.append(header, card);
-
   return page;
 }

@@ -9,6 +9,8 @@ import { createNaoEncontradoPage } from '../features/nao-encontrado/nao-encontra
 import { createPesquisaPage } from '../features/pesquisa/pesquisa-page.js';
 import { createRecuperacaoPage } from '../features/recuperacao/recuperacao-page.js';
 import { createAppShell } from '../ui/components/app-shell.js';
+import { createOverlayManager } from '../ui/overlays/overlay-manager.js';
+import { createThemeController } from '../ui/theme/theme-controller.js';
 
 const PAGE_FACTORIES = Object.freeze({
   dashboard: createDashboardPage,
@@ -36,7 +38,10 @@ export function createApp({ documentObject = document, windowObject = window } =
       lastError: null,
     },
   });
-  const appShell = createAppShell(documentObject);
+  const themeController = createThemeController({ documentObject, windowObject });
+  const overlayManager = createOverlayManager();
+  const appShell = createAppShell(documentObject, { windowObject });
+  const pageContext = Object.freeze({ appShell, themeController, overlayManager });
 
   root.replaceChildren(appShell.element);
 
@@ -45,8 +50,9 @@ export function createApp({ documentObject = document, windowObject = window } =
   }
 
   function renderRoute(route) {
+    overlayManager.reset('route-change');
     const pageFactory = PAGE_FACTORIES[route.id] ?? createNaoEncontradoPage;
-    const page = pageFactory(documentObject, route);
+    const page = pageFactory(documentObject, route, pageContext);
 
     store.updateState((currentState) => ({
       ui: {
@@ -75,6 +81,8 @@ export function createApp({ documentObject = document, windowObject = window } =
 
   function stop() {
     router.stop();
+    overlayManager.reset('app-stop');
+    themeController.destroy();
   }
 
   return Object.freeze({
@@ -82,5 +90,7 @@ export function createApp({ documentObject = document, windowObject = window } =
     stop,
     store,
     router,
+    themeController,
+    overlayManager,
   });
 }
