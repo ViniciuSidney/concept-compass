@@ -8,20 +8,25 @@
       content="Organizador de Conteúdos — aplicação local para organizar Matérias, Temas e Assuntos."
     />
     <meta name="theme-color" content="#4f46e5" />
-    <title>Organizador de Conteúdos — Desenvolvimento</title>
+    <title>Visão Geral — Organizador de Conteúdos</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./src/styles/reset.css" />
     <link rel="stylesheet" href="./src/styles/tokens.css" />
     <link rel="stylesheet" href="./src/styles/base.css" />
+    <link rel="stylesheet" href="./src/styles/layout.css" />
+    <link rel="stylesheet" href="./src/styles/components/app-shell.css" />
+    <link rel="stylesheet" href="./src/styles/pages/placeholders.css" />
+    <link rel="stylesheet" href="./src/styles/themes.css" />
+    <link rel="stylesheet" href="./src/styles/responsive.css" />
   </head>
   <body>
-    <main id="app" class="m0-shell" tabindex="-1">
-      <p class="m0-kicker">Marco M0</p>
-      <h1>Organizador de Conteúdos</h1>
-      <p>A fundação local do projeto está carregando.</p>
-      <p id="app-status" role="status" aria-live="polite">Inicializando JavaScript…</p>
-    </main>
+    <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+    <div id="app" aria-busy="true">
+      <div class="initial-loading" role="status" aria-live="polite">
+        Carregando o Organizador de Conteúdos…
+      </div>
+    </div>
 
     <noscript>Esta aplicação precisa de JavaScript habilitado.</noscript>
     <script type="module" src="./src/main.js"></script>

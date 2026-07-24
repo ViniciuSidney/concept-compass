@@ -1,1 +1,46 @@
-/* Regras responsivas completas serão implementadas progressivamente até o M10. */
+@media (max-width: 54rem) {
+  .app-content {
+    margin-left: 0;
+  }
+
+  .app-sidebar {
+    width: min(18rem, calc(100vw - 3rem));
+    transform: translateX(-105%);
+    transition: transform 200ms ease;
+  }
+
+  .app-shell.is-navigation-open .app-sidebar {
+    transform: translateX(0);
+  }
+
+  .app-topbar__menu-button {
+    display: grid;
+  }
+}
+
+@media (min-width: 54.001rem) {
+  .app-sidebar-backdrop {
+    display: none;
+  }
+}
+
+@media (max-width: 42rem) {
+  .app-main {
+    padding: 1.35rem 1rem 2rem;
+  }
+
+  .app-topbar {
+    min-height: 4.25rem;
+    padding-inline: 1rem;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .foundation-card {
+    grid-template-columns: 1fr;
+  }
+}

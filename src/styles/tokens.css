@@ -1,21 +1,45 @@
 :root {
   color-scheme: light dark;
-  --color-background: #f6f7fb;
+  --color-background: #f5f6fb;
   --color-surface: #ffffff;
-  --color-text: #171827;
-  --color-muted: #666b7a;
-  --color-primary: #4f46e5;
-  --color-border: #dfe2ea;
-  --radius-large: 1rem;
-  --shadow-soft: 0 1rem 3rem rgb(28 29 45 / 10%);
+  --color-surface-soft: #f8f8fc;
+  --color-sidebar: #17182a;
+  --color-sidebar-soft: #23243b;
+  --color-text: #191a2b;
+  --color-muted: #686c7d;
+  --color-muted-strong: #4d5163;
+  --color-primary: #6558f5;
+  --color-primary-strong: #5145e5;
+  --color-primary-soft: #eeeafd;
+  --color-border: #e1e3ec;
+  --color-border-strong: #cfd2df;
+  --color-focus: #8b82ff;
+  --color-overlay: rgb(8 9 18 / 58%);
+  --radius-small: 0.65rem;
+  --radius-medium: 0.9rem;
+  --radius-large: 1.15rem;
+  --radius-pill: 999px;
+  --shadow-soft: 0 1rem 3rem rgb(28 29 45 / 8%);
+  --shadow-card: 0 0.6rem 1.8rem rgb(28 29 45 / 6%);
+  --sidebar-width: 17.5rem;
+  --content-max-width: 90rem;
+  --transition-fast: 160ms ease;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #10111a;
-    --color-surface: #191b27;
+    --color-background: #0f1019;
+    --color-surface: #181a28;
+    --color-surface-soft: #1d1f2f;
+    --color-sidebar: #12131f;
+    --color-sidebar-soft: #202235;
     --color-text: #f5f6fb;
-    --color-muted: #b7bac8;
-    --color-border: #303344;
+    --color-muted: #b6b9c8;
+    --color-muted-strong: #d2d4de;
+    --color-primary-soft: #2a2748;
+    --color-border: #303345;
+    --color-border-strong: #41455b;
+    --shadow-soft: none;
+    --shadow-card: none;
   }
 }
