@@ -10,13 +10,13 @@ Matéria
 
 ## Situação atual
 
-Esta pasta representa somente o **M0 — Preparação do repositório** da v0.1.
+Esta pasta implementa o **M1 — Fundação técnica e AppShell mínimo** da v0.1 e está pronta para validação manual.
 
-Ela contém a fundação técnica reproduzível, mas ainda não implementa CRUD, cards, pesquisa, persistência acadêmica ou regras de progresso.
+A aplicação já possui núcleo modular, store, roteamento por fragmento, AppShell responsivo e páginas provisórias. CRUD acadêmico, persistência de dados e regras de progresso ainda não foram implementados.
 
 ## Onde manter a pasta
 
-Extraia o projeto em uma pasta local que não seja sincronizada pelo Google Drive, OneDrive ou serviço semelhante. Exemplo no Windows:
+Mantenha o projeto em uma pasta local que não seja sincronizada pelo Google Drive, OneDrive ou serviço semelhante. Exemplo no Windows:
 
 ```text
 C:\Projetos\organizador-de-conteudos
@@ -52,23 +52,43 @@ O servidor local usa, por padrão:
 http://127.0.0.1:4173
 ```
 
-## Escopo do M0
+## Rotas do M1
 
-- estrutura inicial de pastas;
-- página mínima;
-- módulos ES;
-- servidor HTTP local sem dependência externa;
-- ESLint;
-- Prettier;
-- `node:test`;
-- Git com branches `main` e `dev`;
-- zero dependências de execução;
-- nenhum dado real.
+```text
+#/                              Visão Geral
+#/materias                      Matérias
+#/materias/:materiaId           Matéria específica
+#/pesquisa?q=:termo             Pesquisa Geral
+#/configuracoes                 Configurações
+#/recuperacao                   Recuperação de Dados
+```
+
+Rotas desconhecidas exibem o estado de Conteúdo Não Encontrado sem derrubar a aplicação.
+
+## Estrutura implementada
+
+- `src/core`: inicialização, configuração, erros, store e roteador;
+- `src/features`: páginas provisórias por funcionalidade;
+- `src/ui`: AppShell, navegação, ícones e estados reutilizáveis;
+- `src/styles`: tokens, base, layout, componentes, páginas e responsividade;
+- `tests`: testes unitários e de integração.
+
+## Limites do M1
+
+Ainda não existem:
+
+- Matérias, Temas ou Assuntos persistidos;
+- formulários acadêmicos;
+- pesquisa funcional;
+- filtros;
+- progresso;
+- backup;
+- service worker ativo.
 
 ## Branches
 
 - `main`: base estável;
-- `dev`: desenvolvimento da v0.1;
+- `dev`: integração da v0.1;
 - `feature/<objetivo>`: funcionalidade isolada;
 - `fix/<problema>`: correção isolada.
 
@@ -76,7 +96,7 @@ A pasta é entregue na branch `dev`.
 
 ## Próximo marco
 
-Após validar o M0, iniciar o **M1 — Fundação técnica e AppShell mínimo**. Não implementar regras acadêmicas antes da base de domínio e persistência prevista no M2.
+Após validar o M1, iniciar o **M2 — Domínio, validação e persistência**. Nenhum CRUD visual deverá salvar dados antes da conclusão do repositório e dos validadores.
 
 ## Autor
 
