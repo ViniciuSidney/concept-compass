@@ -4,14 +4,14 @@ Aplicação web local para organizar estudos em **Matéria → Tema → Assunto*
 
 ## Situação atual
 
-Esta pasta implementa o **M3 — Sistema visual e componentes globais**. O domínio e a persistência do M2 continuam preservados, mas ainda não há CRUD visual.
+Esta pasta implementa o **M4 — Gerenciamento de Matérias**. O usuário já pode criar, editar, pesquisar, ordenar, reordenar, abrir e excluir matérias com persistência local. Temas e Assuntos continuam reservados ao M5.
 
 ## Preparação
 
 ```bash
 npm install
 npm run check
-npm run verify:m3
+npm run verify:m4
 npm run serve
 ```
 
@@ -20,21 +20,21 @@ Servidor: `http://127.0.0.1:4173`
 ## Rotas
 
 - `#/` — Visão Geral;
-- `#/materias` — Matérias;
-- `#/materias/:materiaId` — Matéria específica;
-- `#/pesquisa?q=:termo` — Pesquisa Geral;
+- `#/materias` — gerenciamento de Matérias;
+- `#/materias/:materiaId` — abertura de uma Matéria;
+- `#/pesquisa?q=:termo` — Pesquisa Geral provisória;
 - `#/configuracoes` — Configurações e laboratório temporário do M3;
 - `#/recuperacao` — Recuperação.
 
-## M3
+## M4
 
-Foram adicionados tokens, temas, componentes de controles, cabeçalhos, breadcrumbs, feedbacks, estados, modal, painel lateral, menu de ações e comportamento responsivo. A prévia de tema não é persistida; isso pertence ao M9.
+A tela de Matérias inclui estado vazio, cards, formulário contextual, cores de identificação, pesquisa, ordenações de visualização, reordenação acessível, exclusão com impacto e persistência pelo `AppRepository`.
 
-O roteiro manual está em `tests/manual/m3.md`.
+O roteiro manual está em `tests/manual/m4.md`.
 
 ## Limites
 
-Ainda não existem matérias reais, formulários acadêmicos, CRUD visual, pesquisa funcional, backup visual ou service worker ativo.
+Ainda não existem CRUD visual de Temas e Assuntos, Dashboard definitivo, Pesquisa Geral funcional, backup visual ou service worker ativo.
 
 ## Autor
 
