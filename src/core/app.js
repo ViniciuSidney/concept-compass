@@ -1,6 +1,9 @@
 import { APP_CONFIG } from './config.js';
 import { createRouter } from './router.js';
 import { createStore } from './store.js';
+import { createAppRepository } from '../data/repositories/app-repository.js';
+import { createLocalStorageAdapter } from '../data/storage/local-storage-adapter.js';
+import { createDefaultPreferences, createEmptyData } from '../domain/constants.js';
 import { createConfiguracoesPage } from '../features/configuracoes/configuracoes-page.js';
 import { createDashboardPage } from '../features/dashboard/dashboard-page.js';
 import { createMateriaPage } from '../features/materias/materia-page.js';
@@ -29,21 +32,33 @@ export function createApp({ documentObject = document, windowObject = window } =
     throw new Error('A região raiz #app não foi encontrada.');
   }
 
+  const storageAdapter = createLocalStorageAdapter(windowObject.localStorage);
+  const repository = createAppRepository({ storageAdapter });
+  const dataResult = repository.loadData();
+  const preferencesResult = repository.loadPreferences();
+  const preferences = preferencesResult.preferences ?? createDefaultPreferences();
   const store = createStore({
+    data: dataResult.data ?? createEmptyData(),
+    preferences,
     ui: {
       route: null,
     },
     status: {
       initializing: true,
-      lastError: null,
+      saving: false,
+      recovering: dataResult.status === 'recovery',
+      recoveryRawData: dataResult.rawData ?? null,
+      lastError: dataResult.error ?? null,
     },
   });
   const themeController = createThemeController({ documentObject, windowObject });
   const overlayManager = createOverlayManager();
   const appShell = createAppShell(documentObject, { windowObject });
-  const pageContext = Object.freeze({ appShell, themeController, overlayManager });
+  let router = null;
 
+  themeController.setTheme(preferences.theme);
   root.replaceChildren(appShell.element);
+  root.removeAttribute('aria-busy');
 
   function updateDocumentTitle(route) {
     documentObject.title = `${route.title} — ${APP_CONFIG.name}`;
@@ -52,6 +67,15 @@ export function createApp({ documentObject = document, windowObject = window } =
   function renderRoute(route) {
     overlayManager.reset('route-change');
     const pageFactory = PAGE_FACTORIES[route.id] ?? createNaoEncontradoPage;
+    const pageContext = Object.freeze({
+      appShell,
+      themeController,
+      overlayManager,
+      store,
+      repository,
+      windowObject,
+      navigate: (href, options) => router?.navigate(href, options),
+    });
     const page = pageFactory(documentObject, route, pageContext);
 
     store.updateState((currentState) => ({
@@ -62,7 +86,6 @@ export function createApp({ documentObject = document, windowObject = window } =
       status: {
         ...currentState.status,
         initializing: false,
-        lastError: null,
       },
     }));
 
@@ -70,12 +93,16 @@ export function createApp({ documentObject = document, windowObject = window } =
     appShell.renderPage(page, route);
   }
 
-  const router = createRouter({
+  router = createRouter({
     windowObject,
     onRouteChange: renderRoute,
   });
 
   function start() {
+    if (dataResult.status === 'recovery' && windowObject.location.hash !== '#/recuperacao') {
+      router.navigate('/recuperacao', { replace: true });
+    }
+
     router.start();
   }
 
@@ -90,6 +117,7 @@ export function createApp({ documentObject = document, windowObject = window } =
     stop,
     store,
     router,
+    repository,
     themeController,
     overlayManager,
   });
