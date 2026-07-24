@@ -1,4 +1,8 @@
-# Preparação para validação do M2 — Domínio, validação e persistência
+# Validação concluída do M2 — Domínio, validação e persistência
+
+## Status
+
+**Aprovado pelo usuário.** Os testes manuais do M2 foram concluídos com resultado OK e o avanço ao M3 foi autorizado.
 
 ## Escopo concluído
 
@@ -43,4 +47,4 @@ O M2 não implementa:
 
 ## Roteiro manual
 
-A conclusão oficial depende de `tests/manual/m2.md`.
+O roteiro `tests/manual/m2.md` foi concluído e o portão de avanço foi atendido.
