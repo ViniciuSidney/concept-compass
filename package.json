@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "serve": "node scripts/serve.mjs",
+    "verify:m2": "node scripts/verify-m2.mjs",
     "test": "node --test",
     "lint": "eslint .",
     "format": "prettier --write .",

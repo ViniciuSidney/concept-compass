@@ -10,9 +10,9 @@ Matéria
 
 ## Situação atual
 
-Esta pasta implementa o **M1 — Fundação técnica e AppShell mínimo** da v0.1 e está pronta para validação manual.
+Esta pasta implementa o **M2 — Domínio, validação e persistência** da v0.1 e está pronta para validação manual.
 
-A aplicação já possui núcleo modular, store, roteamento por fragmento, AppShell responsivo e páginas provisórias. CRUD acadêmico, persistência de dados e regras de progresso ainda não foram implementados.
+A aplicação mantém o AppShell navegável do M1 e agora possui uma camada independente do DOM para criar, validar, transformar, calcular e persistir a estrutura acadêmica com segurança. O CRUD visual ainda não foi iniciado.
 
 ## Onde manter a pasta
 
@@ -39,6 +39,7 @@ npm install
 
 ```bash
 npm run serve
+npm run verify:m2
 npm test
 npm run lint
 npm run format
@@ -52,7 +53,7 @@ O servidor local usa, por padrão:
 http://127.0.0.1:4173
 ```
 
-## Rotas do M1
+## Base do M1 preservada
 
 ```text
 #/                              Visão Geral
@@ -65,25 +66,62 @@ http://127.0.0.1:4173
 
 Rotas desconhecidas exibem o estado de Conteúdo Não Encontrado sem derrubar a aplicação.
 
-## Estrutura implementada
+## Estrutura implementada no M2
 
-- `src/core`: inicialização, configuração, erros, store e roteador;
-- `src/features`: páginas provisórias por funcionalidade;
-- `src/ui`: AppShell, navegação, ícones e estados reutilizáveis;
-- `src/styles`: tokens, base, layout, componentes, páginas e responsividade;
-- `tests`: testes unitários e de integração.
+- `src/domain/constants.js`: estados, dificuldades, pesos, cores, limites e versões;
+- `src/domain/validators`: validação de entidades, preferências e estrutura completa;
+- `src/domain/selectors`: relações hierárquicas básicas;
+- `src/domain/services`: CRUD puro, progresso, ordenação, movimentação e cascatas;
+- `src/data/storage`: adaptadores de `localStorage` e memória;
+- `src/data/migrations`: controle inicial do esquema 1;
+- `src/data/repositories`: leitura e gravação segura do retrato completo;
+- `src/utils`: UUID, datas locais, texto, objetos e clonagem;
+- `tests`: 48 testes unitários e de integração, além dos roteiros manuais.
 
-## Limites do M1
+## Proteções já cobertas
+
+- nomes obrigatórios e limites de campos;
+- estados, dificuldades e cores permitidos;
+- data de último estudo não futura;
+- IDs duplicados;
+- temas e assuntos órfãos;
+- ordem contínua entre itens irmãos;
+- progresso calculado sem persistência derivada;
+- movimentações e exclusões em cascata;
+- JSON corrompido;
+- esquema futuro incompatível;
+- falha e limite do armazenamento;
+- preservação do conteúdo bruto inválido;
+- preservação do retrato anterior após falha de gravação.
+
+## Limites do M2
 
 Ainda não existem:
 
-- Matérias, Temas ou Assuntos persistidos;
 - formulários acadêmicos;
+- cards definitivos;
+- CRUD visual;
+- conexão do AppShell ao repositório;
 - pesquisa funcional;
 - filtros;
-- progresso;
-- backup;
+- indicadores definitivos;
+- backup em arquivo e importação pela interface;
 - service worker ativo.
+
+## Validação
+
+O roteiro manual está em:
+
+```text
+tests/manual/m2.md
+```
+
+Execute primeiro:
+
+```bash
+npm run check
+npm run verify:m2
+```
 
 ## Branches
 
@@ -96,7 +134,7 @@ A pasta é entregue na branch `dev`.
 
 ## Próximo marco
 
-Após validar o M1, iniciar o **M2 — Domínio, validação e persistência**. Nenhum CRUD visual deverá salvar dados antes da conclusão do repositório e dos validadores.
+Após validar o M2, iniciar o **M3 — Sistema visual e componentes globais**. Nenhum CRUD visual deverá salvar dados antes que o fluxo entre caso de uso, repositório e store seja integrado no marco correspondente.
 
 ## Autor
 

@@ -1,0 +1,46 @@
+# Preparação para validação do M2 — Domínio, validação e persistência
+
+## Escopo concluído
+
+- constantes oficiais de estados, dificuldades, pesos, cores, chaves e limites;
+- estrutura vazia e preferências padrão;
+- UUID com alternativa segura;
+- data local e datas técnicas;
+- normalização de texto;
+- validadores de Matéria, Tema, Assunto, preferências e estrutura completa;
+- integridade de IDs, relações e ordens;
+- seletores hierárquicos básicos;
+- cálculo de progresso sem persistir dados derivados;
+- criação e edição puras de Matéria, Tema e Assunto;
+- reordenação e movimentação entre origens e destinos;
+- exclusões isoladas e em cascata;
+- `LocalStorageAdapter` como único acesso direto ao armazenamento;
+- adaptador de memória para testes;
+- migrações preparadas para o esquema 1;
+- `AppRepository` com leitura, gravação, recuperação e preferências;
+- preservação de dados brutos inválidos;
+- tratamento de falhas e limite de armazenamento;
+- verificação integrada executável por `npm run verify:m2`.
+
+## Limites mantidos
+
+O M2 não implementa:
+
+- CRUD visual;
+- formulários;
+- cards definitivos;
+- carregamento do repositório no AppShell;
+- backup em arquivo;
+- importação pela interface;
+- recuperação visual definitiva;
+- indicadores do Dashboard;
+- pesquisa real;
+- service worker ativo.
+
+## Critério de conclusão
+
+É possível criar, validar, transformar, salvar e recarregar dados inteiramente por módulos e testes, sem DOM, preservando integridade e mantendo o retrato anterior quando uma gravação falha.
+
+## Roteiro manual
+
+A conclusão oficial depende de `tests/manual/m2.md`.
