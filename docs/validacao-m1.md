@@ -1,4 +1,8 @@
-# Preparação para validação do M1 — Fundação técnica e AppShell mínimo
+# Validação concluída do M1 — Fundação técnica e AppShell mínimo
+
+## Status
+
+**Aprovado pelo usuário.** Os testes manuais M1-T01 a M1-T12 foram executados com resultado OK.
 
 ## Escopo concluído
 
@@ -17,39 +21,13 @@
 - estado de Conteúdo Não Encontrado;
 - testes unitários e de integração do núcleo.
 
-## Rotas disponíveis
+## Evidências
 
-- `#/`;
-- `#/materias`;
-- `#/materias/:materiaId`;
-- `#/pesquisa?q=:termo`;
-- `#/configuracoes`;
-- `#/recuperacao`;
-- rota desconhecida encaminhada para o estado interno de não encontrado.
+- `npm run check` aprovado;
+- M1-T01 a M1-T12 aprovados;
+- ausência de erros no console durante o roteiro;
+- AppShell preservado como base para os marcos seguintes.
 
-## Limites mantidos
+## Portão de avanço
 
-O M1 não implementa:
-
-- CRUD de Matérias, Temas ou Assuntos;
-- persistência acadêmica;
-- cálculo de progresso;
-- pesquisa real;
-- filtros;
-- backups;
-- temas explícitos Claro e Escuro;
-- service worker ativo.
-
-## Critério de conclusão
-
-Todas as rotas oficiais devem abrir no mesmo AppShell, sem recarregamento completo, com navegação por hash, título correto e ausência de erros no console.
-
-## Verificações automatizadas executadas
-
-- `npm test`: 10 testes aprovados;
-- `npm run lint`: aprovado;
-- `npm run format:check`: aprovado;
-- arquivos principais carregados pelo servidor HTTP local;
-- nenhuma dependência de execução adicionada.
-
-A conclusão oficial do M1 depende da execução do roteiro manual em `tests/manual/m1.md`.
+O M1 está oficialmente concluído e o M2 está autorizado.
