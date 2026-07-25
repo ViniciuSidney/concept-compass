@@ -1,4 +1,4 @@
-# Preparação para validação do M4 — Gerenciamento de Matérias
+# Validação do M4 — Gerenciamento de Matérias
 
 ## Concluído tecnicamente
 
@@ -18,10 +18,14 @@
 - persistência antes da confirmação visual;
 - testes automatizados e `npm run verify:m4`.
 
-## Limites preservados
+## Correção durante a validação
 
-O M4 não implementa CRUD de Temas ou Assuntos, Pesquisa Geral funcional, Dashboard definitivo, backup visual ou preferências definitivas.
+O botão de envio do formulário foi associado explicitamente ao `<form>` pelo atributo `form`, cobrindo criação e edição mesmo com as ações no rodapé do modal.
 
-## Critério pendente
+## Validação manual
 
-A aprovação depende da execução dos casos `M4-T01` a `M4-T23` em `tests/manual/m4.md`.
+Os casos `M4-T01` a `M4-T23` foram executados e aprovados pelo usuário em 24/07/2026.
+
+## Resultado
+
+**M4 aprovado e oficialmente concluído.** O projeto está autorizado a avançar para o M5 — Gerenciamento de Temas e Assuntos.
