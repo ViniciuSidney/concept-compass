@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "check": "npm run test && npm run lint && npm run format:check",
     "verify:m5": "node scripts/verify-m5.mjs",
-    "verify:m6": "node scripts/verify-m6.mjs"
+    "verify:m6": "node scripts/verify-m6.mjs",
+    "verify:m7": "node scripts/verify-m7.mjs"
   },
   "engines": {
     "node": ">=20"

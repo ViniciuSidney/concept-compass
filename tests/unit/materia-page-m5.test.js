@@ -58,3 +58,46 @@ test('matéria inexistente preserva tratamento de erro do M4', () => {
   assert.match(page.textContent, /Matéria não encontrada/);
   assert.match(page.textContent, /Voltar para Matérias/);
 });
+
+test('link de pesquisa expande o tema solicitado e destaca o destino', () => {
+  const { documentObject, context } = createContext(validData());
+  const page = createMateriaPage(
+    documentObject,
+    { params: { materiaId: 'materia-1' }, query: { tema: 'tema-1' } },
+    context,
+  );
+  const target = findElement(
+    page,
+    (element) => element.getAttribute?.('data-tema-id') === 'tema-1',
+  );
+
+  assert.ok(target);
+  assert.match(target.className, /is-expanded/);
+  assert.match(target.className, /is-search-target/);
+});
+
+test('link de pesquisa para assunto abre o painel de detalhes', async () => {
+  const { documentObject, context } = createContext(validData());
+  createMateriaPage(
+    documentObject,
+    {
+      params: { materiaId: 'materia-1' },
+      query: { tema: 'tema-1', assunto: 'assunto-1' },
+    },
+    context,
+  );
+
+  await new Promise((resolve) => globalThis.queueMicrotask(resolve));
+  assert.match(documentObject.body.textContent, /Detalhes do assunto em Álgebra/);
+  assert.match(documentObject.body.textContent, /Equação do primeiro grau/);
+});
+
+function findElement(root, predicate) {
+  if (!root || typeof root === 'string') return null;
+  if (predicate(root)) return root;
+  for (const child of root.children ?? []) {
+    const found = findElement(child, predicate);
+    if (found) return found;
+  }
+  return null;
+}
