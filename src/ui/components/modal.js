@@ -8,6 +8,7 @@ export function createModal(
     description = null,
     content = null,
     footer = null,
+    modalClassName = '',
     closeLabel = 'Fechar modal',
     closeOnBackdrop = true,
     onClose = null,
@@ -31,7 +32,7 @@ export function createModal(
   let unregister = () => {};
   overlay.className = 'overlay modal-overlay';
   overlay.hidden = true;
-  dialog.className = 'modal';
+  dialog.className = ['modal', modalClassName].filter(Boolean).join(' ');
   dialog.tabIndex = -1;
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');

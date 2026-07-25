@@ -30,6 +30,8 @@ Servidor: `http://127.0.0.1:4173`
 
 A página de uma Matéria inclui resumo dinâmico, acordeões de Temas, formulários validados, assuntos com estado e dificuldade, reordenação acessível, exclusões confirmadas, progresso e painel lateral de detalhes.
 
+O formulário de Novo/Editar assunto usa uma disposição ampla e compacta em desktop, mantendo as ações acessíveis quando a altura da janela exige rolagem.
+
 O roteiro manual está em `tests/manual/m5.md`.
 
 ## Limites

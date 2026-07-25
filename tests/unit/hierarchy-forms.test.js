@@ -37,3 +37,26 @@ function collectElements(root) {
 
   return result;
 }
+
+test('modal de assunto usa layout amplo e agrupa campos para reduzir rolagem no desktop', () => {
+  const { documentObject, windowObject } = createFakeDocument();
+  const modal = createAssuntoFormModal(documentObject, {
+    windowObject,
+    overlayManager: null,
+    async onSubmit() {},
+  });
+  const elements = collectElements(modal.element);
+  const dialog = elements.find(
+    ({ tagName, classList }) => tagName === 'SECTION' && classList.contains('modal'),
+  );
+  const contentGrid = elements.find(({ classList }) =>
+    classList.contains('assunto-form__content-grid'),
+  );
+  const trackingGrid = elements.find(({ classList }) =>
+    classList.contains('assunto-form__tracking-grid'),
+  );
+
+  assert.ok(dialog?.classList.contains('modal--assunto-form'));
+  assert.equal(contentGrid?.children.length, 2);
+  assert.equal(trackingGrid?.children.length, 3);
+});

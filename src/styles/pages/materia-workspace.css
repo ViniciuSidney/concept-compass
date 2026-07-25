@@ -27,10 +27,22 @@
   line-height: 1.45;
 }
 
-.assunto-form__grid {
+.assunto-form__grid,
+.assunto-form__tracking-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
+}
+
+.assunto-form__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.assunto-form__tracking-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.assunto-form__content-grid .form-field textarea {
+  min-height: 7rem;
 }
 
 .materia-workspace {
@@ -354,6 +366,7 @@
 
 @media (max-width: 42rem) {
   .assunto-form__grid,
+  .assunto-form__tracking-grid,
   .assunto-detail__grid {
     grid-template-columns: 1fr;
   }

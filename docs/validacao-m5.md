@@ -23,6 +23,10 @@
 
 O M5 não implementa movimentação de Temas entre Matérias, movimentação de Assuntos entre Temas pela interface, Pesquisa Geral funcional, Dashboard definitivo, backup visual ou histórico analítico.
 
-## Critério pendente
+## Validação manual
 
-A aprovação depende da execução dos casos `M5-T01` a `M5-T34` em `tests/manual/m5.md`.
+Os casos `M5-T01` a `M5-T34` foram aprovados pelo usuário.
+
+Após a validação, foi solicitado um refinamento de ergonomia no modal de Novo/Editar assunto. O formulário passou a usar uma disposição mais larga e compacta em desktop, mantendo o rodapé acessível e preservando a adaptação para telas estreitas.
+
+A conclusão definitiva do refinamento depende dos casos focados `M5-T35` a `M5-T38` em `tests/manual/m5.md`.

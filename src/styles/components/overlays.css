@@ -22,6 +22,24 @@
   box-shadow: var(--shadow-overlay);
   animation: modal-enter var(--transition-medium) both;
 }
+
+.modal--assunto-form {
+  display: flex;
+  width: min(60rem, 100%);
+  max-height: calc(100vh - 2.5rem);
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.modal--assunto-form .modal__header,
+.modal--assunto-form .modal__footer {
+  flex: 0 0 auto;
+}
+
+.modal--assunto-form .modal__body {
+  min-height: 0;
+  overflow: auto;
+}
 .modal__header,
 .side-panel__header {
   display: flex;

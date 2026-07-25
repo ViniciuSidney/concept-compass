@@ -85,7 +85,8 @@ export function createAssuntoFormModal(
     observacoes: observationsField,
     ultimoEstudoEm: lastStudyField,
   });
-  const grid = documentObject.createElement('div');
+  const contentGrid = documentObject.createElement('div');
+  const trackingGrid = documentObject.createElement('div');
   const cancelButton = createButton(documentObject, {
     label: 'Cancelar',
     variant: 'secondary',
@@ -104,16 +105,11 @@ export function createAssuntoFormModal(
   generalError.className = 'form-general-error';
   generalError.setAttribute('role', 'alert');
   generalError.hidden = true;
-  grid.className = 'assunto-form__grid';
-  grid.append(stateField.element, difficultyField.element);
-  form.append(
-    generalError,
-    nameField.element,
-    descriptionField.element,
-    grid,
-    observationsField.element,
-    lastStudyField.element,
-  );
+  contentGrid.className = 'assunto-form__grid assunto-form__content-grid';
+  trackingGrid.className = 'assunto-form__tracking-grid';
+  contentGrid.append(descriptionField.element, observationsField.element);
+  trackingGrid.append(stateField.element, difficultyField.element, lastStudyField.element);
+  form.append(generalError, nameField.element, contentGrid, trackingGrid);
   submitButton.setAttribute('form', form.id);
   footer.className = 'overlay-actions';
   footer.append(cancelButton, submitButton);
@@ -125,6 +121,7 @@ export function createAssuntoFormModal(
       : 'Cadastre a unidade mais específica da organização.',
     content: form,
     footer,
+    modalClassName: 'modal--assunto-form',
     overlayManager,
     onClose: () => {
       clearErrors();
