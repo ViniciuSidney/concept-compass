@@ -4,14 +4,14 @@ Aplicação web local para organizar estudos em **Matéria → Tema → Assunto*
 
 ## Situação atual
 
-Esta pasta implementa o **M4 — Gerenciamento de Matérias**. O usuário já pode criar, editar, pesquisar, ordenar, reordenar, abrir e excluir matérias com persistência local. Temas e Assuntos continuam reservados ao M5.
+Esta pasta implementa o **M5 — Gerenciamento de Temas e Assuntos**. O usuário pode administrar a hierarquia completa dentro de cada matéria, acompanhar estado, dificuldade e progresso, abrir detalhes em painel lateral e manter tudo no armazenamento local.
 
 ## Preparação
 
 ```bash
 npm install
 npm run check
-npm run verify:m4
+npm run verify:m5
 npm run serve
 ```
 
@@ -21,20 +21,20 @@ Servidor: `http://127.0.0.1:4173`
 
 - `#/` — Visão Geral;
 - `#/materias` — gerenciamento de Matérias;
-- `#/materias/:materiaId` — abertura de uma Matéria;
+- `#/materias/:materiaId` — gerenciamento de Temas e Assuntos da Matéria;
 - `#/pesquisa?q=:termo` — Pesquisa Geral provisória;
 - `#/configuracoes` — Configurações e laboratório temporário do M3;
 - `#/recuperacao` — Recuperação.
 
-## M4
+## M5
 
-A tela de Matérias inclui estado vazio, cards, formulário contextual, cores de identificação, pesquisa, ordenações de visualização, reordenação acessível, exclusão com impacto e persistência pelo `AppRepository`.
+A página de uma Matéria inclui resumo dinâmico, acordeões de Temas, formulários validados, assuntos com estado e dificuldade, reordenação acessível, exclusões confirmadas, progresso e painel lateral de detalhes.
 
-O roteiro manual está em `tests/manual/m4.md`.
+O roteiro manual está em `tests/manual/m5.md`.
 
 ## Limites
 
-Ainda não existem CRUD visual de Temas e Assuntos, Dashboard definitivo, Pesquisa Geral funcional, backup visual ou service worker ativo.
+Ainda não existem movimentações entre estruturas pela interface, Dashboard definitivo, Pesquisa Geral funcional, backup visual, preferências definitivas ou service worker ativo.
 
 ## Autor
 
