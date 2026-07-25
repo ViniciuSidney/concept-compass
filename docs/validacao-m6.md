@@ -30,6 +30,14 @@
 
 O M6 não implementa Pesquisa Geral, movimentações entre estruturas, backup visual, preferências definitivas, histórico de estudos ou análises temporais avançadas.
 
-## Validação manual
+## Roteiro de validação
 
 O roteiro está em `tests/manual/m6.md`, com os casos `M6-T01` a `M6-T26`.
+
+## Validação manual
+
+Os casos `M6-T01` a `M6-T26` foram executados e aprovados pelo usuário em 25/07/2026.
+
+## Resultado
+
+**M6 aprovado e oficialmente concluído.** O projeto está autorizado a avançar para o M7 — Pesquisa Geral e filtros.
