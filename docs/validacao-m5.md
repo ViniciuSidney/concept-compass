@@ -29,4 +29,4 @@ Os casos `M5-T01` a `M5-T34` foram aprovados pelo usuário.
 
 Após a validação, foi solicitado um refinamento de ergonomia no modal de Novo/Editar assunto. O formulário passou a usar uma disposição mais larga e compacta em desktop, mantendo o rodapé acessível e preservando a adaptação para telas estreitas.
 
-A conclusão definitiva do refinamento depende dos casos focados `M5-T35` a `M5-T38` em `tests/manual/m5.md`.
+Os casos focados `M5-T35` a `M5-T38` também foram aprovados pelo usuário após os ajustes de disposição e alinhamento do formulário. O M5 está oficialmente concluído.

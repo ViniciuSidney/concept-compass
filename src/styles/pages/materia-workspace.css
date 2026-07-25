@@ -39,6 +39,12 @@
 
 .assunto-form__tracking-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+
+.assunto-form__tracking-grid > .form-field {
+  align-self: start;
+  align-content: start;
 }
 
 .assunto-form__content-grid .form-field textarea {
