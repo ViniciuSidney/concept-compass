@@ -40,7 +40,10 @@ export function createMateriaPage(documentObject, route, context) {
 
   const controller = createMateriaWorkspaceController({ store, repository });
   const initialTemas = selectTemasByMateria(initialData, materiaId);
+  const deepLink = resolveDeepLink(initialData, materiaId, route.query ?? {});
   const expandedTemaIds = new Set(initialTemas.slice(0, 1).map(({ id }) => id));
+  if (deepLink.temaId) expandedTemaIds.add(deepLink.temaId);
+  let deepLinkHandled = false;
 
   function render() {
     const data = controller.getData();
@@ -121,6 +124,8 @@ export function createMateriaPage(documentObject, route, context) {
           createTemaAccordion(documentObject, {
             section,
             expanded: expandedTemaIds.has(tema.id),
+            highlighted: deepLink.temaId === tema.id,
+            focusedAssuntoId: deepLink.assuntoId,
             onToggle(isExpanded) {
               if (isExpanded) expandedTemaIds.add(tema.id);
               else expandedTemaIds.delete(tema.id);
@@ -143,6 +148,13 @@ export function createMateriaPage(documentObject, route, context) {
     }
 
     page.replaceChildren(header, summary, workspace);
+
+    if (!deepLinkHandled) {
+      deepLinkHandled = true;
+      if (deepLink.assuntoId) {
+        globalThis.queueMicrotask(() => openAssuntoDetails(deepLink.assuntoId));
+      }
+    }
   }
 
   function openCreateTema() {
@@ -390,4 +402,20 @@ function createSummaryStat(documentObject, value, label) {
   text.textContent = label;
   item.append(number, text);
   return item;
+}
+
+function resolveDeepLink(data, materiaId, query) {
+  const requestedAssunto = query.assunto ? selectAssuntoById(data, query.assunto) : null;
+  const assuntoTema = requestedAssunto ? selectTemaById(data, requestedAssunto.temaId) : null;
+
+  if (requestedAssunto && assuntoTema?.materiaId === materiaId) {
+    return Object.freeze({ temaId: assuntoTema.id, assuntoId: requestedAssunto.id });
+  }
+
+  const requestedTema = query.tema ? selectTemaById(data, query.tema) : null;
+  if (requestedTema?.materiaId === materiaId) {
+    return Object.freeze({ temaId: requestedTema.id, assuntoId: null });
+  }
+
+  return Object.freeze({ temaId: null, assuntoId: null });
 }

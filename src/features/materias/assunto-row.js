@@ -9,7 +9,18 @@ import {
 
 export function createAssuntoRow(
   documentObject,
-  { assunto, index, total, onOpen, onEdit, onDelete, onMoveUp, onMoveDown, overlayManager },
+  {
+    assunto,
+    index,
+    total,
+    onOpen,
+    onEdit,
+    onDelete,
+    onMoveUp,
+    onMoveDown,
+    overlayManager,
+    highlighted = false,
+  },
 ) {
   const row = documentObject.createElement('article');
   const openButton = documentObject.createElement('button');
@@ -47,7 +58,8 @@ export function createAssuntoRow(
     ],
   });
 
-  row.className = 'assunto-row';
+  row.className = `assunto-row${highlighted ? ' is-search-target' : ''}`;
+  row.setAttribute('data-assunto-id', assunto.id);
   openButton.type = 'button';
   openButton.className = 'assunto-row__open';
   openButton.setAttribute('aria-label', `Abrir detalhes de ${assunto.nome}`);

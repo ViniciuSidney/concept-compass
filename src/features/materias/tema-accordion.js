@@ -11,6 +11,8 @@ export function createTemaAccordion(
   {
     section,
     expanded,
+    highlighted = false,
+    focusedAssuntoId = null,
     onToggle,
     onAddAssunto,
     onEditTema,
@@ -68,7 +70,8 @@ export function createTemaAccordion(
     ],
   });
 
-  article.className = `tema-accordion${expanded ? ' is-expanded' : ''}`;
+  article.className = `tema-accordion${expanded ? ' is-expanded' : ''}${highlighted ? ' is-search-target' : ''}`;
+  article.setAttribute('data-tema-id', tema.id);
   header.className = 'tema-accordion__header';
   toggle.type = 'button';
   toggle.className = 'tema-accordion__toggle';
@@ -122,6 +125,7 @@ export function createTemaAccordion(
           onMoveUp: () => onMoveAssunto(assunto, index - 1),
           onMoveDown: () => onMoveAssunto(assunto, index + 1),
           overlayManager,
+          highlighted: focusedAssuntoId === assunto.id,
         }),
       );
     });
