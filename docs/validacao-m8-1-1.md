@@ -1,4 +1,4 @@
-# Preparação para validação do M8.1.1 — Refinamentos de acompanhamento
+# Validação concluída do M8.1.1 — Refinamentos de acompanhamento
 
 ## Objetivo
 
@@ -29,3 +29,7 @@ Refinar a leitura e a ergonomia do sistema de pontos já aprovado, sem alterar m
 ## Validação manual
 
 O roteiro está em `tests/manual/m8-1-1.md`, com os casos `M8.1.1-T01` a `M8.1.1-T09`.
+
+## Resultado final
+
+Os casos manuais `M8.1.1-T01` a `M8.1.1-T09` foram aprovados pelo usuário. O marco foi concluído e liberado como base oficial do M9.
