@@ -169,3 +169,75 @@ function createFieldController(element, control, error) {
     },
   });
 }
+
+export function createNumberField(
+  documentObject,
+  { name, label, value = 0, min = null, max = null, description = '' },
+) {
+  const group = documentObject.createElement('div');
+  const labelElement = documentObject.createElement('label');
+  const input = documentObject.createElement('input');
+  const error = documentObject.createElement('p');
+  const descriptionElement = documentObject.createElement('p');
+  const id = createComponentId(name);
+  const errorId = `${id}-error`;
+  const descriptionId = `${id}-description`;
+
+  group.className = 'form-field';
+  labelElement.htmlFor = id;
+  labelElement.textContent = label;
+  input.id = id;
+  input.name = name;
+  input.type = 'number';
+  input.value = String(value);
+  input.step = '1';
+  if (min !== null) input.min = String(min);
+  if (max !== null) input.max = String(max);
+  input.setAttribute('aria-describedby', description ? `${descriptionId} ${errorId}` : errorId);
+  descriptionElement.id = descriptionId;
+  descriptionElement.className = 'form-field__description';
+  descriptionElement.textContent = description;
+  descriptionElement.hidden = !description;
+  error.id = errorId;
+  error.className = 'form-field__error';
+  error.hidden = true;
+  group.append(labelElement, input, descriptionElement, error);
+
+  return createFieldController(group, input, error);
+}
+
+export function createCheckboxField(
+  documentObject,
+  { name, label, checked = false, description = '' },
+) {
+  const group = documentObject.createElement('div');
+  const labelElement = documentObject.createElement('label');
+  const input = documentObject.createElement('input');
+  const text = documentObject.createElement('span');
+  const descriptionElement = documentObject.createElement('p');
+  const error = documentObject.createElement('p');
+  const id = createComponentId(name);
+  const errorId = `${id}-error`;
+  const descriptionId = `${id}-description`;
+
+  group.className = 'form-field form-field--checkbox';
+  labelElement.className = 'form-checkbox';
+  labelElement.htmlFor = id;
+  input.id = id;
+  input.name = name;
+  input.type = 'checkbox';
+  input.checked = checked;
+  input.setAttribute('aria-describedby', description ? `${descriptionId} ${errorId}` : errorId);
+  text.textContent = label;
+  labelElement.append(input, text);
+  descriptionElement.id = descriptionId;
+  descriptionElement.className = 'form-field__description';
+  descriptionElement.textContent = description;
+  descriptionElement.hidden = !description;
+  error.id = errorId;
+  error.className = 'form-field__error';
+  error.hidden = true;
+  group.append(labelElement, descriptionElement, error);
+
+  return createFieldController(group, input, error);
+}

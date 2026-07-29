@@ -25,10 +25,16 @@ export function createTemaAccordion(
     onDeleteAssunto,
     onMoveAssuntoTo,
     onMoveAssunto,
+    onDecreaseAssuntoProgress,
+    onIncreaseAssuntoProgress,
+    onIncreaseAssuntoProgressTotal,
+    onAdjustAssuntoProgress,
+    onCompleteAssuntoProgress,
+    onResetAssuntoProgress,
     overlayManager,
   },
 ) {
-  const { tema, assuntos, progress, canMoveUp, canMoveDown } = section;
+  const { tema, assuntos, progress, progressSummary, canMoveUp, canMoveDown } = section;
   const article = documentObject.createElement('article');
   const header = documentObject.createElement('header');
   const toggle = documentObject.createElement('button');
@@ -109,7 +115,7 @@ export function createTemaAccordion(
   body.id = bodyId;
   body.className = 'tema-accordion__body';
   body.hidden = !expanded;
-  body.append(createTemaProgress(documentObject, progress, assuntos.length));
+  body.append(createTemaProgress(documentObject, progress, progressSummary, assuntos.length));
 
   if (assuntos.length === 0) {
     body.append(createInlineEmptyState(documentObject, tema.nome, onAddAssunto));
@@ -128,6 +134,12 @@ export function createTemaAccordion(
           onMove: () => onMoveAssuntoTo(assunto),
           onMoveUp: () => onMoveAssunto(assunto, index - 1),
           onMoveDown: () => onMoveAssunto(assunto, index + 1),
+          onDecreaseProgress: () => onDecreaseAssuntoProgress(assunto),
+          onIncreaseProgress: () => onIncreaseAssuntoProgress(assunto),
+          onIncreaseProgressTotal: () => onIncreaseAssuntoProgressTotal(assunto),
+          onAdjustProgress: () => onAdjustAssuntoProgress(assunto),
+          onCompleteProgress: () => onCompleteAssuntoProgress(assunto),
+          onResetProgress: () => onResetAssuntoProgress(assunto),
           overlayManager,
           highlighted: focusedAssuntoId === assunto.id,
         }),
@@ -140,7 +152,7 @@ export function createTemaAccordion(
   return article;
 }
 
-function createTemaProgress(documentObject, progress, assuntosCount) {
+function createTemaProgress(documentObject, progress, progressSummary, assuntosCount) {
   const area = documentObject.createElement('div');
   area.className = 'tema-accordion__progress';
 
@@ -154,7 +166,7 @@ function createTemaProgress(documentObject, progress, assuntosCount) {
   area.append(
     createProgressBar(documentObject, {
       value: progress,
-      label: 'Progresso do tema',
+      label: `Progresso do tema · ${progressSummary.points}/${progressSummary.total} pontos`,
       size: 'small',
     }),
   );
@@ -176,7 +188,7 @@ function createInlineEmptyState(documentObject, temaNome, onAddAssunto) {
 
   state.className = 'tema-empty-state';
   title.textContent = `Nenhum assunto em ${temaNome}`;
-  description.textContent = 'Adicione conteúdos específicos para acompanhar estado e dificuldade.';
+  description.textContent = 'Adicione conteúdos específicos para acompanhar pontos e dificuldade.';
   text.append(title, description);
   state.append(text, button);
   return state;

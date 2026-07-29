@@ -17,7 +17,7 @@ export function createMateriaCard(
     onMoveDown,
   },
 ) {
-  const { materia, temasCount, assuntosCount, progress } = summary;
+  const { materia, temasCount, assuntosCount, progress, progressSummary } = summary;
   const article = documentObject.createElement('article');
   const header = documentObject.createElement('header');
   const identity = documentObject.createElement('div');
@@ -70,7 +70,7 @@ export function createMateriaCard(
     progressArea.append(
       createProgressBar(documentObject, {
         value: progress,
-        label: 'Progresso da matéria',
+        label: `Progresso da matéria · ${progressSummary.points}/${progressSummary.total} pontos`,
         size: 'small',
       }),
     );

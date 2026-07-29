@@ -115,10 +115,9 @@ function controlsPreview(documentObject, notify, overlayManager) {
     chips.append(createFilterChip(documentObject, { label, selected: label === 'Tudo' }).element);
   for (const [label, tone] of [
     ['Não iniciado', 'not-started'],
-    ['Em estudo', 'studying'],
-    ['Estudado', 'studied'],
+    ['Em andamento', 'studying'],
+    ['Meta concluída', 'consolidated'],
     ['Precisa de reforço', 'reinforcement'],
-    ['Consolidado', 'consolidated'],
   ])
     badges.append(createBadge(documentObject, { label, tone }));
   const row = documentObject.createElement('div');

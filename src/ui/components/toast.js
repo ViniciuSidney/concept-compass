@@ -1,14 +1,25 @@
+import { createButton } from './button.js';
 import { createIcon } from '../icons/icon.js';
 import { createIconButton } from './icon-button.js';
+
 const ICONS = Object.freeze({
   info: 'info',
   success: 'check',
   warning: 'warning',
   danger: 'warning',
 });
+
 export function createToast(
   documentObject,
-  { title, message = null, tone = 'info', duration = 4500, onDismiss = null },
+  {
+    title,
+    message = null,
+    tone = 'info',
+    duration = 4500,
+    onDismiss = null,
+    actionLabel = null,
+    onAction = null,
+  },
 ) {
   const toast = documentObject.createElement('article');
   const icon = documentObject.createElement('span');
@@ -21,6 +32,7 @@ export function createToast(
     size: 'small',
   });
   let timer = null;
+
   toast.className = `toast toast--${tone}`;
   toast.setAttribute('role', tone === 'danger' ? 'alert' : 'status');
   icon.className = 'toast__icon';
@@ -33,7 +45,21 @@ export function createToast(
     p.textContent = message;
     content.append(p);
   }
+  if (actionLabel && onAction) {
+    const action = createButton(documentObject, {
+      label: actionLabel,
+      variant: 'ghost',
+      size: 'small',
+      className: 'toast__action',
+    });
+    action.addEventListener('click', () => {
+      onAction();
+      dismiss('action');
+    });
+    content.append(action);
+  }
   toast.append(icon, content, close);
+
   function dismiss(reason = 'dismiss') {
     if (timer) {
       clearTimeout(timer);
@@ -48,10 +74,12 @@ export function createToast(
       remove();
     else setTimeout(remove, 180);
   }
+
   close.addEventListener('click', () => dismiss('close-button'));
   if (duration > 0) timer = setTimeout(() => dismiss('timeout'), duration);
   return Object.freeze({ element: toast, dismiss });
 }
+
 export function createToastManager(documentObject, region) {
   return Object.freeze({
     show(options) {

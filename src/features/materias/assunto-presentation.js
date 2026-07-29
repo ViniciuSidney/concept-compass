@@ -1,16 +1,13 @@
+import { DIFFICULTIES, DIFFICULTY_LABELS, PROGRESS_STATUS_LABELS } from '../../domain/constants.js';
 import {
-  DIFFICULTIES,
-  DIFFICULTY_LABELS,
-  STUDY_STATES,
-  STUDY_STATE_LABELS,
-} from '../../domain/constants.js';
+  calculateAssuntoProgress,
+  deriveProgressStatus,
+} from '../../domain/services/progress-service.js';
 
-const STATE_TONES = Object.freeze({
-  [STUDY_STATES.NAO_INICIADO]: 'not-started',
-  [STUDY_STATES.EM_ESTUDO]: 'studying',
-  [STUDY_STATES.ESTUDADO]: 'studied',
-  [STUDY_STATES.PRECISA_REFORCO]: 'reinforcement',
-  [STUDY_STATES.CONSOLIDADO]: 'consolidated',
+const STATUS_TONES = Object.freeze({
+  not_started: 'not-started',
+  in_progress: 'studying',
+  complete: 'consolidated',
 });
 
 const DIFFICULTY_TONES = Object.freeze({
@@ -20,10 +17,14 @@ const DIFFICULTY_TONES = Object.freeze({
   [DIFFICULTIES.DIFICIL]: 'danger',
 });
 
-export function getStatePresentation(state) {
+export function getProgressPresentation(assunto) {
+  const status = deriveProgressStatus(assunto);
   return Object.freeze({
-    label: STUDY_STATE_LABELS[state] ?? 'Estado desconhecido',
-    tone: STATE_TONES[state] ?? 'neutral',
+    status,
+    label: PROGRESS_STATUS_LABELS[status],
+    tone: STATUS_TONES[status] ?? 'neutral',
+    percentage: calculateAssuntoProgress(assunto),
+    pointsLabel: `${assunto.pontosProgresso} de ${assunto.metaPontosProgresso} pontos`,
   });
 }
 
@@ -36,7 +37,6 @@ export function getDifficultyPresentation(difficulty) {
 
 export function formatLocalDate(value) {
   if (!value) return 'Não informado';
-
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(year, month - 1, day, 12);
   return new Intl.DateTimeFormat('pt-BR').format(date);
@@ -44,7 +44,6 @@ export function formatLocalDate(value) {
 
 export function formatIsoDate(value) {
   if (!value) return 'Não informado';
-
   return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',

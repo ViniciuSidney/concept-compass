@@ -159,3 +159,11 @@
     background-position: -100% 0;
   }
 }
+
+.toast__action {
+  width: fit-content;
+  margin-top: var(--space-2);
+  padding-inline: 0;
+  color: currentcolor;
+  font-weight: 800;
+}

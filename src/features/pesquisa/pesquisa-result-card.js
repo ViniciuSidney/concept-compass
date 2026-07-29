@@ -4,7 +4,7 @@ import { createIcon } from '../../ui/icons/icon.js';
 import {
   formatLocalDate,
   getDifficultyPresentation,
-  getStatePresentation,
+  getProgressPresentation,
 } from '../materias/assunto-presentation.js';
 import { SEARCH_TYPES } from './pesquisa-selectors.js';
 
@@ -87,12 +87,21 @@ function appendMetadata(documentObject, meta, result) {
     return;
   }
 
-  const state = getStatePresentation(result.assunto.estado);
+  const progress = getProgressPresentation(result.assunto);
   const difficulty = getDifficultyPresentation(result.assunto.dificuldade);
   meta.append(
-    createBadge(documentObject, { label: state.label, tone: state.tone }),
+    createBadge(documentObject, { label: progress.label, tone: progress.tone }),
     createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }),
+    createMetaText(
+      documentObject,
+      `${result.assunto.pontosProgresso}/${result.assunto.metaPontosProgresso} pontos · ${Math.round(progress.percentage)}%`,
+    ),
   );
+  if (result.assunto.precisaReforco) {
+    meta.append(
+      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
+    );
+  }
   if (result.assunto.ultimoEstudoEm) {
     meta.append(
       createMetaText(

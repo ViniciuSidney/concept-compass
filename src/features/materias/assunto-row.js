@@ -1,10 +1,11 @@
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createBadge } from '../../ui/components/badge.js';
 import { createIconButton } from '../../ui/components/icon-button.js';
+import { createAssuntoProgressControl } from './assunto-progress-control.js';
 import {
   formatLocalDate,
   getDifficultyPresentation,
-  getStatePresentation,
+  getProgressPresentation,
 } from './assunto-presentation.js';
 
 export function createAssuntoRow(
@@ -19,6 +20,12 @@ export function createAssuntoRow(
     onMove,
     onMoveUp,
     onMoveDown,
+    onDecreaseProgress,
+    onIncreaseProgress,
+    onIncreaseProgressTotal,
+    onAdjustProgress,
+    onCompleteProgress,
+    onResetProgress,
     overlayManager,
     highlighted = false,
   },
@@ -32,7 +39,7 @@ export function createAssuntoRow(
   const date = documentObject.createElement('span');
   const actions = documentObject.createElement('div');
   const reorder = documentObject.createElement('div');
-  const state = getStatePresentation(assunto.estado);
+  const progress = getProgressPresentation(assunto);
   const difficulty = getDifficultyPresentation(assunto.dificuldade);
   const moveUp = createIconButton(documentObject, {
     icon: 'arrow-up',
@@ -54,6 +61,19 @@ export function createAssuntoRow(
     label: `Ações de ${assunto.nome}`,
     overlayManager,
     items: [
+      { label: 'Ajustar progresso', icon: 'settings', onSelect: onAdjustProgress },
+      {
+        label: 'Concluir meta',
+        icon: 'check',
+        disabled: assunto.pontosProgresso >= assunto.metaPontosProgresso,
+        onSelect: onCompleteProgress,
+      },
+      {
+        label: 'Reiniciar progresso',
+        icon: 'warning',
+        disabled: assunto.pontosProgresso === 0,
+        onSelect: onResetProgress,
+      },
       { label: 'Editar assunto', icon: 'edit', onSelect: onEdit },
       { label: 'Mover assunto', icon: 'move', onSelect: onMove },
       { label: 'Excluir assunto', icon: 'trash', danger: true, onSelect: onDelete },
@@ -74,14 +94,32 @@ export function createAssuntoRow(
   description.textContent = assunto.descricao || 'Sem descrição cadastrada.';
   meta.className = 'assunto-row__meta';
   meta.append(
-    createBadge(documentObject, { label: state.label, tone: state.tone }),
+    createBadge(documentObject, { label: progress.label, tone: progress.tone }),
     createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }),
   );
+  if (assunto.precisaReforco) {
+    meta.append(
+      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
+    );
+  }
   date.className = 'assunto-row__date';
   date.textContent = assunto.ultimoEstudoEm
     ? `Último estudo: ${formatLocalDate(assunto.ultimoEstudoEm)}`
     : 'Último estudo não informado';
-  content.append(openButton, description, meta, date);
+  content.append(
+    openButton,
+    description,
+    createAssuntoProgressControl(documentObject, {
+      assunto,
+      compact: true,
+      onDecrease: onDecreaseProgress,
+      onIncrease: onIncreaseProgress,
+      onIncreaseTotal: onIncreaseProgressTotal,
+      onAdjust: onAdjustProgress,
+    }),
+    meta,
+    date,
+  );
   reorder.className = 'assunto-row__reorder';
   reorder.setAttribute('aria-label', `Reordenar ${assunto.nome}`);
   reorder.append(moveUp, moveDown);

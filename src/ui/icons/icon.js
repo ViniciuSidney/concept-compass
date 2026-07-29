@@ -13,6 +13,7 @@ const ICON_PATHS = Object.freeze({
   close: ['m6 6 12 12', 'M18 6 6 18'],
   arrow: ['m9 18 6-6-6-6'],
   plus: ['M12 5v14', 'M5 12h14'],
+  minus: ['M5 12h14'],
   'arrow-up': ['m18 15-6-6-6 6'],
   'arrow-down': ['m6 9 6 6 6-6'],
   'arrow-left': ['m15 18-6-6 6-6'],

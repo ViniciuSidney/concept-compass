@@ -4,16 +4,16 @@ import {
   DIFFICULTY_LABELS,
   DIFFICULTY_VALUES,
   FIELD_LIMITS,
-  STUDY_STATES,
-  STUDY_STATE_LABELS,
-  STUDY_STATE_VALUES,
+  PROGRESS_POINTS,
 } from '../../domain/constants.js';
 import { createLocalDate } from '../../utils/date.js';
 import { createButton } from '../../ui/components/button.js';
 import { createComponentId } from '../../ui/components/component-utils.js';
 import { createModal } from '../../ui/components/modal.js';
 import {
+  createCheckboxField,
   createDateField,
+  createNumberField,
   createSelectField,
   createTextAreaField,
   createTextField,
@@ -43,32 +43,35 @@ export function createAssuntoFormModal(
     placeholder: 'Registre o foco ou os limites deste assunto.',
     rows: 3,
   });
-  const stateField = createSelectField(documentObject, {
-    name: 'estado',
-    label: 'Estado de estudo',
-    value: assunto?.estado ?? STUDY_STATES.NAO_INICIADO,
-    options: STUDY_STATE_VALUES.map((value) => ({
-      value,
-      label: STUDY_STATE_LABELS[value],
-    })),
-    description: 'O estado participa do cálculo de progresso do tema e da matéria.',
-  });
-  const difficultyField = createSelectField(documentObject, {
-    name: 'dificuldade',
-    label: 'Dificuldade',
-    value: assunto?.dificuldade ?? DIFFICULTIES.NAO_DEFINIDA,
-    options: DIFFICULTY_VALUES.map((value) => ({
-      value,
-      label: DIFFICULTY_LABELS[value],
-    })),
-  });
   const observationsField = createTextAreaField(documentObject, {
     name: 'observacoes',
     label: 'Observações',
     value: assunto?.observacoes ?? '',
     maxLength: FIELD_LIMITS.assunto.observacoes,
     placeholder: 'Dúvidas, cuidados, materiais ou próximos passos.',
-    rows: 4,
+    rows: 3,
+  });
+  const difficultyField = createSelectField(documentObject, {
+    name: 'dificuldade',
+    label: 'Dificuldade',
+    value: assunto?.dificuldade ?? DIFFICULTIES.NAO_DEFINIDA,
+    options: DIFFICULTY_VALUES.map((value) => ({ value, label: DIFFICULTY_LABELS[value] })),
+  });
+  const currentPointsField = createNumberField(documentObject, {
+    name: 'pontosProgresso',
+    label: 'Pontos atuais',
+    value: assunto?.pontosProgresso ?? 0,
+    min: PROGRESS_POINTS.MIN_CURRENT,
+    max: PROGRESS_POINTS.MAX_TOTAL,
+    description: 'Avanço já alcançado neste assunto.',
+  });
+  const totalPointsField = createNumberField(documentObject, {
+    name: 'metaPontosProgresso',
+    label: 'Meta de progresso',
+    value: assunto?.metaPontosProgresso ?? PROGRESS_POINTS.DEFAULT_TOTAL,
+    min: PROGRESS_POINTS.MIN_TOTAL,
+    max: PROGRESS_POINTS.MAX_TOTAL,
+    description: 'Quantidade estimada de etapas ou esforço, entre 1 e 20.',
   });
   const lastStudyField = createDateField(documentObject, {
     name: 'ultimoEstudoEm',
@@ -77,20 +80,26 @@ export function createAssuntoFormModal(
     max: today,
     description: 'Opcional. Datas futuras não são aceitas.',
   });
+  const reinforcementField = createCheckboxField(documentObject, {
+    name: 'precisaReforco',
+    label: 'Este assunto precisa de reforço',
+    checked: assunto?.precisaReforco ?? false,
+    description:
+      'A marcação é independente da pontuação e pode permanecer mesmo com a meta concluída.',
+  });
   const fields = Object.freeze({
     nome: nameField,
     descricao: descriptionField,
-    estado: stateField,
     dificuldade: difficultyField,
+    pontosProgresso: currentPointsField,
+    metaPontosProgresso: totalPointsField,
+    precisaReforco: reinforcementField,
     observacoes: observationsField,
     ultimoEstudoEm: lastStudyField,
   });
   const contentGrid = documentObject.createElement('div');
   const trackingGrid = documentObject.createElement('div');
-  const cancelButton = createButton(documentObject, {
-    label: 'Cancelar',
-    variant: 'secondary',
-  });
+  const cancelButton = createButton(documentObject, { label: 'Cancelar', variant: 'secondary' });
   const submitButton = createButton(documentObject, {
     label: editing ? 'Salvar alterações' : 'Criar assunto',
     type: 'submit',
@@ -106,10 +115,21 @@ export function createAssuntoFormModal(
   generalError.setAttribute('role', 'alert');
   generalError.hidden = true;
   contentGrid.className = 'assunto-form__grid assunto-form__content-grid';
-  trackingGrid.className = 'assunto-form__tracking-grid';
+  trackingGrid.className = 'assunto-form__tracking-grid assunto-form__tracking-grid--points';
   contentGrid.append(descriptionField.element, observationsField.element);
-  trackingGrid.append(stateField.element, difficultyField.element, lastStudyField.element);
-  form.append(generalError, nameField.element, contentGrid, trackingGrid);
+  trackingGrid.append(
+    difficultyField.element,
+    currentPointsField.element,
+    totalPointsField.element,
+    lastStudyField.element,
+  );
+  form.append(
+    generalError,
+    nameField.element,
+    contentGrid,
+    trackingGrid,
+    reinforcementField.element,
+  );
   submitButton.setAttribute('form', form.id);
   footer.className = 'overlay-actions';
   footer.append(cancelButton, submitButton);
@@ -117,7 +137,7 @@ export function createAssuntoFormModal(
   const modal = createModal(documentObject, {
     title: editing ? 'Editar assunto' : 'Novo assunto',
     description: editing
-      ? 'Atualize o conteúdo e o acompanhamento do estudo.'
+      ? 'Atualize o conteúdo, a meta e o acompanhamento do estudo.'
       : 'Cadastre a unidade mais específica da organização.',
     content: form,
     footer,
@@ -140,8 +160,10 @@ export function createAssuntoFormModal(
       await onSubmit({
         nome: nameField.control.value,
         descricao: descriptionField.control.value,
-        estado: stateField.control.value,
         dificuldade: difficultyField.control.value,
+        pontosProgresso: Number(currentPointsField.control.value),
+        metaPontosProgresso: Number(totalPointsField.control.value),
+        precisaReforco: Boolean(reinforcementField.control.checked),
         observacoes: observationsField.control.value,
         ultimoEstudoEm: lastStudyField.control.value || null,
       });
@@ -171,7 +193,6 @@ export function createAssuntoFormModal(
       form.querySelector?.('[aria-invalid="true"]')?.focus();
       return;
     }
-
     generalError.textContent = error?.message || 'Não foi possível salvar o assunto.';
     generalError.hidden = false;
   }

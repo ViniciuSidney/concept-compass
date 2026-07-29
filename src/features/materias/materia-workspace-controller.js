@@ -1,8 +1,13 @@
 import {
+  changeAssuntoProgress,
+  completeAssuntoProgress,
   createAssunto,
   deleteAssunto,
+  increaseAssuntoProgressTotal,
   moveAssunto,
   reorderAssuntos,
+  resetAssuntoProgress,
+  setAssuntoProgress,
   updateAssunto,
 } from '../../domain/services/assunto-service.js';
 import {
@@ -121,6 +126,36 @@ export function createMateriaWorkspaceController({ store, repository }) {
     return result.assunto;
   }
 
+  function adjustAssuntoProgress(assuntoId, input, options) {
+    const result = setAssuntoProgress(getData(), assuntoId, input, options);
+    persist(result.data);
+    return result.assunto;
+  }
+
+  function changeProgress(assuntoId, delta, options) {
+    const result = changeAssuntoProgress(getData(), assuntoId, delta, options);
+    persist(result.data);
+    return result.assunto;
+  }
+
+  function increaseProgressTotal(assuntoId, options) {
+    const result = increaseAssuntoProgressTotal(getData(), assuntoId, options);
+    persist(result.data);
+    return result.assunto;
+  }
+
+  function completeProgress(assuntoId, options) {
+    const result = completeAssuntoProgress(getData(), assuntoId, options);
+    persist(result.data);
+    return result.assunto;
+  }
+
+  function resetProgress(assuntoId, options) {
+    const result = resetAssuntoProgress(getData(), assuntoId, options);
+    persist(result.data);
+    return result.assunto;
+  }
+
   function removeAssunto(assuntoId, options) {
     const nextData = deleteAssunto(getData(), assuntoId, options);
     persist(nextData);
@@ -150,6 +185,11 @@ export function createMateriaWorkspaceController({ store, repository }) {
     moveTemaTo,
     addAssunto,
     editAssunto,
+    adjustAssuntoProgress,
+    changeProgress,
+    increaseProgressTotal,
+    completeProgress,
+    resetProgress,
     removeAssunto,
     reorderAssunto,
     moveAssuntoTo,

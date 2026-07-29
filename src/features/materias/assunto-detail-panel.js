@@ -1,24 +1,41 @@
 import { createBadge } from '../../ui/components/badge.js';
 import { createButton } from '../../ui/components/button.js';
 import { createSidePanel } from '../../ui/components/side-panel.js';
+import { createAssuntoProgressControl } from './assunto-progress-control.js';
 import {
   formatIsoDate,
   formatLocalDate,
   getDifficultyPresentation,
-  getStatePresentation,
+  getProgressPresentation,
 } from './assunto-presentation.js';
 
 export function createAssuntoDetailPanel(
   documentObject,
-  { assunto, tema, onEdit, onMove, onDelete, overlayManager },
+  {
+    assunto,
+    tema,
+    onEdit,
+    onMove,
+    onDelete,
+    onDecreaseProgress,
+    onIncreaseProgress,
+    onIncreaseProgressTotal,
+    onAdjustProgress,
+    overlayManager,
+  },
 ) {
   const content = documentObject.createElement('div');
   const badges = documentObject.createElement('div');
-  const state = getStatePresentation(assunto.estado);
+  const progress = getProgressPresentation(assunto);
   const difficulty = getDifficultyPresentation(assunto.dificuldade);
   const editButton = createButton(documentObject, {
     label: 'Editar assunto',
     icon: 'edit',
+    variant: 'secondary',
+  });
+  const adjustButton = createButton(documentObject, {
+    label: 'Ajustar progresso',
+    icon: 'settings',
     variant: 'secondary',
   });
   const moveButton = createButton(documentObject, {
@@ -37,11 +54,23 @@ export function createAssuntoDetailPanel(
   content.className = 'assunto-detail';
   badges.className = 'assunto-detail__badges';
   badges.append(
-    createBadge(documentObject, { label: state.label, tone: state.tone }),
+    createBadge(documentObject, { label: progress.label, tone: progress.tone }),
     createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }),
   );
+  if (assunto.precisaReforco) {
+    badges.append(
+      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
+    );
+  }
   content.append(
     badges,
+    createAssuntoProgressControl(documentObject, {
+      assunto,
+      onDecrease: () => runProgressAction('decrease-progress', onDecreaseProgress),
+      onIncrease: () => runProgressAction('increase-progress', onIncreaseProgress),
+      onIncreaseTotal: () => runProgressAction('increase-total', onIncreaseProgressTotal),
+      onAdjust: () => runProgressAction('adjust-progress', onAdjustProgress),
+    }),
     createDetailSection(
       documentObject,
       'Descrição',
@@ -54,13 +83,15 @@ export function createAssuntoDetailPanel(
     ),
     createDetailGrid(documentObject, [
       ['Tema', tema?.nome ?? 'Tema não encontrado'],
+      ['Pontos de progresso', `${assunto.pontosProgresso} de ${assunto.metaPontosProgresso}`],
+      ['Progresso percentual', `${Math.round(progress.percentage)}%`],
       ['Último estudo', formatLocalDate(assunto.ultimoEstudoEm)],
       ['Criado em', formatIsoDate(assunto.criadoEm)],
       ['Atualizado em', formatIsoDate(assunto.atualizadoEm)],
     ]),
   );
   footer.className = 'overlay-actions';
-  footer.append(deleteButton, moveButton, editButton);
+  footer.append(deleteButton, moveButton, adjustButton, editButton);
 
   const panel = createSidePanel(documentObject, {
     title: assunto.nome,
@@ -72,9 +103,18 @@ export function createAssuntoDetailPanel(
   });
   panelHolder.current = panel;
 
+  function runProgressAction(reason, action) {
+    panel.close(reason);
+    globalThis.queueMicrotask(action);
+  }
+
   editButton.addEventListener('click', () => {
     panel.close('edit');
     globalThis.queueMicrotask(onEdit);
+  });
+  adjustButton.addEventListener('click', () => {
+    panel.close('adjust-progress');
+    globalThis.queueMicrotask(onAdjustProgress);
   });
   moveButton.addEventListener('click', () => {
     panel.close('move');
@@ -92,7 +132,6 @@ function createDetailSection(documentObject, title, text) {
   const section = documentObject.createElement('section');
   const heading = documentObject.createElement('h3');
   const paragraph = documentObject.createElement('p');
-
   section.className = 'assunto-detail__section';
   heading.textContent = title;
   paragraph.textContent = text;
@@ -103,7 +142,6 @@ function createDetailSection(documentObject, title, text) {
 function createDetailGrid(documentObject, items) {
   const list = documentObject.createElement('dl');
   list.className = 'assunto-detail__grid';
-
   for (const [label, value] of items) {
     const item = documentObject.createElement('div');
     const term = documentObject.createElement('dt');
@@ -113,6 +151,5 @@ function createDetailGrid(documentObject, items) {
     item.append(term, description);
     list.append(item);
   }
-
   return list;
 }

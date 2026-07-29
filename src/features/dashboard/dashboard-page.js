@@ -7,14 +7,14 @@ import { createIcon } from '../../ui/icons/icon.js';
 import { createEmptyState } from '../../ui/states/empty-state.js';
 import {
   getDifficultyPresentation,
-  getStatePresentation,
+  getProgressPresentation,
   formatLocalDate,
 } from '../materias/assunto-presentation.js';
 import {
   selectDashboardSummary,
   selectMateriaProgressHighlights,
   selectRecentStudies,
-  selectStateDistribution,
+  selectProgressDistribution,
   selectStudyPriorities,
 } from './dashboard-selectors.js';
 
@@ -86,7 +86,10 @@ function createOverview(documentObject, summary) {
   progressArea.className = 'dashboard-overview__progress';
   value.className = 'dashboard-overview__value';
   value.textContent = summary.progress === null ? '—' : `${Math.round(summary.progress)}%`;
-  label.textContent = summary.progress === null ? 'Sem assuntos avaliáveis' : 'Média dos assuntos';
+  label.textContent =
+    summary.progress === null
+      ? 'Sem assuntos avaliáveis'
+      : `${summary.points} de ${summary.totalPoints} pontos`;
   progressArea.append(value, label);
   if (summary.progress !== null) {
     progressArea.append(
@@ -163,7 +166,7 @@ function createPrimaryGrid(documentObject, data) {
   const grid = documentObject.createElement('div');
   grid.className = 'dashboard-grid dashboard-grid--primary';
   grid.append(
-    createStateDistributionSection(documentObject, data),
+    createProgressDistributionSection(documentObject, data),
     createPrioritiesSection(documentObject, data),
   );
   return grid;
@@ -179,12 +182,12 @@ function createSecondaryGrid(documentObject, data) {
   return grid;
 }
 
-function createStateDistributionSection(documentObject, data) {
+function createProgressDistributionSection(documentObject, data) {
   const section = createDashboardCard(documentObject, {
-    title: 'Situação dos assuntos',
-    description: 'Distribuição atual pelos estados de estudo.',
+    title: 'Situação do progresso',
+    description: 'Distribuição entre assuntos não iniciados, em andamento e com a meta concluída.',
   });
-  const distribution = selectStateDistribution(data);
+  const distribution = selectProgressDistribution(data);
   const list = documentObject.createElement('div');
   list.className = 'dashboard-state-list';
 
@@ -201,7 +204,15 @@ function createStateDistributionSection(documentObject, data) {
     const count = documentObject.createElement('span');
     const track = documentObject.createElement('div');
     const fill = documentObject.createElement('span');
-    const presentation = getStatePresentation(entry.state);
+    const presentation = {
+      label: entry.label,
+      tone:
+        entry.status === 'complete'
+          ? 'consolidated'
+          : entry.status === 'in_progress'
+            ? 'studying'
+            : 'not-started',
+    };
 
     row.className = 'dashboard-state-row';
     header.className = 'dashboard-state-row__header';
@@ -227,7 +238,7 @@ function createStateDistributionSection(documentObject, data) {
 function createPrioritiesSection(documentObject, data) {
   const section = createDashboardCard(documentObject, {
     title: 'Prioridades de estudo',
-    description: 'Reforços, estudos em andamento e assuntos difíceis aparecem primeiro.',
+    description: 'Reforços, progresso em andamento e assuntos difíceis aparecem primeiro.',
     action: createButtonLink(documentObject, {
       label: 'Ver matérias',
       href: '#/materias',
@@ -290,7 +301,7 @@ function createMateriaHighlightsSection(documentObject, data) {
       heading,
       createProgressBar(documentObject, {
         value: item.progress ?? 0,
-        label: `Progresso de ${item.materia.nome}`,
+        label: `Progresso de ${item.materia.nome} · ${item.progressSummary.points}/${item.progressSummary.total} pontos`,
         size: 'small',
       }),
     );
@@ -377,7 +388,7 @@ function createAssuntoItem(documentObject, entry, { showDifficulty = true } = {}
   const title = documentObject.createElement('a');
   const context = documentObject.createElement('p');
   const badges = documentObject.createElement('div');
-  const state = getStatePresentation(entry.assunto.estado);
+  const progress = getProgressPresentation(entry.assunto);
   const difficulty = getDifficultyPresentation(entry.assunto.dificuldade);
 
   item.className = 'dashboard-item';
@@ -387,7 +398,12 @@ function createAssuntoItem(documentObject, entry, { showDifficulty = true } = {}
   title.textContent = entry.assunto.nome;
   context.textContent = `${entry.materia.nome} · ${entry.tema.nome}`;
   badges.className = 'dashboard-item__badges';
-  badges.append(createBadge(documentObject, state));
+  badges.append(createBadge(documentObject, progress));
+  if (entry.assunto.precisaReforco) {
+    badges.append(
+      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
+    );
+  }
   if (showDifficulty && entry.assunto.dificuldade !== DIFFICULTIES.NAO_DEFINIDA) {
     badges.append(createBadge(documentObject, difficulty));
   }
@@ -425,9 +441,9 @@ function createProgressDescription(summary) {
     return 'Adicione assuntos aos temas para começar a calcular o progresso geral.';
   }
 
-  const active = summary.emEstudoCount + summary.reforcoCount;
+  const active = summary.emAndamentoCount + summary.reforcoCount;
   if (active === 0) {
-    return `${summary.assuntosCount} ${summary.assuntosCount === 1 ? 'assunto organizado' : 'assuntos organizados'}, sem itens marcados como em estudo ou reforço.`;
+    return `${summary.assuntosCount} ${summary.assuntosCount === 1 ? 'assunto organizado' : 'assuntos organizados'}, sem itens em andamento ou marcados para reforço.`;
   }
 
   return `${active} ${active === 1 ? 'assunto pede' : 'assuntos pedem'} acompanhamento neste momento.`;

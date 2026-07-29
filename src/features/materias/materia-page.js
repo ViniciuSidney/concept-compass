@@ -5,7 +5,7 @@ import {
   selectTemaById,
   selectTemasByMateria,
 } from '../../domain/selectors/hierarchy-selectors.js';
-import { calculateMateriaProgress } from '../../domain/services/progress-service.js';
+import { summarizeMateriaProgress } from '../../domain/services/progress-service.js';
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createPageHeader } from '../../ui/components/page-header.js';
@@ -15,6 +15,8 @@ import { createErrorState } from '../../ui/states/error-state.js';
 import { createAssuntoDeleteDialog } from './assunto-delete-dialog.js';
 import { createAssuntoDetailPanel } from './assunto-detail-panel.js';
 import { createAssuntoFormModal } from './assunto-form.js';
+import { createAssuntoProgressDialog } from './assunto-progress-dialog.js';
+import { createAssuntoProgressResetDialog } from './assunto-progress-reset-dialog.js';
 import { createMateriaDeleteDialog } from './materia-delete-dialog.js';
 import { createMateriaFormModal } from './materia-form.js';
 import { createMateriaWorkspaceController } from './materia-workspace-controller.js';
@@ -69,7 +71,8 @@ export function createMateriaPage(documentObject, route, context) {
 
     const temas = selectTemasByMateria(data, materia.id);
     const assuntos = selectAssuntosByMateria(data, materia.id);
-    const progress = calculateMateriaProgress(data, materia.id);
+    const progressSummary = summarizeMateriaProgress(data, materia.id);
+    const progress = progressSummary?.percentage ?? null;
     const materiaMenu = createActionMenu(documentObject, {
       label: `Ações da matéria ${materia.nome}`,
       overlayManager,
@@ -110,6 +113,7 @@ export function createMateriaPage(documentObject, route, context) {
       temas.length,
       assuntos.length,
       progress,
+      progressSummary,
     );
     const workspace = documentObject.createElement('section');
     const workspaceHeader = documentObject.createElement('div');
@@ -168,6 +172,12 @@ export function createMateriaPage(documentObject, route, context) {
             onDeleteAssunto: (assunto) => openDeleteAssunto(assunto),
             onMoveAssuntoTo: (assunto) => openMoveAssunto(assunto),
             onMoveAssunto: (assunto, targetIndex) => moveAssunto(assunto, targetIndex),
+            onDecreaseAssuntoProgress: (assunto) => changeProgress(assunto, -1),
+            onIncreaseAssuntoProgress: (assunto) => changeProgress(assunto, 1),
+            onIncreaseAssuntoProgressTotal: (assunto) => increaseProgressTotal(assunto),
+            onAdjustAssuntoProgress: (assunto) => openAdjustProgress(assunto),
+            onCompleteAssuntoProgress: (assunto) => completeProgress(assunto),
+            onResetAssuntoProgress: (assunto) => resetProgress(assunto),
             overlayManager,
           }),
         );
@@ -399,6 +409,89 @@ export function createMateriaPage(documentObject, route, context) {
     form.open();
   }
 
+  function openAdjustProgress(assunto) {
+    const current = selectAssuntoById(controller.getData(), assunto.id);
+    if (!current) return;
+
+    const dialog = createAssuntoProgressDialog(documentObject, {
+      assunto: current,
+      overlayManager,
+      windowObject,
+      async onSubmit(input) {
+        applyProgressUpdate(current, () => controller.adjustAssuntoProgress(current.id, input));
+      },
+    });
+    dialog.open();
+  }
+
+  function changeProgress(assunto, delta) {
+    const current = selectAssuntoById(controller.getData(), assunto.id);
+    if (!current) return;
+    applyProgressUpdate(current, () => controller.changeProgress(current.id, delta));
+  }
+
+  function increaseProgressTotal(assunto) {
+    const current = selectAssuntoById(controller.getData(), assunto.id);
+    if (!current) return;
+    applyProgressUpdate(current, () => controller.increaseProgressTotal(current.id));
+  }
+
+  function completeProgress(assunto) {
+    const current = selectAssuntoById(controller.getData(), assunto.id);
+    if (!current) return;
+    applyProgressUpdate(current, () => controller.completeProgress(current.id));
+  }
+
+  function resetProgress(assunto) {
+    const current = selectAssuntoById(controller.getData(), assunto.id);
+    if (!current || current.pontosProgresso === 0) return;
+
+    const dialog = createAssuntoProgressResetDialog(documentObject, {
+      assunto: current,
+      overlayManager,
+      async onConfirm() {
+        applyProgressUpdate(current, () => controller.resetProgress(current.id));
+      },
+    });
+    dialog.open();
+  }
+
+  function applyProgressUpdate(current, operation) {
+    const previous = {
+      pontosProgresso: current.pontosProgresso,
+      metaPontosProgresso: current.metaPontosProgresso,
+      precisaReforco: current.precisaReforco,
+    };
+
+    try {
+      const updated = operation();
+      expandedTemaIds.add(updated.temaId);
+      render();
+      const percentage = Math.round((updated.pontosProgresso / updated.metaPontosProgresso) * 100);
+      appShell.showToast({
+        tone: 'success',
+        title: 'Progresso atualizado',
+        message: `${updated.nome}: ${updated.pontosProgresso}/${updated.metaPontosProgresso} pontos · ${percentage}%.`,
+        actionLabel: 'Desfazer',
+        onAction() {
+          try {
+            controller.adjustAssuntoProgress(updated.id, previous);
+            expandedTemaIds.add(updated.temaId);
+            render();
+            appShell.announce(`Alteração de progresso de ${updated.nome} desfeita.`);
+          } catch (error) {
+            showOperationError('Não foi possível desfazer a alteração', error);
+          }
+        },
+      });
+      appShell.announce(
+        `Progresso de ${updated.nome} atualizado para ${updated.pontosProgresso} de ${updated.metaPontosProgresso} pontos.`,
+      );
+    } catch (error) {
+      showOperationError('Não foi possível atualizar o progresso', error);
+    }
+  }
+
   function openDeleteAssunto(assunto) {
     const current = selectAssuntoById(controller.getData(), assunto.id);
     if (!current) return;
@@ -495,6 +588,10 @@ export function createMateriaPage(documentObject, route, context) {
       onEdit: () => openEditAssunto(details.assunto),
       onMove: () => openMoveAssunto(details.assunto),
       onDelete: () => openDeleteAssunto(details.assunto),
+      onDecreaseProgress: () => changeProgress(details.assunto, -1),
+      onIncreaseProgress: () => changeProgress(details.assunto, 1),
+      onIncreaseProgressTotal: () => increaseProgressTotal(details.assunto),
+      onAdjustProgress: () => openAdjustProgress(details.assunto),
     });
     panel.open();
   }
@@ -532,7 +629,14 @@ function renderNotFound(documentObject, page) {
   );
 }
 
-function createMateriaSummary(documentObject, materia, temasCount, assuntosCount, progress) {
+function createMateriaSummary(
+  documentObject,
+  materia,
+  temasCount,
+  assuntosCount,
+  progress,
+  progressSummary,
+) {
   const summary = documentObject.createElement('section');
   const stats = documentObject.createElement('div');
   const progressCard = documentObject.createElement('div');
@@ -551,7 +655,10 @@ function createMateriaSummary(documentObject, materia, temasCount, assuntosCount
     progressCard.append(label);
   } else {
     progressCard.append(
-      createProgressBar(documentObject, { value: progress, label: 'Progresso geral' }),
+      createProgressBar(documentObject, {
+        value: progress,
+        label: `Progresso geral · ${progressSummary.points}/${progressSummary.total} pontos`,
+      }),
     );
   }
 
