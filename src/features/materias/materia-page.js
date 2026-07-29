@@ -6,6 +6,7 @@ import {
   selectTemasByMateria,
 } from '../../domain/selectors/hierarchy-selectors.js';
 import { calculateMateriaProgress } from '../../domain/services/progress-service.js';
+import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createPageHeader } from '../../ui/components/page-header.js';
 import { createProgressBar } from '../../ui/components/progress-bar.js';
@@ -14,6 +15,8 @@ import { createErrorState } from '../../ui/states/error-state.js';
 import { createAssuntoDeleteDialog } from './assunto-delete-dialog.js';
 import { createAssuntoDetailPanel } from './assunto-detail-panel.js';
 import { createAssuntoFormModal } from './assunto-form.js';
+import { createMateriaDeleteDialog } from './materia-delete-dialog.js';
+import { createMateriaFormModal } from './materia-form.js';
 import { createMateriaWorkspaceController } from './materia-workspace-controller.js';
 import {
   selectAssuntoDetails,
@@ -23,9 +26,19 @@ import {
 import { createTemaAccordion } from './tema-accordion.js';
 import { createTemaDeleteDialog } from './tema-delete-dialog.js';
 import { createTemaFormModal } from './tema-form.js';
+import { selectMateriaImpact } from './materias-selectors.js';
+import { createStructureMoveDialog } from './structure-move-dialog.js';
+import {
+  describeAssuntoOrigin,
+  describeTemaOrigin,
+  selectAssuntoMoveDestinations,
+  selectAssuntoMovePositions,
+  selectTemaMoveDestinations,
+  selectTemaMovePositions,
+} from './structure-move-selectors.js';
 
 export function createMateriaPage(documentObject, route, context) {
-  const { store, repository, appShell, overlayManager, windowObject } = context;
+  const { store, repository, appShell, overlayManager, windowObject, navigate } = context;
   const materiaId = route.params.materiaId;
   const initialData = store.getState().data;
   const initialMateria = selectMateriaById(initialData, materiaId);
@@ -57,6 +70,19 @@ export function createMateriaPage(documentObject, route, context) {
     const temas = selectTemasByMateria(data, materia.id);
     const assuntos = selectAssuntosByMateria(data, materia.id);
     const progress = calculateMateriaProgress(data, materia.id);
+    const materiaMenu = createActionMenu(documentObject, {
+      label: `Ações da matéria ${materia.nome}`,
+      overlayManager,
+      items: [
+        { label: 'Editar matéria', icon: 'edit', onSelect: () => openEditMateria(materia) },
+        {
+          label: 'Excluir matéria',
+          icon: 'trash',
+          danger: true,
+          onSelect: () => openDeleteMateria(materia),
+        },
+      ],
+    });
     const actions = [
       createButtonLink(documentObject, {
         label: 'Voltar para Matérias',
@@ -69,6 +95,7 @@ export function createMateriaPage(documentObject, route, context) {
         icon: 'plus',
         onClick: openCreateTema,
       }),
+      materiaMenu.element,
     ];
     const header = createPageHeader(documentObject, {
       breadcrumb: [{ label: 'Matérias', href: '#/materias' }, { label: materia.nome }],
@@ -133,11 +160,13 @@ export function createMateriaPage(documentObject, route, context) {
             onAddAssunto: () => openCreateAssunto(tema),
             onEditTema: () => openEditTema(tema),
             onDeleteTema: () => openDeleteTema(tema),
+            onMoveTema: () => openMoveTema(tema),
             onMoveTemaUp: () => moveTema(tema, tema.ordem - 1),
             onMoveTemaDown: () => moveTema(tema, tema.ordem + 1),
             onOpenAssunto: (assunto) => openAssuntoDetails(assunto.id),
             onEditAssunto: (assunto) => openEditAssunto(assunto),
             onDeleteAssunto: (assunto) => openDeleteAssunto(assunto),
+            onMoveAssuntoTo: (assunto) => openMoveAssunto(assunto),
             onMoveAssunto: (assunto, targetIndex) => moveAssunto(assunto, targetIndex),
             overlayManager,
           }),
@@ -155,6 +184,51 @@ export function createMateriaPage(documentObject, route, context) {
         globalThis.queueMicrotask(() => openAssuntoDetails(deepLink.assuntoId));
       }
     }
+  }
+
+  function openEditMateria(materia) {
+    const current = selectMateriaById(controller.getData(), materia.id);
+    if (!current) return;
+
+    const form = createMateriaFormModal(documentObject, {
+      materia: current,
+      overlayManager,
+      windowObject,
+      async onSubmit(input) {
+        const updated = controller.editMateria(current.id, input);
+        render();
+        appShell.showToast({
+          tone: 'success',
+          title: 'Matéria atualizada',
+          message: `As alterações em ${updated.nome} foram salvas.`,
+        });
+        appShell.announce(`Matéria ${updated.nome} atualizada com sucesso.`);
+      },
+    });
+    form.open();
+  }
+
+  function openDeleteMateria(materia) {
+    const current = selectMateriaById(controller.getData(), materia.id);
+    if (!current) return;
+    const impact = selectMateriaImpact(controller.getData(), current.id);
+
+    const dialog = createMateriaDeleteDialog(documentObject, {
+      materia: current,
+      impact,
+      overlayManager,
+      async onConfirm() {
+        const removed = controller.removeMateria(current.id);
+        appShell.showToast({
+          tone: 'success',
+          title: 'Matéria excluída',
+          message: `${current.nome}, ${removed.temas} temas e ${removed.assuntos} assuntos foram removidos.`,
+        });
+        appShell.announce(`Matéria ${current.nome} excluída com sucesso.`);
+        navigate('/materias');
+      },
+    });
+    dialog.open();
   }
 
   function openCreateTema() {
@@ -235,6 +309,49 @@ export function createMateriaPage(documentObject, route, context) {
     } catch (error) {
       showOperationError('Não foi possível reordenar o tema', error);
     }
+  }
+
+  function openMoveTema(tema) {
+    const data = controller.getData();
+    const current = selectTemaById(data, tema.id);
+    if (!current) return;
+
+    const dialog = createStructureMoveDialog(documentObject, {
+      title: 'Mover tema',
+      description: 'Transfira o tema inteiro, incluindo todos os assuntos relacionados.',
+      entityName: current.nome,
+      originLabel: describeTemaOrigin(data, current.id),
+      destinationLabel: 'Matéria de destino',
+      destinations: selectTemaMoveDestinations(data, current.id),
+      initialDestinationId: current.materiaId,
+      getPositions: (destinationId) =>
+        selectTemaMovePositions(controller.getData(), current.id, destinationId),
+      overlayManager,
+      windowObject,
+      async onConfirm({ destinationId, targetIndex }) {
+        if (destinationId === current.materiaId && targetIndex === current.ordem) {
+          appShell.showToast({
+            tone: 'info',
+            title: 'Nenhuma alteração necessária',
+            message: `${current.nome} já está nessa posição.`,
+          });
+          return;
+        }
+
+        const moved = controller.moveTemaTo(current.id, destinationId, { targetIndex });
+        const destination = selectMateriaById(controller.getData(), destinationId);
+        expandedTemaIds.delete(current.id);
+        if (destinationId === materiaId) expandedTemaIds.add(current.id);
+        render();
+        appShell.showToast({
+          tone: 'success',
+          title: 'Tema movido',
+          message: `${moved.nome} agora está em ${destination?.nome ?? 'outra matéria'}.`,
+        });
+        appShell.announce(`Tema ${moved.nome} movido com sucesso.`);
+      },
+    });
+    dialog.open();
   }
 
   function openCreateAssunto(tema) {
@@ -320,6 +437,53 @@ export function createMateriaPage(documentObject, route, context) {
     }
   }
 
+  function openMoveAssunto(assunto) {
+    const data = controller.getData();
+    const current = selectAssuntoById(data, assunto.id);
+    if (!current) return;
+
+    const dialog = createStructureMoveDialog(documentObject, {
+      title: 'Mover assunto',
+      description: 'Transfira o assunto para outro tema ou altere sua posição no tema atual.',
+      entityName: current.nome,
+      originLabel: describeAssuntoOrigin(data, current.id),
+      destinationLabel: 'Tema de destino',
+      destinations: selectAssuntoMoveDestinations(data, current.id),
+      initialDestinationId: current.temaId,
+      getPositions: (destinationId) =>
+        selectAssuntoMovePositions(controller.getData(), current.id, destinationId),
+      overlayManager,
+      windowObject,
+      async onConfirm({ destinationId, targetIndex }) {
+        if (destinationId === current.temaId && targetIndex === current.ordem) {
+          appShell.showToast({
+            tone: 'info',
+            title: 'Nenhuma alteração necessária',
+            message: `${current.nome} já está nessa posição.`,
+          });
+          return;
+        }
+
+        const moved = controller.moveAssuntoTo(current.id, destinationId, { targetIndex });
+        const destinationTema = selectTemaById(controller.getData(), destinationId);
+        const destinationMateria = destinationTema
+          ? selectMateriaById(controller.getData(), destinationTema.materiaId)
+          : null;
+        const sourceTema = selectTemaById(controller.getData(), current.temaId);
+        if (sourceTema?.materiaId === materiaId) expandedTemaIds.add(current.temaId);
+        if (destinationTema?.materiaId === materiaId) expandedTemaIds.add(destinationId);
+        render();
+        appShell.showToast({
+          tone: 'success',
+          title: 'Assunto movido',
+          message: `${moved.nome} agora está em ${destinationMateria?.nome ?? 'outra matéria'} › ${destinationTema?.nome ?? 'outro tema'}.`,
+        });
+        appShell.announce(`Assunto ${moved.nome} movido com sucesso.`);
+      },
+    });
+    dialog.open();
+  }
+
   function openAssuntoDetails(assuntoId) {
     const details = selectAssuntoDetails(controller.getData(), assuntoId);
     if (!details) return;
@@ -329,6 +493,7 @@ export function createMateriaPage(documentObject, route, context) {
       tema: details.tema,
       overlayManager,
       onEdit: () => openEditAssunto(details.assunto),
+      onMove: () => openMoveAssunto(details.assunto),
       onDelete: () => openDeleteAssunto(details.assunto),
     });
     panel.open();

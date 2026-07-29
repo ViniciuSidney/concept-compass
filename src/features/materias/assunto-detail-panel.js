@@ -10,7 +10,7 @@ import {
 
 export function createAssuntoDetailPanel(
   documentObject,
-  { assunto, tema, onEdit, onDelete, overlayManager },
+  { assunto, tema, onEdit, onMove, onDelete, overlayManager },
 ) {
   const content = documentObject.createElement('div');
   const badges = documentObject.createElement('div');
@@ -19,6 +19,11 @@ export function createAssuntoDetailPanel(
   const editButton = createButton(documentObject, {
     label: 'Editar assunto',
     icon: 'edit',
+    variant: 'secondary',
+  });
+  const moveButton = createButton(documentObject, {
+    label: 'Mover assunto',
+    icon: 'move',
     variant: 'secondary',
   });
   const deleteButton = createButton(documentObject, {
@@ -55,7 +60,7 @@ export function createAssuntoDetailPanel(
     ]),
   );
   footer.className = 'overlay-actions';
-  footer.append(deleteButton, editButton);
+  footer.append(deleteButton, moveButton, editButton);
 
   const panel = createSidePanel(documentObject, {
     title: assunto.nome,
@@ -70,6 +75,10 @@ export function createAssuntoDetailPanel(
   editButton.addEventListener('click', () => {
     panel.close('edit');
     globalThis.queueMicrotask(onEdit);
+  });
+  moveButton.addEventListener('click', () => {
+    panel.close('move');
+    globalThis.queueMicrotask(onMove);
   });
   deleteButton.addEventListener('click', () => {
     panel.close('delete');

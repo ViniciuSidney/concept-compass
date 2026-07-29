@@ -16,6 +16,7 @@ const ICON_PATHS = Object.freeze({
   'arrow-up': ['m18 15-6-6-6 6'],
   'arrow-down': ['m6 9 6 6 6-6'],
   'arrow-left': ['m15 18-6-6 6-6'],
+  move: ['M5 9h11', 'm13 6 3 3-3 3', 'M19 15H8', 'm11 12-3 3 3 3'],
   'chevron-right': ['m9 18 6-6-6-6'],
   layers: ['m12 2 9 5-9 5-9-5 9-5Z', 'm3 12 9 5 9-5', 'm3 17 9 5 9-5'],
   more: ['M5 12h.01', 'M12 12h.01', 'M19 12h.01'],

@@ -1,15 +1,18 @@
 import {
   createAssunto,
   deleteAssunto,
+  moveAssunto,
   reorderAssuntos,
   updateAssunto,
 } from '../../domain/services/assunto-service.js';
 import {
   createTema,
   deleteTemaCascade,
+  moveTema,
   reorderTemas,
   updateTema,
 } from '../../domain/services/tema-service.js';
+import { deleteMateriaCascade, updateMateria } from '../../domain/services/materia-service.js';
 
 export function createMateriaWorkspaceController({ store, repository }) {
   if (!store || !repository) {
@@ -64,6 +67,18 @@ export function createMateriaWorkspaceController({ store, repository }) {
     }
   }
 
+  function editMateria(materiaId, input, options) {
+    const result = updateMateria(getData(), materiaId, input, options);
+    persist(result.data);
+    return result.materia;
+  }
+
+  function removeMateria(materiaId) {
+    const result = deleteMateriaCascade(getData(), materiaId);
+    persist(result.data);
+    return result.removed;
+  }
+
   function addTema(materiaId, input, options) {
     const result = createTema(getData(), materiaId, input, options);
     persist(result.data);
@@ -84,6 +99,12 @@ export function createMateriaWorkspaceController({ store, repository }) {
 
   function reorderTema(temaId, targetIndex) {
     const nextData = reorderTemas(getData(), temaId, targetIndex);
+    persist(nextData);
+    return nextData.temas.find(({ id }) => id === temaId);
+  }
+
+  function moveTemaTo(temaId, destinationMateriaId, options) {
+    const nextData = moveTema(getData(), temaId, destinationMateriaId, options);
     persist(nextData);
     return nextData.temas.find(({ id }) => id === temaId);
   }
@@ -112,15 +133,25 @@ export function createMateriaWorkspaceController({ store, repository }) {
     return nextData.assuntos.find(({ id }) => id === assuntoId);
   }
 
+  function moveAssuntoTo(assuntoId, destinationTemaId, options) {
+    const nextData = moveAssunto(getData(), assuntoId, destinationTemaId, options);
+    persist(nextData);
+    return nextData.assuntos.find(({ id }) => id === assuntoId);
+  }
+
   return Object.freeze({
     getData,
+    editMateria,
+    removeMateria,
     addTema,
     editTema,
     removeTema,
     reorderTema,
+    moveTemaTo,
     addAssunto,
     editAssunto,
     removeAssunto,
     reorderAssunto,
+    moveAssuntoTo,
   });
 }

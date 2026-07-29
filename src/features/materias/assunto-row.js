@@ -16,6 +16,7 @@ export function createAssuntoRow(
     onOpen,
     onEdit,
     onDelete,
+    onMove,
     onMoveUp,
     onMoveDown,
     overlayManager,
@@ -54,6 +55,7 @@ export function createAssuntoRow(
     overlayManager,
     items: [
       { label: 'Editar assunto', icon: 'edit', onSelect: onEdit },
+      { label: 'Mover assunto', icon: 'move', onSelect: onMove },
       { label: 'Excluir assunto', icon: 'trash', danger: true, onSelect: onDelete },
     ],
   });
