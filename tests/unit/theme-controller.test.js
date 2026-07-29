@@ -31,3 +31,16 @@ test('tema explícito atualiza raiz e assinantes', () => {
     { choice: 'light', resolved: 'light' },
   ]);
 });
+
+test('modo sistema reage a mudanças do dispositivo sem alterar a escolha armazenada', () => {
+  const { documentObject, windowObject, mediaQuery } = createFakeDocument({ prefersDark: false });
+  const controller = createThemeController({ documentObject, windowObject });
+  const states = [];
+  controller.subscribe((state) => states.push(state));
+
+  mediaQuery.setMatches(true);
+
+  assert.deepEqual(controller.getState(), { choice: 'system', resolved: 'dark' });
+  assert.equal(documentObject.documentElement.getAttribute('data-theme'), null);
+  assert.deepEqual(states.at(-1), { choice: 'system', resolved: 'dark' });
+});

@@ -121,6 +121,9 @@ export class FakeElement {
   focus() {
     this.ownerDocument.activeElement = this;
   }
+  click() {
+    if (!this.disabled) this.dispatch('click');
+  }
   remove() {
     this.isConnected = false;
   }
@@ -150,7 +153,20 @@ export function createFakeDocument({ prefersDark = false } = {}) {
       );
     },
   };
-  const mediaQuery = { matches: prefersDark, addEventListener() {}, removeEventListener() {} };
+  const mediaListeners = new Set();
+  const mediaQuery = {
+    matches: prefersDark,
+    addEventListener(type, listener) {
+      if (type === 'change') mediaListeners.add(listener);
+    },
+    removeEventListener(type, listener) {
+      if (type === 'change') mediaListeners.delete(listener);
+    },
+    setMatches(matches) {
+      this.matches = matches;
+      for (const listener of mediaListeners) listener({ matches });
+    },
+  };
   const windowObject = {
     matchMedia() {
       return mediaQuery;

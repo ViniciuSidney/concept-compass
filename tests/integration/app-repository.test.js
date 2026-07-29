@@ -157,3 +157,52 @@ test('salva e remove preferências e dados separadamente', () => {
   repository.clearData();
   assert.deepEqual(storage.dump(), {});
 });
+
+test('substitui dados e preferências somente depois de validar o retrato completo', () => {
+  const originalData = createEmptyData();
+  const originalPreferences = createDefaultPreferences();
+  const storage = createMemoryStorageAdapter({
+    [STORAGE_KEYS.data]: JSON.stringify(originalData),
+    [STORAGE_KEYS.preferences]: JSON.stringify(originalPreferences),
+  });
+  const repository = createAppRepository({ storageAdapter: storage });
+  const nextPreferences = { ...createDefaultPreferences(), theme: 'dark' };
+
+  const restored = repository.replaceSnapshot(
+    { data: validData(), preferences: nextPreferences },
+    { today: '2026-07-29' },
+  );
+
+  assert.deepEqual(restored.data, validData());
+  assert.deepEqual(restored.preferences, nextPreferences);
+  assert.deepEqual(JSON.parse(storage.dump()[STORAGE_KEYS.data]), validData());
+  assert.deepEqual(JSON.parse(storage.dump()[STORAGE_KEYS.preferences]), nextPreferences);
+});
+
+test('falha durante substituição restaura dados e preferências anteriores', () => {
+  const originalData = createEmptyData();
+  const originalPreferences = createDefaultPreferences();
+  const storage = createMemoryStorageAdapter(
+    {
+      [STORAGE_KEYS.data]: JSON.stringify(originalData),
+      [STORAGE_KEYS.preferences]: JSON.stringify(originalPreferences),
+    },
+    { writeAt: 2 },
+  );
+  const repository = createAppRepository({ storageAdapter: storage });
+
+  assert.throws(
+    () =>
+      repository.replaceSnapshot(
+        {
+          data: validData(),
+          preferences: { ...createDefaultPreferences(), theme: 'dark' },
+        },
+        { today: '2026-07-29' },
+      ),
+    StorageError,
+  );
+
+  assert.deepEqual(JSON.parse(storage.dump()[STORAGE_KEYS.data]), originalData);
+  assert.deepEqual(JSON.parse(storage.dump()[STORAGE_KEYS.preferences]), originalPreferences);
+});

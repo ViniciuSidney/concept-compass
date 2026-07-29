@@ -4,15 +4,14 @@ Aplicação web local para organizar estudos em **Matéria → Tema → Assunto*
 
 ## Situação atual
 
-Esta pasta implementa o **M8.1.1 — Refinamentos do Sistema de Pontos de Progresso**. O M8.1 foi aprovado integralmente; esta entrega melhora a leitura dos Temas, a abertura dos menus e o fluxo dos cards da Visão Geral sem alterar dados ou cálculos.
+Esta pasta implementa o **M9 — Configurações, backup e recuperação**. Os marcos M0 a M8.1.1 foram validados e permanecem preservados.
 
 ## Preparação
 
 ```bash
 npm install
 npm run check
-npm run verify:m8-1
-npm run verify:m8-1-1
+npm run verify:m9
 npm run serve
 ```
 
@@ -25,39 +24,45 @@ Servidor: `http://127.0.0.1:4173`
 - `#/materias/:materiaId` — gerenciamento da hierarquia e do progresso;
 - `#/materias/:materiaId?tema=:temaId&assunto=:assuntoId` — navegação profunda;
 - `#/pesquisa?q=:termo&tipo=:tipo` — Pesquisa Geral funcional;
-- `#/configuracoes` — Configurações e laboratório temporário do M3;
-- `#/recuperacao` — Recuperação.
+- `#/configuracoes` — aparência, backup, dados e informações da aplicação;
+- `#/recuperacao` — preservação e restauração quando os dados locais são inválidos.
 
-## M8.1
+## M9
 
-Cada Assunto possui:
+### Aparência
 
-- pontos atuais, inicialmente `0`;
-- meta total, inicialmente `5` e ajustável de `1` a `20`;
-- marcação independente **Precisa de reforço**;
-- situação derivada automaticamente: **Não iniciado**, **Em andamento** ou **Meta concluída**.
+- Claro, Escuro e Seguir sistema;
+- preferência persistida no navegador;
+- reação à mudança do sistema;
+- aplicação antecipada para reduzir flashes de tema incorreto;
+- restauração única ao padrão Seguir sistema.
 
-O usuário pode retirar ou adicionar um ponto, aumentar a meta, ajustar os valores diretamente, concluir a meta, reiniciar o progresso com confirmação e desfazer a última alteração pela mensagem de sucesso.
+### Backup
 
-O progresso de Tema, Matéria e Visão Geral é calculado por:
+- exportação JSON com metadados, dados e preferências permitidas;
+- arquivo `organizador-conteudos-backup-AAAA-MM-DD.json`;
+- validação completa antes da importação;
+- resumo e confirmação antes da substituição;
+- opção de exportar os dados atuais durante o fluxo;
+- substituição conjunta com preservação do retrato anterior em caso de falha.
 
-```text
-soma dos pontos atuais ÷ soma das metas totais
-```
+### Dados e recuperação
 
-Dados do esquema anterior são migrados automaticamente para pontos, preservando IDs, conteúdo, dificuldade, observações, datas e hierarquia.
+- exclusão geral confirmada de Matérias, Temas e Assuntos, preservando aparência;
+- detecção de conteúdo local inválido;
+- redirecionamento seguro para Recuperação;
+- download, cópia e visualização do texto bruto preservado;
+- restauração por backup válido sem correção silenciosa.
 
-O roteiro principal está em `tests/manual/m8-1.md`. Os refinamentos desta entrega estão em `tests/manual/m8-1-1.md`.
+O roteiro manual está em `tests/manual/m9.md`.
 
-## M8.1.1
+## Sistema de progresso
 
-- o progresso dos Temas permanece visível nos cabeçalhos recolhidos;
-- menus próximos ao fim da tela ajustam a rolagem para revelar todas as ações;
-- os quatro cards inferiores da Visão Geral fluem em duas colunas independentes.
+Cada Assunto possui pontos atuais, meta total de `1` a `20`, marcação independente de reforço e situação derivada. Tema, Matéria e Visão Geral usam a soma dos pontos atuais dividida pela soma das metas.
 
 ## Limites
 
-Ainda não existem backup visual, importação pela interface, preferências definitivas, histórico de cada ponto, gráficos temporais, operações em lote ou service worker ativo.
+Ainda faltam a auditoria completa de responsividade, acessibilidade e tema escuro do M10, além da estabilização, publicação e fechamento da v0.1 no M11. Não existem contas, nuvem, colaboração, histórico de backups ou service worker ativo.
 
 ## Autor
 
