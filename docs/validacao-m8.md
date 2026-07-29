@@ -28,7 +28,7 @@
 - mover um Tema altera apenas seu `materiaId`, sua posição e `atualizadoEm`;
 - os Assuntos relacionados permanecem ligados ao mesmo Tema movido;
 - mover um Assunto altera apenas seu `temaId`, sua posição e `atualizadoEm`;
-- IDs, `criadoEm`, estado, dificuldade, descrições, observações e último estudo são preservados;
+- IDs, `criadoEm`, pontos, meta, reforço, dificuldade, descrições, observações e último estudo são preservados;
 - origem e destino sempre terminam com ordens contínuas iniciadas em zero;
 - selecionar a origem e a posição atuais não duplica nem altera o registro;
 - a posição é escolhida por controle nativo acessível;
@@ -37,8 +37,12 @@
 
 ## Limites preservados
 
-O M8 não implementa arrastar e soltar, seleção múltipla, operações em lote, desfazer, lixeira, histórico estrutural, backup visual ou preferências definitivas. Esses recursos não pertencem ao marco atual.
+O M8 não implementa arrastar e soltar, seleção múltipla, operações em lote, lixeira, histórico estrutural, backup visual ou preferências definitivas. Esses recursos não pertencem ao marco atual.
 
 ## Validação manual
 
 O roteiro está em `tests/manual/m8.md`, com os casos `M8-T01` a `M8-T30`.
+
+## Resultado da validação manual
+
+Os casos `M8-T01` a `M8-T30` foram executados e aprovados pelo usuário. O M8 foi oficialmente concluído antes do início do M8.1.
