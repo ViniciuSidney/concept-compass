@@ -40,3 +40,11 @@ O M7 não implementa favoritos, conteúdos como entidade, pesquisas recentes, hi
 ## Validação manual
 
 O roteiro está em `tests/manual/m7.md`, com os casos `M7-T01` a `M7-T28`.
+
+## Validação manual concluída
+
+Os casos `M7-T01` a `M7-T28` foram executados e aprovados pelo usuário em 29/07/2026.
+
+## Resultado
+
+**M7 aprovado e oficialmente concluído.** O projeto está autorizado a avançar para o M8 — Reordenação, movimentação e exclusões completas.
