@@ -57,8 +57,7 @@ export function createDashboardPage(documentObject, _route, context) {
   page.append(
     createOverview(documentObject, summary),
     createMetrics(documentObject, summary),
-    createPrimaryGrid(documentObject, data),
-    createSecondaryGrid(documentObject, data),
+    createDashboardGallery(documentObject, data),
   );
 
   return page;
@@ -162,29 +161,31 @@ function createMetrics(documentObject, summary) {
   return section;
 }
 
-function createPrimaryGrid(documentObject, data) {
-  const grid = documentObject.createElement('div');
-  grid.className = 'dashboard-grid dashboard-grid--primary';
-  grid.append(
-    createProgressDistributionSection(documentObject, data),
-    createPrioritiesSection(documentObject, data),
-  );
-  return grid;
-}
+function createDashboardGallery(documentObject, data) {
+  const gallery = documentObject.createElement('div');
+  const leftColumn = documentObject.createElement('div');
+  const rightColumn = documentObject.createElement('div');
 
-function createSecondaryGrid(documentObject, data) {
-  const grid = documentObject.createElement('div');
-  grid.className = 'dashboard-grid dashboard-grid--secondary';
-  grid.append(
+  gallery.className = 'dashboard-gallery';
+  leftColumn.className = 'dashboard-gallery__column';
+  rightColumn.className = 'dashboard-gallery__column';
+
+  leftColumn.append(
+    createProgressDistributionSection(documentObject, data),
     createMateriaHighlightsSection(documentObject, data),
+  );
+  rightColumn.append(
+    createPrioritiesSection(documentObject, data),
     createRecentStudiesSection(documentObject, data),
   );
-  return grid;
+  gallery.append(leftColumn, rightColumn);
+  return gallery;
 }
 
 function createProgressDistributionSection(documentObject, data) {
   const section = createDashboardCard(documentObject, {
     title: 'Situação do progresso',
+    className: 'dashboard-card--distribution',
     description: 'Distribuição entre assuntos não iniciados, em andamento e com a meta concluída.',
   });
   const distribution = selectProgressDistribution(data);
@@ -238,6 +239,7 @@ function createProgressDistributionSection(documentObject, data) {
 function createPrioritiesSection(documentObject, data) {
   const section = createDashboardCard(documentObject, {
     title: 'Prioridades de estudo',
+    className: 'dashboard-card--priorities',
     description: 'Reforços, progresso em andamento e assuntos difíceis aparecem primeiro.',
     action: createButtonLink(documentObject, {
       label: 'Ver matérias',
@@ -272,6 +274,7 @@ function createPrioritiesSection(documentObject, data) {
 function createMateriaHighlightsSection(documentObject, data) {
   const section = createDashboardCard(documentObject, {
     title: 'Matérias que pedem avanço',
+    className: 'dashboard-card--materias',
     description: 'Matérias com assuntos, ordenadas do menor para o maior progresso.',
   });
   const highlights = selectMateriaProgressHighlights(data);
@@ -315,6 +318,7 @@ function createMateriaHighlightsSection(documentObject, data) {
 function createRecentStudiesSection(documentObject, data) {
   const section = createDashboardCard(documentObject, {
     title: 'Estudos recentes',
+    className: 'dashboard-card--recent',
     description: 'Últimas datas registradas nos assuntos.',
   });
   const recent = selectRecentStudies(data);
@@ -361,7 +365,10 @@ function createMetricCard(documentObject, { label, value, note, icon, tone = 'pr
   return article;
 }
 
-function createDashboardCard(documentObject, { title, description, action = null }) {
+function createDashboardCard(
+  documentObject,
+  { title, description, action = null, className = '' },
+) {
   const element = documentObject.createElement('section');
   const header = documentObject.createElement('header');
   const heading = documentObject.createElement('div');
@@ -369,7 +376,7 @@ function createDashboardCard(documentObject, { title, description, action = null
   const p = documentObject.createElement('p');
   const body = documentObject.createElement('div');
 
-  element.className = 'dashboard-card';
+  element.className = `dashboard-card${className ? ` ${className}` : ''}`;
   header.className = 'dashboard-card__header';
   heading.className = 'dashboard-card__heading';
   h2.textContent = title;

@@ -162,18 +162,18 @@
   line-height: 1.45;
 }
 
-.dashboard-grid {
+.dashboard-gallery {
   display: grid;
-  gap: var(--space-5);
-  align-items: start;
-}
-
-.dashboard-grid--primary {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5);
 }
 
-.dashboard-grid--secondary {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.dashboard-gallery__column {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: var(--space-5);
 }
 
 .dashboard-card {
@@ -372,9 +372,28 @@
 
 @media (max-width: 64rem) {
   .dashboard-overview,
-  .dashboard-grid--primary,
-  .dashboard-grid--secondary {
+  .dashboard-gallery {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-gallery__column {
+    display: contents;
+  }
+
+  .dashboard-card--distribution {
+    order: 1;
+  }
+
+  .dashboard-card--priorities {
+    order: 2;
+  }
+
+  .dashboard-card--materias {
+    order: 3;
+  }
+
+  .dashboard-card--recent {
+    order: 4;
   }
 }
 

@@ -46,6 +46,27 @@ export function createActionMenu(
   function handleOutside(event) {
     if (isOpen && !wrapper.contains(event.target)) close({ restoreFocus: false });
   }
+  function keepMenuInsideViewport() {
+    const windowObject = documentObject.defaultView;
+    const rect = menu.getBoundingClientRect?.();
+    const viewportHeight =
+      windowObject?.innerHeight ?? documentObject.documentElement?.clientHeight ?? 0;
+
+    if (!rect || !viewportHeight || typeof windowObject?.scrollBy !== 'function') return;
+
+    const margin = 16;
+    const bottomOverflow = rect.bottom - (viewportHeight - margin);
+    const topOverflow = rect.top - margin;
+    const offset = bottomOverflow > 0 ? bottomOverflow : topOverflow < 0 ? topOverflow : 0;
+
+    if (!offset) return;
+
+    const reducedMotion = windowObject.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    windowObject.scrollBy({
+      top: offset,
+      behavior: reducedMotion ? 'auto' : 'smooth',
+    });
+  }
   function open() {
     if (isOpen) return;
     isOpen = true;
@@ -53,6 +74,10 @@ export function createActionMenu(
     trigger.setAttribute('aria-expanded', 'true');
     documentObject.addEventListener('pointerdown', handleOutside);
     focusItem(0);
+    const schedule =
+      documentObject.defaultView?.requestAnimationFrame ?? globalThis.requestAnimationFrame;
+    if (typeof schedule === 'function') schedule(keepMenuInsideViewport);
+    else keepMenuInsideViewport();
   }
   function close({ restoreFocus = true } = {}) {
     if (!isOpen) return;

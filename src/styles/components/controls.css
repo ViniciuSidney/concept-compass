@@ -285,7 +285,10 @@
   z-index: 15;
   top: calc(100% + 0.45rem);
   min-width: 13rem;
+  max-height: calc(100vh - 2rem);
   padding: var(--space-2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);

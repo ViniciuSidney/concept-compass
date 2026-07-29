@@ -43,6 +43,12 @@ export function createTemaAccordion(
   const title = documentObject.createElement('strong');
   const description = documentObject.createElement('span');
   const summary = documentObject.createElement('span');
+  const headerProgress = createTemaProgress(
+    documentObject,
+    progress,
+    progressSummary,
+    assuntos.length,
+  );
   const headerActions = documentObject.createElement('div');
   const reorder = documentObject.createElement('div');
   const body = documentObject.createElement('div');
@@ -110,12 +116,11 @@ export function createTemaAccordion(
   reorder.append(moveUp, moveDown);
   headerActions.className = 'tema-accordion__actions';
   headerActions.append(addButton, reorder, menu.element);
-  header.append(toggle, headerActions);
+  header.append(toggle, headerProgress, headerActions);
 
   body.id = bodyId;
   body.className = 'tema-accordion__body';
   body.hidden = !expanded;
-  body.append(createTemaProgress(documentObject, progress, progressSummary, assuntos.length));
 
   if (assuntos.length === 0) {
     body.append(createInlineEmptyState(documentObject, tema.nome, onAddAssunto));
@@ -154,7 +159,7 @@ export function createTemaAccordion(
 
 function createTemaProgress(documentObject, progress, progressSummary, assuntosCount) {
   const area = documentObject.createElement('div');
-  area.className = 'tema-accordion__progress';
+  area.className = 'tema-accordion__progress tema-accordion__progress--header';
 
   if (progress === null) {
     const text = documentObject.createElement('p');
