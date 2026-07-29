@@ -70,11 +70,42 @@ export function createAppRepository({ storageAdapter }) {
     storageAdapter.removeItem(STORAGE_KEYS.preferences);
   }
 
+  function replaceSnapshot(candidate, options = {}) {
+    const normalizedData = validateAppData(candidate?.data, options);
+    const normalizedPreferences = validatePreferences(candidate?.preferences);
+    const previousData = storageAdapter.getItem(STORAGE_KEYS.data);
+    const previousPreferences = storageAdapter.getItem(STORAGE_KEYS.preferences);
+
+    try {
+      storageAdapter.setItem(STORAGE_KEYS.data, JSON.stringify(normalizedData));
+      storageAdapter.setItem(STORAGE_KEYS.preferences, JSON.stringify(normalizedPreferences));
+    } catch (error) {
+      try {
+        restoreRawValue(STORAGE_KEYS.data, previousData);
+        restoreRawValue(STORAGE_KEYS.preferences, previousPreferences);
+      } catch (rollbackError) {
+        error.rollbackError = rollbackError;
+      }
+      throw error;
+    }
+
+    return Object.freeze({
+      data: cloneValue(normalizedData),
+      preferences: cloneValue(normalizedPreferences),
+    });
+  }
+
+  function restoreRawValue(key, rawValue) {
+    if (rawValue === null) storageAdapter.removeItem(key);
+    else storageAdapter.setItem(key, rawValue);
+  }
+
   return Object.freeze({
     loadData,
     saveData,
     loadPreferences,
     savePreferences,
+    replaceSnapshot,
     clearData,
     clearPreferences,
   });

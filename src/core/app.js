@@ -55,7 +55,8 @@ export function createApp({ documentObject = document, windowObject = window } =
       saving: false,
       recovering: dataResult.status === 'recovery',
       recoveryRawData: dataResult.rawData ?? null,
-      lastError: dataResult.error ?? null,
+      lastError: serializeAppError(dataResult.error),
+      preferencesFallback: preferencesResult.status === 'fallback',
     },
   });
   const themeController = createThemeController({ documentObject, windowObject });
@@ -72,6 +73,11 @@ export function createApp({ documentObject = document, windowObject = window } =
   }
 
   function renderRoute(route) {
+    if (store.getState().status.recovering && route.id !== 'recuperacao') {
+      router?.navigate('/recuperacao', { replace: true });
+      return;
+    }
+
     overlayManager.reset('route-change');
     const pageFactory = PAGE_FACTORIES[route.id] ?? createNaoEncontradoPage;
     const pageContext = Object.freeze({
@@ -127,5 +133,15 @@ export function createApp({ documentObject = document, windowObject = window } =
     repository,
     themeController,
     overlayManager,
+  });
+}
+
+function serializeAppError(error) {
+  if (!error) return null;
+  return Object.freeze({
+    name: error.name ?? 'Error',
+    message: error.message ?? 'Erro desconhecido.',
+    code: error.code ?? null,
+    details: error.details ?? null,
   });
 }

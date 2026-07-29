@@ -2,9 +2,12 @@ import { StorageError } from '../../core/errors.js';
 
 export function createMemoryStorageAdapter(initialEntries = {}, failureOptions = {}) {
   const entries = new Map(Object.entries(initialEntries));
+  const operationCounts = { read: 0, write: 0, remove: 0 };
 
   function assertOperation(operation, key) {
-    if (failureOptions[operation]) {
+    operationCounts[operation] += 1;
+    const failAt = failureOptions[`${operation}At`];
+    if (failureOptions[operation] || failAt === operationCounts[operation]) {
       throw new StorageError(`Falha simulada de ${operation}.`, {
         operation,
         key,
