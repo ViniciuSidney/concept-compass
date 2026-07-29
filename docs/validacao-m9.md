@@ -30,7 +30,7 @@ Entregar controle persistente de aparência e proteção completa dos dados loca
 ### Dados
 
 - resumo das quantidades atuais;
-- confirmação destrutiva explícita;
+- duas confirmações destrutivas consecutivas;
 - exclusão somente de Matérias, Temas e Assuntos;
 - preservação da preferência de aparência;
 - retorno à Visão Geral vazia.
@@ -66,13 +66,13 @@ A cobertura inclui:
 - carregamento de preferência inválida com fallback;
 - reação do tema ao sistema;
 - estrutura oficial da página de Configurações;
-- confirmação de importação e exclusão geral;
+- confirmação de importação e dupla confirmação da exclusão geral;
 - preservação do conteúdo bruto na tela de recuperação;
 - regressão dos marcos anteriores.
 
 ## Validação manual
 
-O roteiro está em `tests/manual/m9.md`, com os casos `M9-T01` a `M9-T38`.
+O roteiro está em `tests/manual/m9.md`, com os casos `M9-T01` a `M9-T39`.
 
 ## Limites preservados
 

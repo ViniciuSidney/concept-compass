@@ -44,3 +44,42 @@ test('confirmação destrutiva usa somente matérias, temas e assuntos', () => {
   assert.match(dialog.element.textContent, /4 assuntos/);
   assert.equal(dialog.element.textContent.includes('Conteúdo'), false);
 });
+
+test('exclusão geral exige duas confirmações antes de apagar', () => {
+  const { documentObject } = createFakeDocument();
+  let confirmations = 0;
+  const dialog = createDeleteAllDataDialog(documentObject, {
+    counts: { materias: 2, temas: 3, assuntos: 4 },
+    onConfirm() {
+      confirmations += 1;
+    },
+    overlayManager: createOverlayManager(),
+  });
+  const continueButton = findButton(dialog.element, 'Continuar para confirmação final');
+  const finalButton = findButton(dialog.element, 'Apagar definitivamente');
+
+  assert.ok(continueButton);
+  assert.ok(finalButton);
+  assert.equal(finalButton.hidden, true);
+
+  continueButton.click();
+
+  assert.equal(confirmations, 0);
+  assert.equal(continueButton.hidden, true);
+  assert.equal(finalButton.hidden, false);
+  assert.equal(documentObject.activeElement, finalButton);
+  assert.match(dialog.element.textContent, /Confirmação final/);
+
+  finalButton.click();
+  assert.equal(confirmations, 1);
+});
+
+function findButton(element, label) {
+  if (element.tagName === 'BUTTON' && element.textContent.includes(label)) return element;
+  for (const child of element.children ?? []) {
+    if (typeof child === 'string') continue;
+    const match = findButton(child, label);
+    if (match) return match;
+  }
+  return null;
+}

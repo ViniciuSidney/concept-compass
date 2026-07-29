@@ -237,6 +237,27 @@
   font-weight: 800;
 }
 
+.delete-all-summary__step {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.delete-all-summary__step h3,
+.delete-all-summary__step p {
+  margin: 0;
+}
+
+.delete-all-summary__final-warning {
+  padding: var(--space-4);
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
+  border-radius: var(--radius-small);
+  font-size: var(--font-size-sm);
+  font-weight: 750;
+  line-height: 1.5;
+}
+
 .backup-import-actions {
   justify-content: space-between;
 }
