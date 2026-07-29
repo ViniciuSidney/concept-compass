@@ -60,3 +60,7 @@ O M8.1 não cria histórico de cada clique, gráficos de evolução, pontos nome
 ## Validação manual
 
 O roteiro está em `tests/manual/m8-1.md`, com os casos `M8.1-T01` a `M8.1-T30`.
+
+## Aprovação manual
+
+Em 29/07/2026, os casos `M8.1-T01` a `M8.1-T30` foram executados e aprovados pelo usuário. O M8.1 foi oficialmente concluído antes da abertura do refinamento visual M8.1.1.
