@@ -4,7 +4,7 @@ Aplicação web local para organizar estudos em **Matéria → Tema → Assunto*
 
 ## Situação atual
 
-Esta pasta implementa o **M8.1 — Sistema de Pontos de Progresso**. A hierarquia e as movimentações do M8 permanecem completas, enquanto o acompanhamento dos Assuntos agora utiliza pontos flexíveis em vez de estados escolhidos manualmente.
+Esta pasta implementa o **M8.1.1 — Refinamentos do Sistema de Pontos de Progresso**. O M8.1 foi aprovado integralmente; esta entrega melhora a leitura dos Temas, a abertura dos menus e o fluxo dos cards da Visão Geral sem alterar dados ou cálculos.
 
 ## Preparação
 
@@ -12,6 +12,7 @@ Esta pasta implementa o **M8.1 — Sistema de Pontos de Progresso**. A hierarqui
 npm install
 npm run check
 npm run verify:m8-1
+npm run verify:m8-1-1
 npm run serve
 ```
 
@@ -46,7 +47,13 @@ soma dos pontos atuais ÷ soma das metas totais
 
 Dados do esquema anterior são migrados automaticamente para pontos, preservando IDs, conteúdo, dificuldade, observações, datas e hierarquia.
 
-O roteiro manual está em `tests/manual/m8-1.md`.
+O roteiro principal está em `tests/manual/m8-1.md`. Os refinamentos desta entrega estão em `tests/manual/m8-1-1.md`.
+
+## M8.1.1
+
+- o progresso dos Temas permanece visível nos cabeçalhos recolhidos;
+- menus próximos ao fim da tela ajustam a rolagem para revelar todas as ações;
+- os quatro cards inferiores da Visão Geral fluem em duas colunas independentes.
 
 ## Limites
 

@@ -18,7 +18,8 @@
     "verify:m6": "node scripts/verify-m6.mjs",
     "verify:m7": "node scripts/verify-m7.mjs",
     "verify:m8": "node scripts/verify-m8.mjs",
-    "verify:m8-1": "node scripts/verify-m8-1.mjs"
+    "verify:m8-1": "node scripts/verify-m8-1.mjs",
+    "verify:m8-1-1": "node scripts/verify-m8-1-1.mjs"
   },
   "engines": {
     "node": ">=20"

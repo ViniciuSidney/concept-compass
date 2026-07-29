@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { createActionMenu } from '../../src/ui/components/action-menu.js';
 import { createBadge } from '../../src/ui/components/badge.js';
 import { createButton, createButtonLink } from '../../src/ui/components/button.js';
 import { createFilterChip } from '../../src/ui/components/filter-chip.js';
@@ -98,4 +99,23 @@ test('progresso segmentado usa pontos reais até dez e normaliza metas maiores',
     6,
   );
   assert.equal(normalized.children[1].textContent, '12/20 · 60%');
+});
+
+test('menu de ações rola a janela quando abre abaixo da área visível', () => {
+  const { documentObject, windowObject } = createFakeDocument();
+  const scrollCalls = [];
+  windowObject.innerHeight = 600;
+  windowObject.scrollBy = (options) => scrollCalls.push(options);
+
+  const actionMenu = createActionMenu(documentObject, {
+    items: [{ label: 'Ajustar progresso' }, { label: 'Concluir meta' }],
+  });
+  actionMenu.menu.querySelectorAll = () => actionMenu.menu.children;
+  actionMenu.menu.getBoundingClientRect = () => ({ top: 560, bottom: 720 });
+
+  actionMenu.open();
+
+  assert.equal(actionMenu.isOpen(), true);
+  assert.equal(scrollCalls.length, 1);
+  assert.equal(scrollCalls[0].top, 136);
 });

@@ -47,6 +47,23 @@ test('Visão Geral preenchida apresenta pontos, prioridades e estudos recentes',
   assert.match(page.textContent, /Precisa de reforço/);
   assert.match(page.textContent, /Estudos recentes/);
   assert.match(page.textContent, /24\/07\/2026/);
+
+  const gallery = page.children.at(-1);
+  assert.equal(gallery.classList.contains('dashboard-gallery'), true);
+  assert.equal(gallery.children.length, 2);
+  assert.equal(
+    gallery.children[0].children[0].classList.contains('dashboard-card--distribution'),
+    true,
+  );
+  assert.equal(
+    gallery.children[0].children[1].classList.contains('dashboard-card--materias'),
+    true,
+  );
+  assert.equal(
+    gallery.children[1].children[0].classList.contains('dashboard-card--priorities'),
+    true,
+  );
+  assert.equal(gallery.children[1].children[1].classList.contains('dashboard-card--recent'), true);
 });
 
 test('Visão Geral com matéria sem assuntos preserva estados informativos', () => {
