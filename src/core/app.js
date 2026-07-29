@@ -35,6 +35,13 @@ export function createApp({ documentObject = document, windowObject = window } =
   const storageAdapter = createLocalStorageAdapter(windowObject.localStorage);
   const repository = createAppRepository({ storageAdapter });
   const dataResult = repository.loadData();
+  if (dataResult.status === 'ready' && dataResult.migrated) {
+    try {
+      repository.saveData(dataResult.data);
+    } catch {
+      // A migração permanece disponível em memória mesmo se o navegador bloquear a gravação.
+    }
+  }
   const preferencesResult = repository.loadPreferences();
   const preferences = preferencesResult.preferences ?? createDefaultPreferences();
   const store = createStore({

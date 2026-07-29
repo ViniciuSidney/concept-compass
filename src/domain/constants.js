@@ -1,4 +1,4 @@
-export const DATA_SCHEMA_VERSION = 1;
+export const DATA_SCHEMA_VERSION = 2;
 export const PREFERENCES_SCHEMA_VERSION = 1;
 
 export const STORAGE_KEYS = Object.freeze({
@@ -7,30 +7,25 @@ export const STORAGE_KEYS = Object.freeze({
   ui: 'organizador-conteudos:ui',
 });
 
-export const STUDY_STATES = Object.freeze({
-  NAO_INICIADO: 'nao_iniciado',
-  EM_ESTUDO: 'em_estudo',
-  ESTUDADO: 'estudado',
-  PRECISA_REFORCO: 'precisa_reforco',
-  CONSOLIDADO: 'consolidado',
+export const PROGRESS_POINTS = Object.freeze({
+  MIN_CURRENT: 0,
+  MIN_TOTAL: 1,
+  DEFAULT_TOTAL: 5,
+  MAX_TOTAL: 20,
+  MAX_VISIBLE_SEGMENTS: 10,
 });
 
-export const STUDY_STATE_VALUES = Object.freeze(Object.values(STUDY_STATES));
-
-export const STUDY_STATE_LABELS = Object.freeze({
-  [STUDY_STATES.NAO_INICIADO]: 'Não iniciado',
-  [STUDY_STATES.EM_ESTUDO]: 'Em estudo',
-  [STUDY_STATES.ESTUDADO]: 'Estudado',
-  [STUDY_STATES.PRECISA_REFORCO]: 'Precisa de reforço',
-  [STUDY_STATES.CONSOLIDADO]: 'Consolidado',
+export const PROGRESS_STATUSES = Object.freeze({
+  NOT_STARTED: 'not_started',
+  IN_PROGRESS: 'in_progress',
+  COMPLETE: 'complete',
 });
 
-export const PROGRESS_WEIGHTS = Object.freeze({
-  [STUDY_STATES.NAO_INICIADO]: 0,
-  [STUDY_STATES.EM_ESTUDO]: 25,
-  [STUDY_STATES.PRECISA_REFORCO]: 50,
-  [STUDY_STATES.ESTUDADO]: 75,
-  [STUDY_STATES.CONSOLIDADO]: 100,
+export const PROGRESS_STATUS_VALUES = Object.freeze(Object.values(PROGRESS_STATUSES));
+export const PROGRESS_STATUS_LABELS = Object.freeze({
+  [PROGRESS_STATUSES.NOT_STARTED]: 'Não iniciado',
+  [PROGRESS_STATUSES.IN_PROGRESS]: 'Em andamento',
+  [PROGRESS_STATUSES.COMPLETE]: 'Meta concluída',
 });
 
 export const DIFFICULTIES = Object.freeze({
@@ -41,7 +36,6 @@ export const DIFFICULTIES = Object.freeze({
 });
 
 export const DIFFICULTY_VALUES = Object.freeze(Object.values(DIFFICULTIES));
-
 export const DIFFICULTY_LABELS = Object.freeze({
   [DIFFICULTIES.NAO_DEFINIDA]: 'Não definida',
   [DIFFICULTIES.FACIL]: 'Fácil',
@@ -59,12 +53,7 @@ export const MATERIA_COLORS = Object.freeze([
   'cinza',
 ]);
 
-export const THEMES = Object.freeze({
-  LIGHT: 'light',
-  DARK: 'dark',
-  SYSTEM: 'system',
-});
-
+export const THEMES = Object.freeze({ LIGHT: 'light', DARK: 'dark', SYSTEM: 'system' });
 export const THEME_VALUES = Object.freeze(Object.values(THEMES));
 export const VIEW_MODES = Object.freeze({ CARDS: 'cards' });
 
@@ -75,12 +64,7 @@ export const FIELD_LIMITS = Object.freeze({
 });
 
 export function createEmptyData() {
-  return {
-    schemaVersion: DATA_SCHEMA_VERSION,
-    materias: [],
-    temas: [],
-    assuntos: [],
-  };
+  return { schemaVersion: DATA_SCHEMA_VERSION, materias: [], temas: [], assuntos: [] };
 }
 
 export function createDefaultPreferences() {

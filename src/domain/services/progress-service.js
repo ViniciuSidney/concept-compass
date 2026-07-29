@@ -1,39 +1,69 @@
-import { PROGRESS_WEIGHTS } from '../constants.js';
+import { InvariantError } from '../../core/errors.js';
+import { PROGRESS_STATUSES } from '../constants.js';
 import {
   requireMateria,
   requireTema,
   selectAssuntosByMateria,
   selectAssuntosByTema,
 } from '../selectors/hierarchy-selectors.js';
-import { InvariantError } from '../../core/errors.js';
 
-export function getStateWeight(state) {
-  const weight = PROGRESS_WEIGHTS[state];
+export function calculateAssuntoProgress(assunto) {
+  validateProgressRecord(assunto);
+  return (assunto.pontosProgresso / assunto.metaPontosProgresso) * 100;
+}
 
-  if (weight === undefined) {
-    throw new InvariantError('Não existe peso de progresso para o estado informado.', {
-      details: { state },
-    });
+export function deriveProgressStatus(assunto) {
+  validateProgressRecord(assunto);
+  if (assunto.pontosProgresso === 0) return PROGRESS_STATUSES.NOT_STARTED;
+  if (assunto.pontosProgresso >= assunto.metaPontosProgresso) return PROGRESS_STATUSES.COMPLETE;
+  return PROGRESS_STATUSES.IN_PROGRESS;
+}
+
+export function summarizeAssuntosProgress(assuntos) {
+  if (assuntos.length === 0) return null;
+  let points = 0;
+  let total = 0;
+  for (const assunto of assuntos) {
+    validateProgressRecord(assunto);
+    points += assunto.pontosProgresso;
+    total += assunto.metaPontosProgresso;
   }
-
-  return weight;
+  if (total <= 0) return null;
+  return Object.freeze({ points, total, percentage: (points / total) * 100 });
 }
 
 export function calculateAssuntosProgress(assuntos) {
-  if (assuntos.length === 0) {
-    return null;
-  }
+  return summarizeAssuntosProgress(assuntos)?.percentage ?? null;
+}
 
-  const total = assuntos.reduce((sum, assunto) => sum + getStateWeight(assunto.estado), 0);
-  return total / assuntos.length;
+export function summarizeTemaProgress(data, temaId) {
+  requireTema(data, temaId);
+  return summarizeAssuntosProgress(selectAssuntosByTema(data, temaId));
+}
+
+export function summarizeMateriaProgress(data, materiaId) {
+  requireMateria(data, materiaId);
+  return summarizeAssuntosProgress(selectAssuntosByMateria(data, materiaId));
 }
 
 export function calculateTemaProgress(data, temaId) {
-  requireTema(data, temaId);
-  return calculateAssuntosProgress(selectAssuntosByTema(data, temaId));
+  return summarizeTemaProgress(data, temaId)?.percentage ?? null;
 }
 
 export function calculateMateriaProgress(data, materiaId) {
-  requireMateria(data, materiaId);
-  return calculateAssuntosProgress(selectAssuntosByMateria(data, materiaId));
+  return summarizeMateriaProgress(data, materiaId)?.percentage ?? null;
+}
+
+function validateProgressRecord(assunto) {
+  if (
+    !Number.isInteger(assunto?.pontosProgresso) ||
+    !Number.isInteger(assunto?.metaPontosProgresso) ||
+    assunto.metaPontosProgresso < 1 ||
+    assunto.pontosProgresso < 0 ||
+    assunto.pontosProgresso > assunto.metaPontosProgresso
+  ) {
+    throw new InvariantError('O assunto possui uma pontuação de progresso inválida.', {
+      details: { assuntoId: assunto?.id ?? null },
+    });
+  }
 }

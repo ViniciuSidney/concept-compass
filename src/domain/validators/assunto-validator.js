@@ -1,10 +1,4 @@
-import {
-  DIFFICULTIES,
-  DIFFICULTY_VALUES,
-  FIELD_LIMITS,
-  STUDY_STATES,
-  STUDY_STATE_VALUES,
-} from '../constants.js';
+import { DIFFICULTIES, DIFFICULTY_VALUES, FIELD_LIMITS, PROGRESS_POINTS } from '../constants.js';
 import {
   createLocalDate,
   isFutureLocalDate,
@@ -17,8 +11,10 @@ import {
   normalizeOptionalText,
   normalizeRequiredText,
   throwIfIssues,
+  validateBoolean,
   validateEnum,
   validateIdentifier,
+  validateIntegerRange,
   validateOrder,
 } from './validation-utils.js';
 
@@ -26,7 +22,6 @@ export function normalizeAssuntoInput(input, { today = createLocalDate() } = {})
   const issues = [];
   const source = isPlainObject(input) ? input : {};
   const normalized = normalizeFields(source, issues, today);
-
   throwIfIssues(issues, 'O assunto possui dados inválidos.');
   return normalized;
 }
@@ -42,7 +37,6 @@ export function validateAssuntoRecord(value, { today = createLocalDate() } = {})
     criadoEm: validateTimestamp(source.criadoEm, 'criadoEm', issues),
     atualizadoEm: validateTimestamp(source.atualizadoEm, 'atualizadoEm', issues),
   };
-
   if (
     normalized.criadoEm &&
     normalized.atualizadoEm &&
@@ -56,6 +50,31 @@ export function validateAssuntoRecord(value, { today = createLocalDate() } = {})
 }
 
 function normalizeFields(source, issues, today) {
+  const metaPontosProgresso = validateIntegerRange(
+    source.metaPontosProgresso ?? PROGRESS_POINTS.DEFAULT_TOTAL,
+    'metaPontosProgresso',
+    PROGRESS_POINTS.MIN_TOTAL,
+    PROGRESS_POINTS.MAX_TOTAL,
+    issues,
+  );
+  const pontosProgresso = validateIntegerRange(
+    source.pontosProgresso ?? PROGRESS_POINTS.MIN_CURRENT,
+    'pontosProgresso',
+    PROGRESS_POINTS.MIN_CURRENT,
+    PROGRESS_POINTS.MAX_TOTAL,
+    issues,
+  );
+
+  if (pontosProgresso > metaPontosProgresso) {
+    issues.push(
+      issue(
+        'pontosProgresso',
+        'Os pontos atuais não podem ultrapassar a meta de progresso.',
+        'progress_over_total',
+      ),
+    );
+  }
+
   return {
     nome: normalizeRequiredText(source.nome, 'nome', FIELD_LIMITS.assunto.nome, issues),
     descricao: normalizeOptionalText(
@@ -64,12 +83,9 @@ function normalizeFields(source, issues, today) {
       FIELD_LIMITS.assunto.descricao,
       issues,
     ),
-    estado: validateEnum(
-      source.estado ?? STUDY_STATES.NAO_INICIADO,
-      STUDY_STATE_VALUES,
-      'estado',
-      issues,
-    ),
+    pontosProgresso,
+    metaPontosProgresso,
+    precisaReforco: validateBoolean(source.precisaReforco ?? false, 'precisaReforco', issues),
     dificuldade: validateEnum(
       source.dificuldade ?? DIFFICULTIES.NAO_DEFINIDA,
       DIFFICULTY_VALUES,
@@ -87,21 +103,16 @@ function normalizeFields(source, issues, today) {
 }
 
 function validateLastStudyDate(value, issues, today) {
-  if (value === null) {
-    return null;
-  }
-
+  if (value === null) return null;
   if (!isValidLocalDate(value)) {
     issues.push(
       issue('ultimoEstudoEm', 'Deve usar uma data válida no formato AAAA-MM-DD.', 'date'),
     );
     return null;
   }
-
   if (isFutureLocalDate(value, today)) {
     issues.push(issue('ultimoEstudoEm', 'Não pode estar no futuro.', 'future_date'));
   }
-
   return value;
 }
 
@@ -110,6 +121,5 @@ function validateTimestamp(value, field, issues) {
     issues.push(issue(field, 'Deve ser uma data e hora ISO 8601 válida.', 'timestamp'));
     return '';
   }
-
   return value;
 }

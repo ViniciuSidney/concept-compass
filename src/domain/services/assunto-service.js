@@ -53,6 +53,91 @@ export function updateAssunto(
   return { data: nextData, assunto };
 }
 
+export function setAssuntoProgress(
+  data,
+  assuntoId,
+  { pontosProgresso, metaPontosProgresso, precisaReforco },
+  { nowFactory = createIsoTimestamp, todayFactory = createLocalDate } = {},
+) {
+  const current = requireAssunto(data, assuntoId);
+  const today = todayFactory();
+  const assunto = {
+    ...current,
+    pontosProgresso,
+    metaPontosProgresso,
+    precisaReforco: precisaReforco ?? current.precisaReforco,
+    atualizadoEm: nowFactory(),
+  };
+  const nextData = validateAppData(
+    {
+      ...data,
+      assuntos: data.assuntos.map((item) => (item.id === assuntoId ? assunto : item)),
+    },
+    { today },
+  );
+  return { data: nextData, assunto: nextData.assuntos.find(({ id }) => id === assuntoId) };
+}
+
+export function changeAssuntoProgress(data, assuntoId, delta, options = {}) {
+  const current = requireAssunto(data, assuntoId);
+  const target = Math.min(
+    current.metaPontosProgresso,
+    Math.max(0, current.pontosProgresso + delta),
+  );
+  return setAssuntoProgress(
+    data,
+    assuntoId,
+    {
+      pontosProgresso: target,
+      metaPontosProgresso: current.metaPontosProgresso,
+      precisaReforco: current.precisaReforco,
+    },
+    options,
+  );
+}
+
+export function increaseAssuntoProgressTotal(data, assuntoId, options = {}) {
+  const current = requireAssunto(data, assuntoId);
+  return setAssuntoProgress(
+    data,
+    assuntoId,
+    {
+      pontosProgresso: current.pontosProgresso,
+      metaPontosProgresso: current.metaPontosProgresso + 1,
+      precisaReforco: current.precisaReforco,
+    },
+    options,
+  );
+}
+
+export function completeAssuntoProgress(data, assuntoId, options = {}) {
+  const current = requireAssunto(data, assuntoId);
+  return setAssuntoProgress(
+    data,
+    assuntoId,
+    {
+      pontosProgresso: current.metaPontosProgresso,
+      metaPontosProgresso: current.metaPontosProgresso,
+      precisaReforco: current.precisaReforco,
+    },
+    options,
+  );
+}
+
+export function resetAssuntoProgress(data, assuntoId, options = {}) {
+  const current = requireAssunto(data, assuntoId);
+  return setAssuntoProgress(
+    data,
+    assuntoId,
+    {
+      pontosProgresso: 0,
+      metaPontosProgresso: current.metaPontosProgresso,
+      precisaReforco: current.precisaReforco,
+    },
+    options,
+  );
+}
+
 export function reorderAssuntos(data, assuntoId, targetIndex, { today = createLocalDate() } = {}) {
   const current = requireAssunto(data, assuntoId);
   const siblings = selectAssuntosByTema(data, current.temaId);

@@ -74,3 +74,25 @@ export function validateEnum(value, allowedValues, field, issues) {
 
   return value;
 }
+
+export function validateIntegerRange(value, field, minimum, maximum, issues) {
+  if (!Number.isInteger(value)) {
+    issues.push(issue(field, 'Deve ser um número inteiro.', 'integer'));
+    return minimum;
+  }
+
+  if (value < minimum || value > maximum) {
+    issues.push(issue(field, `Deve estar entre ${minimum} e ${maximum}.`, 'range'));
+  }
+
+  return value;
+}
+
+export function validateBoolean(value, field, issues) {
+  if (typeof value !== 'boolean') {
+    issues.push(issue(field, 'Deve ser verdadeiro ou falso.', 'boolean'));
+    return false;
+  }
+
+  return value;
+}
