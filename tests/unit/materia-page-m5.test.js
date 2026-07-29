@@ -26,7 +26,9 @@ function createContext(data) {
       windowObject,
       overlayManager: null,
       appShell: { showToast() {}, announce() {} },
+      navigate() {},
     },
+    store,
   };
 }
 
@@ -100,4 +102,49 @@ function findElement(root, predicate) {
     if (found) return found;
   }
   return null;
+}
+
+test('workspace expõe movimentações estruturais e ações da matéria no M8', () => {
+  const { documentObject, context } = createContext(validData());
+  const page = createMateriaPage(documentObject, { params: { materiaId: 'materia-1' } }, context);
+
+  assert.match(page.textContent, /Editar matéria/);
+  assert.match(page.textContent, /Excluir matéria/);
+  assert.match(page.textContent, /Mover tema/);
+  assert.match(page.textContent, /Mover assunto/);
+});
+
+test('exclusão da Matéria aberta remove a hierarquia e navega para a listagem', async () => {
+  const { documentObject, context, store } = createContext(validData());
+  let destination = null;
+  context.navigate = (href) => {
+    destination = href;
+  };
+  const page = createMateriaPage(documentObject, { params: { materiaId: 'materia-1' } }, context);
+  const deleteMenuItem = findElement(
+    page,
+    (element) => element.tagName === 'BUTTON' && element.textContent === 'Excluir matéria',
+  );
+
+  deleteMenuItem.dispatch('click');
+  const confirmButton = findElements(documentObject.body).find(
+    (element) =>
+      element.tagName === 'BUTTON' &&
+      element.textContent === 'Excluir matéria' &&
+      element !== deleteMenuItem,
+  );
+  confirmButton.dispatch('click');
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(destination, '/materias');
+  assert.equal(store.getState().data.materias.length, 0);
+  assert.equal(store.getState().data.temas.length, 0);
+  assert.equal(store.getState().data.assuntos.length, 0);
+});
+
+function findElements(root, output = []) {
+  if (!root || typeof root === 'string') return output;
+  output.push(root);
+  for (const child of root.children ?? []) findElements(child, output);
+  return output;
 }
