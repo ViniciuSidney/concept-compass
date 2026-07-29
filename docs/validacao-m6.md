@@ -3,11 +3,11 @@
 ## Concluído tecnicamente
 
 - substituição da tela provisória por uma Visão Geral funcional;
-- progresso geral calculado pela média dos pesos oficiais dos assuntos;
+- progresso geral calculado pela soma dos pontos atuais dividida pela soma das metas;
 - contadores de Matérias, Temas e Assuntos;
 - indicador de assuntos que precisam de reforço;
 - identificação de Matérias sem Temas e Temas sem Assuntos;
-- distribuição pelos cinco estados oficiais, com contagens e percentuais;
+- distribuição pelas três situações derivadas, com contagens e percentuais;
 - prioridades automáticas baseadas em reforço, estudo em andamento e dificuldade alta;
 - lista de Matérias com menor progresso;
 - estudos recentes derivados do campo Último estudo;
@@ -19,10 +19,10 @@
 
 ## Regras consolidadas
 
-- o progresso geral é a média simples dos pesos dos Assuntos;
+- o progresso geral utiliza a soma dos pontos atuais sobre a soma das metas dos Assuntos;
 - sem Assuntos, o progresso é ausente, e não `0%`;
-- a prioridade automática segue esta ordem: Precisa de reforço, Em estudo e dificuldade Difícil não consolidada;
-- assuntos Consolidados não entram nas prioridades;
+- a prioridade automática segue esta ordem: reforço, progresso em andamento e dificuldade Difícil ainda incompleta;
+- Assuntos com meta concluída só entram nas prioridades quando precisam de reforço;
 - Estudos recentes usa apenas o valor atual de Último estudo e não constitui histórico analítico;
 - Matérias que pedem avanço exibe somente Matérias com Assuntos e ordena pelo menor progresso.
 

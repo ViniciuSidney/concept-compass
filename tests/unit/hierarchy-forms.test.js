@@ -58,5 +58,5 @@ test('modal de assunto usa layout amplo e agrupa campos para reduzir rolagem no 
 
   assert.ok(dialog?.classList.contains('modal--assunto-form'));
   assert.equal(contentGrid?.children.length, 2);
-  assert.equal(trackingGrid?.children.length, 3);
+  assert.equal(trackingGrid?.children.length, 4);
 });

@@ -1,6 +1,6 @@
 import { createAppRepository } from '../src/data/repositories/app-repository.js';
 import { createMemoryStorageAdapter } from '../src/data/storage/memory-storage-adapter.js';
-import { STUDY_STATES, createEmptyData } from '../src/domain/constants.js';
+import { createEmptyData } from '../src/domain/constants.js';
 import { createAssunto } from '../src/domain/services/assunto-service.js';
 import { createMateria, deleteMateriaCascade } from '../src/domain/services/materia-service.js';
 import { calculateMateriaProgress } from '../src/domain/services/progress-service.js';
@@ -19,13 +19,13 @@ let data = createEmptyData();
 ({ data } = createAssunto(
   data,
   'tema-demo',
-  { nome: 'Equação', estado: STUDY_STATES.EM_ESTUDO },
+  { nome: 'Equação', pontosProgresso: 1, metaPontosProgresso: 5 },
   options,
 ));
 ({ data } = createAssunto(
   data,
   'tema-demo',
-  { nome: 'Inequação', estado: STUDY_STATES.CONSOLIDADO },
+  { nome: 'Inequação', pontosProgresso: 5, metaPontosProgresso: 5 },
   options,
 ));
 
@@ -36,7 +36,7 @@ const loaded = repository.loadData({ today: '2026-07-24' });
 const progress = calculateMateriaProgress(loaded.data, 'materia-demo');
 const removed = deleteMateriaCascade(loaded.data, 'materia-demo');
 
-if (progress !== 62.5 || removed.data.materias.length !== 0 || removed.removed.assuntos !== 2) {
+if (progress !== 60 || removed.data.materias.length !== 0 || removed.removed.assuntos !== 2) {
   throw new Error('A verificação integrada do M2 produziu um resultado inesperado.');
 }
 

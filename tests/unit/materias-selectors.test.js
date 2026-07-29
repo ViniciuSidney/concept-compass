@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { STUDY_STATES } from '../../src/domain/constants.js';
 import {
   MATERIAS_SORT_MODES,
   selectMateriaImpact,
@@ -23,24 +22,23 @@ function dataWithMaterias() {
     ],
     temas: [tema({ id: 't1', materiaId: 'm1' }), tema({ id: 't2', materiaId: 'm2' })],
     assuntos: [
-      assunto({ id: 'a1', temaId: 't1', estado: STUDY_STATES.CONSOLIDADO }),
-      assunto({ id: 'a2', temaId: 't2', estado: STUDY_STATES.NAO_INICIADO }),
+      assunto({ id: 'a1', temaId: 't1', pontosProgresso: 5 }),
+      assunto({ id: 'a2', temaId: 't2', pontosProgresso: 0 }),
     ],
   });
 }
 
-test('resume contagens e progresso de cada matéria', () => {
+test('resume contagens, pontos e progresso de cada matéria', () => {
   const summaries = selectMateriaSummaries(dataWithMaterias());
-
   assert.equal(summaries[0].temasCount, 1);
   assert.equal(summaries[0].assuntosCount, 1);
   assert.equal(summaries[0].progress, 100);
+  assert.deepEqual(summaries[0].progressSummary, { points: 5, total: 5, percentage: 100 });
   assert.equal(summaries[1].progress, 0);
 });
 
 test('pesquisa matérias ignorando caixa e acentos', () => {
   const summaries = selectMateriaSummaries(dataWithMaterias(), { query: 'matematica' });
-
   assert.deepEqual(
     summaries.map(({ materia: item }) => item.id),
     ['m1'],
@@ -51,7 +49,6 @@ test('ordena por nome e atualização sem alterar ordem armazenada', () => {
   const data = dataWithMaterias();
   const byName = selectMateriaSummaries(data, { sortMode: MATERIAS_SORT_MODES.NAME });
   const byRecent = selectMateriaSummaries(data, { sortMode: MATERIAS_SORT_MODES.RECENT });
-
   assert.deepEqual(
     byName.map(({ materia: item }) => item.id),
     ['m2', 'm1'],
@@ -67,7 +64,5 @@ test('ordena por nome e atualização sem alterar ordem armazenada', () => {
 });
 
 test('calcula impacto de exclusão', () => {
-  const impact = selectMateriaImpact(dataWithMaterias(), 'm1');
-
-  assert.deepEqual(impact, { temas: 1, assuntos: 1 });
+  assert.deepEqual(selectMateriaImpact(dataWithMaterias(), 'm1'), { temas: 1, assuntos: 1 });
 });

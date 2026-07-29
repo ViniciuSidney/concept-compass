@@ -1,10 +1,10 @@
 import { access, readFile, readdir } from 'node:fs/promises';
 
-import { DIFFICULTIES, STUDY_STATES, createEmptyData } from '../src/domain/constants.js';
+import { DIFFICULTIES, PROGRESS_STATUSES, createEmptyData } from '../src/domain/constants.js';
 import {
   selectDashboardSummary,
+  selectProgressDistribution,
   selectRecentStudies,
-  selectStateDistribution,
   selectStudyPriorities,
 } from '../src/features/dashboard/dashboard-selectors.js';
 
@@ -64,7 +64,9 @@ const data = {
       temaId: 'tema-1',
       nome: 'Equações',
       descricao: '',
-      estado: STUDY_STATES.PRECISA_REFORCO,
+      pontosProgresso: 3,
+      metaPontosProgresso: 5,
+      precisaReforco: true,
       dificuldade: DIFFICULTIES.DIFICIL,
       observacoes: '',
       ultimoEstudoEm: '2026-07-24',
@@ -77,7 +79,9 @@ const data = {
       temaId: 'tema-1',
       nome: 'Funções',
       descricao: '',
-      estado: STUDY_STATES.CONSOLIDADO,
+      pontosProgresso: 5,
+      metaPontosProgresso: 5,
+      precisaReforco: false,
       dificuldade: DIFFICULTIES.MEDIA,
       observacoes: '',
       ultimoEstudoEm: '2026-07-25',
@@ -89,20 +93,21 @@ const data = {
 };
 
 const summary = selectDashboardSummary(data);
-const distribution = selectStateDistribution(data);
+const distribution = selectProgressDistribution(data);
 const priorities = selectStudyPriorities(data);
 const recent = selectRecentStudies(data);
 
 if (
-  summary.progress !== 75 ||
+  summary.progress !== 80 ||
+  summary.points !== 8 ||
   summary.reforcoCount !== 1 ||
-  distribution.find(({ state }) => state === STUDY_STATES.CONSOLIDADO)?.count !== 1 ||
+  distribution.find(({ status }) => status === PROGRESS_STATUSES.COMPLETE)?.count !== 1 ||
   priorities[0]?.assunto.id !== 'assunto-1' ||
   recent[0]?.assunto.id !== 'assunto-2'
 ) {
   throw new Error('A verificação funcional dos indicadores do M6 produziu resultado inesperado.');
 }
-process.stdout.write('✓ progresso, distribuição, prioridades e estudos recentes verificados\n');
+process.stdout.write('✓ pontos, distribuição, prioridades e estudos recentes verificados\n');
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 if (Object.keys(pkg.dependencies ?? {}).length) {

@@ -1,17 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { DIFFICULTIES, STUDY_STATES } from '../../src/domain/constants.js';
+import { DIFFICULTIES } from '../../src/domain/constants.js';
 import {
   formatLocalDate,
   getDifficultyPresentation,
-  getStatePresentation,
+  getProgressPresentation,
 } from '../../src/features/materias/assunto-presentation.js';
+import { assunto } from '../fixtures/data-builders.js';
 
-test('apresenta rótulos e tons oficiais de estado e dificuldade', () => {
-  assert.deepEqual(getStatePresentation(STUDY_STATES.PRECISA_REFORCO), {
-    label: 'Precisa de reforço',
-    tone: 'reinforcement',
+test('apresenta situação derivada, pontos e dificuldade', () => {
+  assert.deepEqual(getProgressPresentation(assunto({ pontosProgresso: 3 })), {
+    status: 'in_progress',
+    label: 'Em andamento',
+    tone: 'studying',
+    percentage: 60,
+    pointsLabel: '3 de 5 pontos',
   });
   assert.deepEqual(getDifficultyPresentation(DIFFICULTIES.DIFICIL), {
     label: 'Difícil',

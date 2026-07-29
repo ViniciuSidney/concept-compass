@@ -6,7 +6,7 @@
 
 ## Escopo concluído
 
-- constantes oficiais de estados, dificuldades, pesos, cores, chaves e limites;
+- constantes oficiais de dificuldade, pontos de progresso, cores, chaves e limites;
 - estrutura vazia e preferências padrão;
 - UUID com alternativa segura;
 - data local e datas técnicas;

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createStore } from '../../src/core/store.js';
-import { createEmptyData, DIFFICULTIES, STUDY_STATES } from '../../src/domain/constants.js';
+import { createEmptyData, DIFFICULTIES } from '../../src/domain/constants.js';
 import { createDashboardPage } from '../../src/features/dashboard/dashboard-page.js';
 import { createFakeDocument } from '../helpers/fake-dom.js';
 import { assunto, materia, tema } from '../fixtures/data-builders.js';
@@ -16,12 +16,11 @@ function createContext(data) {
 test('Visão Geral vazia orienta a criação da primeira matéria', () => {
   const { documentObject, context } = createContext(createEmptyData());
   const page = createDashboardPage(documentObject, {}, context);
-
   assert.match(page.textContent, /Sua organização ainda está vazia/);
   assert.match(page.textContent, /Criar primeira matéria/);
 });
 
-test('Visão Geral preenchida apresenta indicadores, prioridades e estudos recentes', () => {
+test('Visão Geral preenchida apresenta pontos, prioridades e estudos recentes', () => {
   const data = {
     ...createEmptyData(),
     materias: [materia({ id: 'm1' })],
@@ -30,7 +29,9 @@ test('Visão Geral preenchida apresenta indicadores, prioridades e estudos recen
       assunto({
         id: 'a1',
         temaId: 't1',
-        estado: STUDY_STATES.PRECISA_REFORCO,
+        pontosProgresso: 3,
+        metaPontosProgresso: 5,
+        precisaReforco: true,
         dificuldade: DIFFICULTIES.DIFICIL,
         ultimoEstudoEm: '2026-07-24',
       }),
@@ -40,10 +41,10 @@ test('Visão Geral preenchida apresenta indicadores, prioridades e estudos recen
   const page = createDashboardPage(documentObject, {}, context);
 
   assert.match(page.textContent, /Progresso geral/);
-  assert.match(page.textContent, /Matérias/);
-  assert.match(page.textContent, /Situação dos assuntos/);
+  assert.match(page.textContent, /3 de 5 pontos/);
+  assert.match(page.textContent, /Situação do progresso/);
   assert.match(page.textContent, /Prioridades de estudo/);
-  assert.match(page.textContent, /Equação do primeiro grau/);
+  assert.match(page.textContent, /Precisa de reforço/);
   assert.match(page.textContent, /Estudos recentes/);
   assert.match(page.textContent, /24\/07\/2026/);
 });

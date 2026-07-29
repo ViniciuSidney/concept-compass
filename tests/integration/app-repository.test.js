@@ -28,6 +28,63 @@ test('salva e recarrega um retrato completo validado', () => {
   assert.equal(loaded.status, 'ready');
 });
 
+test('carrega estrutura v1 como v2 e sinaliza migração sem apagar a origem', () => {
+  const created = '2026-07-24T12:00:00.000Z';
+  const legacy = {
+    schemaVersion: 1,
+    materias: [
+      {
+        id: 'materia-1',
+        nome: 'Matemática',
+        descricao: '',
+        corId: 'roxo',
+        ordem: 0,
+        criadoEm: created,
+        atualizadoEm: created,
+      },
+    ],
+    temas: [
+      {
+        id: 'tema-1',
+        materiaId: 'materia-1',
+        nome: 'Álgebra',
+        descricao: '',
+        ordem: 0,
+        criadoEm: created,
+        atualizadoEm: created,
+      },
+    ],
+    assuntos: [
+      {
+        id: 'assunto-1',
+        temaId: 'tema-1',
+        nome: 'Equação',
+        descricao: '',
+        estado: 'precisa_reforco',
+        dificuldade: 'media',
+        observacoes: 'Preservar',
+        ultimoEstudoEm: '2026-07-24',
+        ordem: 0,
+        criadoEm: created,
+        atualizadoEm: created,
+      },
+    ],
+  };
+  const rawData = JSON.stringify(legacy);
+  const storage = createMemoryStorageAdapter({ [STORAGE_KEYS.data]: rawData });
+  const repository = createAppRepository({ storageAdapter: storage });
+  const result = repository.loadData({ today: '2026-07-24' });
+
+  assert.equal(result.status, 'ready');
+  assert.equal(result.migrated, true);
+  assert.equal(result.data.schemaVersion, 2);
+  assert.equal(result.data.assuntos[0].pontosProgresso, 3);
+  assert.equal(result.data.assuntos[0].metaPontosProgresso, 5);
+  assert.equal(result.data.assuntos[0].precisaReforco, true);
+  assert.equal(result.data.assuntos[0].observacoes, 'Preservar');
+  assert.equal(storage.dump()[STORAGE_KEYS.data], rawData);
+});
+
 test('JSON corrompido entra em recuperação e preserva conteúdo bruto', () => {
   const rawData = '{"schemaVersion":1';
   const repository = createAppRepository({

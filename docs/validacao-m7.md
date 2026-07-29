@@ -11,7 +11,7 @@
 - contagens atualizadas por tipo e pelo termo pesquisado;
 - ordenação por relevância, priorizando títulos exatos e iniciais;
 - cartões de resultado com tipo, hierarquia, descrição e metadados;
-- badges de estado e dificuldade nos Assuntos;
+- badges de situação derivada, reforço e dificuldade nos Assuntos;
 - parâmetros `q` e `tipo` preservados no endereço;
 - navegação profunda para Matérias, Temas e Assuntos;
 - expansão e destaque do Tema localizado;
@@ -35,7 +35,7 @@
 
 ## Limites preservados
 
-O M7 não implementa favoritos, conteúdos como entidade, pesquisas recentes, histórico, filtros por estado ou dificuldade, movimentações entre estruturas, backup visual ou preferências definitivas.
+O M7 não implementa favoritos, conteúdos como entidade, pesquisas recentes, histórico, filtros por situação, reforço ou dificuldade, movimentações entre estruturas, backup visual ou preferências definitivas.
 
 ## Validação manual
 

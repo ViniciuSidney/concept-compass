@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { DIFFICULTIES, STUDY_STATES, createEmptyData } from '../../src/domain/constants.js';
+import { DIFFICULTIES, createEmptyData } from '../../src/domain/constants.js';
 import {
   SEARCH_TYPES,
   normalizeSearchType,
@@ -28,7 +28,9 @@ function createData() {
         nome: 'Equação do primeiro grau',
         descricao: 'Resolução de problemas',
         observacoes: 'Revisar operações inversas',
-        estado: STUDY_STATES.EM_ESTUDO,
+        pontosProgresso: 1,
+        metaPontosProgresso: 5,
+        precisaReforco: false,
         dificuldade: DIFFICULTIES.MEDIA,
         ordem: 0,
       }),

@@ -1,4 +1,4 @@
-import { DIFFICULTIES, STUDY_STATES, createEmptyData } from '../../src/domain/constants.js';
+import { DIFFICULTIES, PROGRESS_POINTS, createEmptyData } from '../../src/domain/constants.js';
 
 const CREATED = '2026-07-24T12:00:00.000Z';
 
@@ -34,7 +34,9 @@ export function assunto(overrides = {}) {
     temaId: 'tema-1',
     nome: 'Equação do primeiro grau',
     descricao: '',
-    estado: STUDY_STATES.NAO_INICIADO,
+    pontosProgresso: 0,
+    metaPontosProgresso: PROGRESS_POINTS.DEFAULT_TOTAL,
+    precisaReforco: false,
     dificuldade: DIFFICULTIES.NAO_DEFINIDA,
     observacoes: '',
     ultimoEstudoEm: null,

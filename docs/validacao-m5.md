@@ -9,9 +9,9 @@
 - exclusão de Tema com impacto e cascata;
 - estados vazios gerais e contextuais;
 - criação, edição, reordenação e exclusão de Assuntos;
-- campos de estado, dificuldade, descrição, observações e último estudo;
+- campos de pontos atuais, meta, reforço, dificuldade, descrição, observações e último estudo;
 - validação de limites e impedimento de data futura;
-- badges oficiais de estado e dificuldade;
+- badges de situação derivada, reforço e dificuldade;
 - painel lateral de detalhes do Assunto;
 - atualização dos contadores e cálculos já consumidos pelo M4;
 - persistência antes da confirmação visual;

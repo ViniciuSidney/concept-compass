@@ -4,14 +4,14 @@ Aplicação web local para organizar estudos em **Matéria → Tema → Assunto*
 
 ## Situação atual
 
-Esta pasta implementa o **M8 — Reordenação, movimentação e exclusões completas**. A aplicação já possui gerenciamento integral da hierarquia, persistência local, Visão Geral, Pesquisa Geral e organização estrutural entre Matérias e Temas.
+Esta pasta implementa o **M8.1 — Sistema de Pontos de Progresso**. A hierarquia e as movimentações do M8 permanecem completas, enquanto o acompanhamento dos Assuntos agora utiliza pontos flexíveis em vez de estados escolhidos manualmente.
 
 ## Preparação
 
 ```bash
 npm install
 npm run check
-npm run verify:m8
+npm run verify:m8-1
 npm run serve
 ```
 
@@ -19,25 +19,38 @@ Servidor: `http://127.0.0.1:4173`
 
 ## Rotas
 
-- `#/` — Visão Geral com indicadores e prioridades;
+- `#/` — Visão Geral com pontos, prioridades e estudos recentes;
 - `#/materias` — gerenciamento de Matérias;
-- `#/materias/:materiaId` — gerenciamento, movimentação e exclusão da hierarquia;
+- `#/materias/:materiaId` — gerenciamento da hierarquia e do progresso;
 - `#/materias/:materiaId?tema=:temaId&assunto=:assuntoId` — navegação profunda;
 - `#/pesquisa?q=:termo&tipo=:tipo` — Pesquisa Geral funcional;
 - `#/configuracoes` — Configurações e laboratório temporário do M3;
 - `#/recuperacao` — Recuperação.
 
-## M8
+## M8.1
 
-Temas podem ser movidos entre Matérias, e Assuntos podem ser movidos entre Temas da mesma ou de outra Matéria. O usuário escolhe a posição exata no destino, enquanto IDs, conteúdo e datas de criação são preservados. Todas as operações essenciais funcionam por teclado, sem exigir arrastar e soltar.
+Cada Assunto possui:
 
-O workspace também permite editar ou excluir a Matéria aberta, e o painel do Assunto oferece edição, movimentação e exclusão seguras.
+- pontos atuais, inicialmente `0`;
+- meta total, inicialmente `5` e ajustável de `1` a `20`;
+- marcação independente **Precisa de reforço**;
+- situação derivada automaticamente: **Não iniciado**, **Em andamento** ou **Meta concluída**.
 
-O roteiro manual está em `tests/manual/m8.md`.
+O usuário pode retirar ou adicionar um ponto, aumentar a meta, ajustar os valores diretamente, concluir a meta, reiniciar o progresso com confirmação e desfazer a última alteração pela mensagem de sucesso.
+
+O progresso de Tema, Matéria e Visão Geral é calculado por:
+
+```text
+soma dos pontos atuais ÷ soma das metas totais
+```
+
+Dados do esquema anterior são migrados automaticamente para pontos, preservando IDs, conteúdo, dificuldade, observações, datas e hierarquia.
+
+O roteiro manual está em `tests/manual/m8-1.md`.
 
 ## Limites
 
-Ainda não existem backup visual, importação pela interface, preferências definitivas, operações em lote, desfazer, histórico analítico ou service worker ativo.
+Ainda não existem backup visual, importação pela interface, preferências definitivas, histórico de cada ponto, gráficos temporais, operações em lote ou service worker ativo.
 
 ## Autor
 

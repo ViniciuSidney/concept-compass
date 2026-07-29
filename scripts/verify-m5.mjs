@@ -3,7 +3,7 @@ import { access, readFile, readdir } from 'node:fs/promises';
 import { createStore } from '../src/core/store.js';
 import { createAppRepository } from '../src/data/repositories/app-repository.js';
 import { createMemoryStorageAdapter } from '../src/data/storage/memory-storage-adapter.js';
-import { STUDY_STATES, createEmptyData } from '../src/domain/constants.js';
+import { createEmptyData } from '../src/domain/constants.js';
 import {
   selectAssuntosByTema,
   selectTemasByMateria,
@@ -72,7 +72,9 @@ const assunto = controller.addAssunto(
   tema.id,
   {
     nome: 'Equação do primeiro grau',
-    estado: STUDY_STATES.EM_ESTUDO,
+    pontosProgresso: 1,
+    metaPontosProgresso: 5,
+    precisaReforco: false,
     dificuldade: 'media',
     ultimoEstudoEm: '2026-07-24',
   },
@@ -87,7 +89,9 @@ controller.editAssunto(
   {
     nome: assunto.nome,
     descricao: 'Resolução de sentenças lineares',
-    estado: STUDY_STATES.ESTUDADO,
+    pontosProgresso: 3,
+    metaPontosProgresso: 5,
+    precisaReforco: false,
     dificuldade: 'media',
     observacoes: 'Revisar problemas contextualizados',
     ultimoEstudoEm: '2026-07-24',
@@ -103,7 +107,7 @@ const sections = selectTemaSections(saved, 'materia-1');
 if (
   selectTemasByMateria(saved, 'materia-1').length !== 1 ||
   selectAssuntosByTema(saved, tema.id).length !== 1 ||
-  sections[0].progress !== 75
+  sections[0].progress !== 60
 ) {
   throw new Error('A verificação funcional da hierarquia produziu resultado inesperado.');
 }

@@ -5,7 +5,6 @@ import { StorageError } from '../../src/core/errors.js';
 import { createStore } from '../../src/core/store.js';
 import { createAppRepository } from '../../src/data/repositories/app-repository.js';
 import { createMemoryStorageAdapter } from '../../src/data/storage/memory-storage-adapter.js';
-import { STUDY_STATES } from '../../src/domain/constants.js';
 import {
   selectAssuntosByTema,
   selectTemasByMateria,
@@ -22,9 +21,11 @@ function createHarness({ failWrite = false } = {}) {
     ui: {},
     status: { saving: false, lastError: null },
   });
-  const controller = createMateriaWorkspaceController({ store, repository });
-
-  return { storage, repository, store, controller };
+  return {
+    repository,
+    store,
+    controller: createMateriaWorkspaceController({ store, repository }),
+  };
 }
 
 const firstTime = () => '2026-07-24T12:00:00.000Z';
@@ -43,14 +44,12 @@ test('cria, edita e reordena temas com persistência', () => {
     { nome: 'Geometria', descricao: '' },
     { idFactory: () => 'tema-b', nowFactory: secondTime },
   );
-
   controller.editTema(
     algebra.id,
     { nome: 'Álgebra básica', descricao: 'Fundamentos' },
     { nowFactory: secondTime },
   );
   controller.reorderTema(geometria.id, 0);
-
   assert.deepEqual(
     selectTemasByMateria(store.getState().data, 'materia-1').map(({ id }) => id),
     ['tema-b', 'tema-a'],
@@ -59,7 +58,7 @@ test('cria, edita e reordena temas com persistência', () => {
   assert.deepEqual(repository.loadData().data, store.getState().data);
 });
 
-test('cria, edita, reordena e remove assuntos com persistência', () => {
+test('cria, edita, ajusta progresso, reordena e remove assuntos com persistência', () => {
   const { controller, repository, store } = createHarness();
   const tema = controller.addTema(
     'materia-1',
@@ -68,12 +67,12 @@ test('cria, edita, reordena e remove assuntos com persistência', () => {
   );
   const equacao = controller.addAssunto(
     tema.id,
-    { nome: 'Equação', estado: STUDY_STATES.NAO_INICIADO },
+    { nome: 'Equação' },
     { idFactory: () => 'assunto-a', nowFactory: firstTime, todayFactory: today },
   );
   const funcao = controller.addAssunto(
     tema.id,
-    { nome: 'Função', estado: STUDY_STATES.EM_ESTUDO },
+    { nome: 'Função', pontosProgresso: 1 },
     { idFactory: () => 'assunto-b', nowFactory: secondTime, todayFactory: today },
   );
 
@@ -82,23 +81,26 @@ test('cria, edita, reordena e remove assuntos com persistência', () => {
     {
       nome: 'Equação do primeiro grau',
       descricao: 'Base algébrica',
-      estado: STUDY_STATES.ESTUDADO,
+      pontosProgresso: 3,
+      metaPontosProgresso: 6,
+      precisaReforco: true,
       dificuldade: 'media',
       observacoes: 'Revisar problemas',
       ultimoEstudoEm: '2026-07-23',
     },
     { nowFactory: secondTime, todayFactory: today },
   );
+  controller.changeProgress(equacao.id, 1, { nowFactory: secondTime, todayFactory: today });
   controller.reorderAssunto(funcao.id, 0, { today: '2026-07-24' });
 
   assert.deepEqual(
     selectAssuntosByTema(store.getState().data, tema.id).map(({ id }) => id),
     ['assunto-b', 'assunto-a'],
   );
-  assert.equal(
-    selectAssuntosByTema(store.getState().data, tema.id)[1].estado,
-    STUDY_STATES.ESTUDADO,
-  );
+  const edited = selectAssuntosByTema(store.getState().data, tema.id)[1];
+  assert.equal(edited.pontosProgresso, 4);
+  assert.equal(edited.metaPontosProgresso, 6);
+  assert.equal(edited.precisaReforco, true);
   assert.deepEqual(repository.loadData().data, store.getState().data);
 
   controller.removeAssunto(funcao.id, { today: '2026-07-24' });
@@ -125,9 +127,7 @@ test('exclusão de tema remove assuntos relacionados e normaliza a ordem', () =>
     { nome: 'Equação' },
     { idFactory: () => 'assunto-a', nowFactory: firstTime, todayFactory: today },
   );
-
   const removed = controller.removeTema(first.id);
-
   assert.deepEqual(removed, { temas: 1, assuntos: 1 });
   assert.deepEqual(store.getState().data.temas, [{ ...second, ordem: 0 }]);
   assert.deepEqual(store.getState().data.assuntos, []);
@@ -136,7 +136,6 @@ test('exclusão de tema remove assuntos relacionados e normaliza a ordem', () =>
 test('falha de gravação preserva o retrato anterior e registra erro', () => {
   const { controller, store } = createHarness({ failWrite: true });
   const before = store.getState().data;
-
   assert.throws(
     () =>
       controller.addTema(

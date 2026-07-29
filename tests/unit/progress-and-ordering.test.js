@@ -1,38 +1,53 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { STUDY_STATES } from '../../src/domain/constants.js';
 import {
   calculateAssuntosProgress,
   calculateMateriaProgress,
   calculateTemaProgress,
+  deriveProgressStatus,
+  summarizeAssuntosProgress,
 } from '../../src/domain/services/progress-service.js';
 import { normalizeOrder, reorderItems } from '../../src/domain/services/ordering-service.js';
 import { assunto, validData } from '../fixtures/data-builders.js';
 
 test('progresso vazio retorna ausência de progresso', () => {
   assert.equal(calculateAssuntosProgress([]), null);
+  assert.equal(summarizeAssuntosProgress([]), null);
 });
 
-test('progresso preserva média fracionária internamente', () => {
-  const result = calculateAssuntosProgress([
-    assunto({ estado: STUDY_STATES.NAO_INICIADO }),
-    assunto({ id: 'assunto-2', estado: STUDY_STATES.ESTUDADO }),
+test('progresso usa soma de pontos e metas, não média simples das porcentagens', () => {
+  const result = summarizeAssuntosProgress([
+    assunto({ pontosProgresso: 3, metaPontosProgresso: 5 }),
+    assunto({ id: 'assunto-2', pontosProgresso: 2, metaPontosProgresso: 10 }),
   ]);
 
-  assert.equal(result, 37.5);
+  assert.deepEqual(result, { points: 5, total: 15, percentage: 33.33333333333333 });
+  assert.equal(
+    calculateAssuntosProgress([
+      assunto({ pontosProgresso: 3, metaPontosProgresso: 5 }),
+      assunto({ id: 'assunto-2', pontosProgresso: 2, metaPontosProgresso: 10 }),
+    ]),
+    33.33333333333333,
+  );
 });
 
 test('progresso de tema e matéria considera os assuntos corretos', () => {
   const data = validData({
     assuntos: [
-      assunto({ estado: STUDY_STATES.EM_ESTUDO }),
-      assunto({ id: 'assunto-2', ordem: 1, estado: STUDY_STATES.CONSOLIDADO }),
+      assunto({ pontosProgresso: 1, metaPontosProgresso: 5 }),
+      assunto({ id: 'assunto-2', ordem: 1, pontosProgresso: 5, metaPontosProgresso: 5 }),
     ],
   });
 
-  assert.equal(calculateTemaProgress(data, 'tema-1'), 62.5);
-  assert.equal(calculateMateriaProgress(data, 'materia-1'), 62.5);
+  assert.equal(calculateTemaProgress(data, 'tema-1'), 60);
+  assert.equal(calculateMateriaProgress(data, 'materia-1'), 60);
+});
+
+test('situação é derivada dos pontos atuais', () => {
+  assert.equal(deriveProgressStatus(assunto()), 'not_started');
+  assert.equal(deriveProgressStatus(assunto({ pontosProgresso: 2 })), 'in_progress');
+  assert.equal(deriveProgressStatus(assunto({ pontosProgresso: 5 })), 'complete');
 });
 
 test('reordenação limita posição e normaliza a sequência', () => {

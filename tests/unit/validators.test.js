@@ -26,28 +26,42 @@ test('rejeita matéria sem nome, cor inválida e limites excedidos', () => {
   );
 });
 
-test('assunto aplica padrões oficiais', () => {
+test('assunto aplica padrões oficiais de progresso', () => {
   const normalized = normalizeAssuntoInput({ nome: 'Razão', ultimoEstudoEm: null });
 
-  assert.equal(normalized.estado, 'nao_iniciado');
+  assert.equal(normalized.pontosProgresso, 0);
+  assert.equal(normalized.metaPontosProgresso, 5);
+  assert.equal(normalized.precisaReforco, false);
   assert.equal(normalized.dificuldade, 'nao_definida');
   assert.equal(normalized.descricao, '');
   assert.equal(normalized.observacoes, '');
 });
 
-test('rejeita estado, dificuldade e data futura', () => {
+test('rejeita pontos inválidos, dificuldade e data futura', () => {
   assert.throws(
     () =>
       normalizeAssuntoInput(
         {
           nome: 'Razão',
-          estado: 'arquivado',
+          pontosProgresso: 8,
+          metaPontosProgresso: 5,
           dificuldade: 'extrema',
           ultimoEstudoEm: '2026-07-25',
         },
         { today: '2026-07-24' },
       ),
-    (error) => error instanceof ValidationError && error.issues.length === 3,
+    (error) =>
+      error instanceof ValidationError &&
+      error.issues.some(({ code }) => code === 'progress_over_total') &&
+      error.issues.some(({ field }) => field === 'dificuldade') &&
+      error.issues.some(({ field }) => field === 'ultimoEstudoEm'),
+  );
+});
+
+test('rejeita meta fora da faixa e reforço não booleano', () => {
+  assert.throws(
+    () => normalizeAssuntoInput({ nome: 'Razão', metaPontosProgresso: 21, precisaReforco: 'sim' }),
+    (error) => error instanceof ValidationError && error.issues.length >= 2,
   );
 });
 
@@ -71,7 +85,6 @@ test('rejeita tema órfão e assunto órfão', () => {
     temas: [tema({ materiaId: 'inexistente' })],
     assuntos: [assunto({ temaId: 'inexistente' })],
   });
-
   assert.throws(
     () => validateAppData(data),
     (error) => error.issues.some(({ code }) => code === 'orphan'),
@@ -82,7 +95,6 @@ test('rejeita ordens duplicadas ou com lacunas', () => {
   const data = validData({
     materias: [materia(), materia({ id: 'materia-2', nome: 'História', ordem: 2 })],
   });
-
   assert.throws(
     () => validateAppData(data),
     (error) => error.issues.some(({ code }) => code === 'order_sequence'),
@@ -98,7 +110,6 @@ test('rejeita cronologia técnica impossível', () => {
       }),
     ],
   });
-
   assert.throws(() => validateAppData(data), /estrutura principal/i);
 });
 

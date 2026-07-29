@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { STUDY_STATES } from '../../src/domain/constants.js';
 import {
   selectAssuntoDetails,
   selectTemaDeleteImpact,
@@ -14,16 +13,16 @@ test('monta seções de tema com assuntos, progresso e limites de reordenação'
     materias: [materia()],
     temas: [tema({ id: 't1', ordem: 0 }), tema({ id: 't2', ordem: 1, nome: 'Geometria' })],
     assuntos: [
-      assunto({ id: 'a1', temaId: 't1', estado: STUDY_STATES.ESTUDADO }),
-      assunto({ id: 'a2', temaId: 't1', ordem: 1, estado: STUDY_STATES.CONSOLIDADO }),
+      assunto({ id: 'a1', temaId: 't1', pontosProgresso: 3, metaPontosProgresso: 5 }),
+      assunto({ id: 'a2', temaId: 't1', ordem: 1, pontosProgresso: 5, metaPontosProgresso: 5 }),
     ],
   });
 
   const sections = selectTemaSections(data, 'materia-1');
-
   assert.equal(sections.length, 2);
   assert.equal(sections[0].assuntos.length, 2);
-  assert.equal(sections[0].progress, 87.5);
+  assert.equal(sections[0].progress, 80);
+  assert.deepEqual(sections[0].progressSummary, { points: 8, total: 10, percentage: 80 });
   assert.equal(sections[0].canMoveUp, false);
   assert.equal(sections[0].canMoveDown, true);
   assert.equal(sections[1].progress, null);
@@ -32,7 +31,6 @@ test('monta seções de tema com assuntos, progresso e limites de reordenação'
 
 test('calcula impacto de tema e resolve detalhes de assunto', () => {
   const data = validData();
-
   assert.deepEqual(selectTemaDeleteImpact(data, 'tema-1'), {
     tema: data.temas[0],
     assuntos: 1,
