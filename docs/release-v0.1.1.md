@@ -1,5 +1,7 @@
 # Release v0.1.1 — Concept Compass
 
+**Status:** aprovada para publicação em 30/07/2026.
+
 ## Objetivo
 
 Adotar a nova identidade **Concept Compass** sem alterar o funcionamento consolidado da v0.1.0 e sem interromper dados ou backups existentes.
@@ -24,6 +26,11 @@ Adotar a nova identidade **Concept Compass** sem alterar o funcionamento consoli
 
 `v0.1.1`
 
-## Critério de aprovação
+## Validação concluída
 
-A atualização está pronta quando a identidade nova aparecer em todos os pontos atuais, os dados anteriores permanecerem acessíveis, backups novos e antigos funcionarem e o portão `npm run release:check` passar.
+- 149 testes automatizados aprovados;
+- roteiro manual CC-T01 a CC-T10 aprovado;
+- dados anteriores preservados;
+- backups novos e antigos validados;
+- responsividade, manifesto, recuperação e regressão funcional aprovados;
+- portão `npm run release:check` aprovado.
