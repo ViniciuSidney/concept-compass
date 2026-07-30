@@ -46,12 +46,14 @@ export class FakeElement {
     this.ownerDocument = documentObject;
     this.tagName = tagName.toUpperCase();
     this.attributes = new Map();
+    this.dataset = {};
     this.children = [];
     this.listeners = new Map();
     this.style = new FakeStyle();
     this.className = '';
     this.classList = new FakeClassList(this);
     this.hidden = false;
+    this.inert = false;
     this.disabled = false;
     this.tabIndex = 0;
     this.value = '';
@@ -118,6 +120,14 @@ export class FakeElement {
     for (const listener of this.listeners.get(type) ?? []) listener(event);
     return event;
   }
+  contains(target) {
+    if (target === this) return true;
+    return this.children.some((child) => typeof child !== 'string' && child.contains?.(target));
+  }
+  closest(selector) {
+    if (selector === 'a' && this.tagName === 'A') return this;
+    return null;
+  }
   focus() {
     this.ownerDocument.activeElement = this;
   }
@@ -139,7 +149,9 @@ export function createFakeDocument({ prefersDark = false } = {}) {
       return new FakeElement(this, tag);
     },
     querySelector(selector) {
-      return selector === 'meta[name="theme-color"]' ? this.themeColorMeta : null;
+      if (selector === 'meta[name="theme-color"]') return this.themeColorMeta;
+      if (selector.startsWith('#')) return findById(this.body, selector.slice(1));
+      return null;
     },
     addEventListener(type, listener) {
       const list = this.listeners.get(type) ?? [];
@@ -151,6 +163,18 @@ export function createFakeDocument({ prefersDark = false } = {}) {
         type,
         (this.listeners.get(type) ?? []).filter((item) => item !== listener),
       );
+    },
+    dispatch(type, event = {}) {
+      const nextEvent = {
+        type,
+        key: null,
+        shiftKey: false,
+        preventDefault() {},
+        stopPropagation() {},
+        ...event,
+      };
+      for (const listener of this.listeners.get(type) ?? []) listener(nextEvent);
+      return nextEvent;
     },
   };
   const mediaListeners = new Set();
@@ -167,12 +191,28 @@ export function createFakeDocument({ prefersDark = false } = {}) {
       for (const listener of mediaListeners) listener({ matches });
     },
   };
+  const windowListeners = new Map();
   const windowObject = {
+    innerWidth: 1024,
     matchMedia() {
       return mediaQuery;
     },
     requestAnimationFrame(callback) {
       callback();
+    },
+    addEventListener(type, listener) {
+      const list = windowListeners.get(type) ?? [];
+      list.push(listener);
+      windowListeners.set(type, list);
+    },
+    removeEventListener(type, listener) {
+      windowListeners.set(
+        type,
+        (windowListeners.get(type) ?? []).filter((item) => item !== listener),
+      );
+    },
+    dispatch(type, event = {}) {
+      for (const listener of windowListeners.get(type) ?? []) listener(event);
     },
   };
   documentObject.documentElement = new FakeElement(documentObject, 'html');
@@ -181,4 +221,14 @@ export function createFakeDocument({ prefersDark = false } = {}) {
   documentObject.themeColorMeta = new FakeElement(documentObject, 'meta');
   documentObject.defaultView = windowObject;
   return { documentObject, windowObject, mediaQuery };
+}
+
+function findById(element, id) {
+  if (!element || typeof element === 'string') return null;
+  if (element.id === id) return element;
+  for (const child of element.children ?? []) {
+    const match = findById(child, id);
+    if (match) return match;
+  }
+  return null;
 }

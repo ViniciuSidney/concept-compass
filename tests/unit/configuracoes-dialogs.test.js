@@ -57,7 +57,7 @@ test('exclusão geral exige duas confirmações antes de apagar', () => {
   });
   const continueButton = findButton(dialog.element, 'Continuar para confirmação final');
   const finalButton = findButton(dialog.element, 'Apagar definitivamente');
-  const confirmationInput = findInput(dialog.element, 'delete-all-confirmation-input');
+  const confirmationInput = findInput(dialog.element, 'deleteAllConfirmation');
 
   assert.ok(continueButton);
   assert.ok(finalButton);
@@ -99,11 +99,11 @@ function findButton(element, label) {
   return null;
 }
 
-function findInput(element, id) {
-  if (element.tagName === 'INPUT' && element.id === id) return element;
+function findInput(element, name) {
+  if (element.tagName === 'INPUT' && element.name === name) return element;
   for (const child of element.children ?? []) {
     if (typeof child === 'string') continue;
-    const match = findInput(child, id);
+    const match = findInput(child, name);
     if (match) return match;
   }
   return null;
