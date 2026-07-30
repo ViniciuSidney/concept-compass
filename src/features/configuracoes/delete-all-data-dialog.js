@@ -11,6 +11,10 @@ export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, o
   const finalHeading = documentObject.createElement('h3');
   const finalMessage = documentObject.createElement('p');
   const finalWarning = documentObject.createElement('p');
+  const confirmationField = documentObject.createElement('div');
+  const confirmationLabel = documentObject.createElement('label');
+  const confirmationInput = documentObject.createElement('input');
+  const confirmationSupport = documentObject.createElement('p');
   const error = documentObject.createElement('p');
   const footer = documentObject.createElement('div');
   const cancelButton = createButton(documentObject, {
@@ -53,7 +57,21 @@ export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, o
   finalWarning.className = 'delete-all-summary__final-warning';
   finalWarning.textContent =
     'Segunda confirmação de 2. Depois de continuar, esta ação não poderá ser desfeita pela aplicação.';
-  finalStep.append(finalHeading, finalMessage, finalWarning);
+  confirmationField.className = 'form-field delete-all-summary__confirmation-field';
+  confirmationLabel.setAttribute('for', 'delete-all-confirmation-input');
+  confirmationLabel.textContent = 'Digite EXCLUIR para confirmar';
+  confirmationInput.id = 'delete-all-confirmation-input';
+  confirmationInput.name = 'deleteAllConfirmation';
+  confirmationInput.type = 'text';
+  confirmationInput.autocomplete = 'off';
+  confirmationInput.autocapitalize = 'characters';
+  confirmationInput.spellcheck = false;
+  confirmationInput.placeholder = 'EXCLUIR';
+  confirmationSupport.className = 'form-field__description';
+  confirmationSupport.textContent =
+    'A exclusão só será liberada quando o texto for digitado exatamente como mostrado.';
+  confirmationField.append(confirmationLabel, confirmationInput, confirmationSupport);
+  finalStep.append(finalHeading, finalMessage, finalWarning, confirmationField);
 
   error.className = 'form-general-error';
   error.setAttribute('role', 'alert');
@@ -61,6 +79,7 @@ export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, o
   content.append(reviewStep, finalStep, error);
 
   confirmButton.hidden = true;
+  confirmButton.disabled = true;
   footer.className = 'overlay-actions';
   footer.append(cancelButton, continueButton, confirmButton);
 
@@ -84,7 +103,12 @@ export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, o
     finalStep.hidden = false;
     continueButton.hidden = true;
     confirmButton.hidden = false;
-    confirmButton.focus();
+    confirmationInput.value = '';
+    syncConfirmationState();
+    confirmationInput.focus();
+  });
+  confirmationInput.addEventListener('input', () => {
+    syncConfirmationState();
   });
   confirmButton.addEventListener('click', async () => {
     setBusy(true);
@@ -100,11 +124,16 @@ export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, o
     }
   });
 
+  function syncConfirmationState() {
+    confirmButton.disabled = confirmationInput.value.trim() !== 'EXCLUIR';
+  }
+
   function setBusy(busy) {
     cancelButton.disabled = busy;
     continueButton.disabled = busy;
-    confirmButton.disabled = busy;
+    confirmButton.disabled = busy || confirmationInput.value.trim() !== 'EXCLUIR';
     confirmButton.setAttribute('aria-busy', String(busy));
+    confirmationInput.disabled = busy;
   }
 
   return Object.freeze({ open: modal.open, close: modal.close, element: modal.element });
