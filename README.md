@@ -1,73 +1,92 @@
 # Organizador de Conteúdos
 
-Aplicação web local para organizar estudos em **Matéria → Tema → Assunto**.
+Aplicação web local para construir e acompanhar um mapa de estudos em **Matéria → Tema → Assunto**.
 
-## Situação atual
+A versão `0.1.0` organiza a hierarquia acadêmica, acompanha pontos de progresso, permite pesquisa e movimentações estruturais e protege os dados por backup e recuperação.
 
-Esta pasta implementa o **M10 — Responsividade, acessibilidade e revisão completa do tema escuro**. Os marcos M0 a M9 foram validados e permanecem preservados.
+## Estado da versão
 
-## Preparação
+O código está preparado como **candidato de release da v0.1.0**. A publicação definitiva depende da execução do roteiro manual do M11 e dos testes de fumaça no GitHub Pages.
+
+## Funcionalidades
+
+- criação, edição, exclusão e reordenação de Matérias, Temas e Assuntos;
+- movimentação de Temas entre Matérias e de Assuntos entre Temas;
+- pontos de progresso flexíveis com meta de `1` a `20`;
+- marcação independente **Precisa de reforço**;
+- cálculo agregado de progresso por Tema, Matéria e aplicação;
+- Visão Geral com indicadores, prioridades e estudos recentes;
+- Pesquisa Geral com filtros para Matérias, Temas e Assuntos;
+- aparência Claro, Escuro ou Seguir sistema;
+- exportação, importação, exclusão protegida e recuperação de dados;
+- funcionamento responsivo e acessível por teclado;
+- armazenamento local, sem conta, servidor ou envio de dados acadêmicos.
+
+## Executar localmente
+
+Requisitos: Node.js `20` ou superior e npm.
 
 ```bash
 npm install
-npm run check
-npm run verify:m10
+npm run release:check
 npm run serve
 ```
 
-Servidor: `http://127.0.0.1:4173`
+Abra `http://127.0.0.1:4173`.
+
+## Dados e segurança
+
+Os dados ficam no `LocalStorage` do navegador. Eles não acompanham automaticamente outro navegador, perfil ou computador.
+
+Antes de trocar de dispositivo, limpar dados do navegador ou testar operações destrutivas:
+
+1. abra **Configurações**;
+2. use **Exportar backup**;
+3. guarde o arquivo JSON em local seguro;
+4. importe-o no outro ambiente.
+
+Backups válidos gerados durante o desenvolvimento da v0.1 continuam aceitos e passam pelas migrações oficiais antes da restauração.
 
 ## Rotas
 
-- `#/` — Visão Geral com pontos, prioridades e estudos recentes;
-- `#/materias` — gerenciamento de Matérias;
-- `#/materias/:materiaId` — gerenciamento da hierarquia e do progresso;
-- `#/materias/:materiaId?tema=:temaId&assunto=:assuntoId` — navegação profunda;
-- `#/pesquisa?q=:termo&tipo=:tipo` — Pesquisa Geral funcional;
-- `#/configuracoes` — aparência, backup, dados e informações da aplicação;
-- `#/recuperacao` — preservação e restauração quando os dados locais são inválidos.
+- `#/` — Visão Geral;
+- `#/materias` — Matérias;
+- `#/materias/:materiaId` — workspace da Matéria;
+- `#/pesquisa?q=:termo&tipo=:tipo` — Pesquisa Geral;
+- `#/configuracoes` — aparência, backup, dados e Sobre;
+- `#/recuperacao` — recuperação de armazenamento inválido.
 
-## M10
+## Comandos
 
-### Responsividade
+```bash
+npm run test                    # testes automatizados
+npm run lint                    # análise estática
+npm run format:check            # conferência de formatação
+npm run check                   # testes + lint + formatação
+npm run verify:all              # verificações estruturais do M2 ao M11
+npm run release:check           # portão técnico completo da release
+npm run generate:large-fixture  # gera massa fictícia em reports/
+npm run serve                   # servidor local
+```
 
-- AppShell fixo em desktop e navegação sobreposta em tablet/mobile;
-- revisão em desktop amplo, desktop comum, tablet, `390 px` e `320 px`;
-- grades de Matérias em 3, 2 e 1 coluna;
-- Temas, Assuntos, filtros e cabeçalhos adaptáveis;
-- modais extensos em tela cheia quando necessário;
-- painéis laterais responsivos;
-- viewport dinâmica e áreas seguras;
-- ausência planejada de rolagem horizontal geral.
+## Publicação
 
-### Acessibilidade
+O projeto usa apenas arquivos estáticos e caminhos relativos. A publicação recomendada é pelo branch `main`, pasta raiz, conforme `docs/publicacao-github-pages.md`.
 
-- skip link e landmarks preservados;
-- navegação móvel, modais e painéis com foco controlado;
-- conteúdo ao fundo inerte durante sobreposições;
-- menus operáveis por setas, `Home`, `End`, `Esc` e `Tab`;
-- retorno de foco após fechamento;
-- alvos mínimos de toque;
-- suporte a movimento reduzido e cores forçadas;
-- fluxo essencial realizável sem mouse.
+O service worker **não está ativo na v0.1.0**. A aplicação pode ser instalada quando o navegador oferecer essa opção, mas o funcionamento offline completo foi adiado para evitar que um cache antigo esconda novas versões sem um fluxo de atualização validado.
 
-### Tema escuro
+## Documentação
 
-- tokens semânticos de estados e categorias;
-- superfícies, campos, menus, modais, painéis e toasts revisados;
-- bordas no lugar de sombras excessivas;
-- contraste reforçado em foco, feedback, ações destrutivas e progresso;
-- tema resolvido antecipadamente, inclusive em Seguir sistema.
+- `docs/manual-do-usuario.md` — uso da aplicação;
+- `docs/publicacao-github-pages.md` — publicação e testes de produção;
+- `docs/release-v0.1.0.md` — notas e checklist da release;
+- `docs/backlog-v0.2.md` — próxima evolução planejada;
+- `tests/manual/README.md` — índice dos roteiros de teste;
+- `tests/manual/m11.md` — aceite final da v0.1.0.
 
-O roteiro manual está em `tests/manual/m10.md`.
+## Próxima versão
 
-## Sistema de progresso
-
-Cada Assunto possui pontos atuais, meta total de `1` a `20`, marcação independente de reforço e situação derivada. Tema, Matéria e Visão Geral usam a soma dos pontos atuais dividida pela soma das metas.
-
-## Limites
-
-Ainda falta o **M11 — Estabilização, publicação e fechamento da v0.1**. Não existem contas, nuvem, colaboração, histórico de backups ou service worker ativo.
+A v0.2 está planejada para adicionar uma **Ficha do Assunto** e **registros metacognitivos por data**, sem misturá-los com o progresso quantitativo. Consulte `docs/backlog-v0.2.md`.
 
 ## Autor
 
