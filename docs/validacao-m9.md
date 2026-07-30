@@ -1,4 +1,4 @@
-# Preparação para validação do M9 — Configurações, backup e recuperação
+# Validação concluída do M9 — Configurações, backup e recuperação
 
 ## Objetivo
 
@@ -31,6 +31,7 @@ Entregar controle persistente de aparência e proteção completa dos dados loca
 
 - resumo das quantidades atuais;
 - duas confirmações destrutivas consecutivas;
+- digitação obrigatória de `EXCLUIR` na confirmação final;
 - exclusão somente de Matérias, Temas e Assuntos;
 - preservação da preferência de aparência;
 - retorno à Visão Geral vazia.
@@ -72,7 +73,7 @@ A cobertura inclui:
 
 ## Validação manual
 
-O roteiro está em `tests/manual/m9.md`, com os casos `M9-T01` a `M9-T39`.
+O roteiro em `tests/manual/m9.md`, com os casos `M9-T01` a `M9-T39`, foi executado e aprovado pelo usuário. O M9 está concluído e foi usado como base oficial do M10.
 
 ## Limites preservados
 
