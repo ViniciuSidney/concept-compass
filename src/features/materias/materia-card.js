@@ -40,6 +40,7 @@ export function createMateriaCard(
   });
 
   article.className = `materia-card materia-card--${materia.corId}`;
+  article.setAttribute('role', 'listitem');
   header.className = 'materia-card__header';
   identity.className = 'materia-card__identity';
   icon.classList.add('materia-card__icon');
@@ -78,6 +79,8 @@ export function createMateriaCard(
 
   footer.className = 'materia-card__footer';
   reorder.className = 'materia-card__reorder';
+  reorder.setAttribute('role', 'group');
+  reorder.setAttribute('aria-label', `Reordenar ${materia.nome}`);
   if (showReorder) {
     reorder.append(
       createIconButton(documentObject, {

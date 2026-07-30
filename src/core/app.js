@@ -122,6 +122,7 @@ export function createApp({ documentObject = document, windowObject = window } =
   function stop() {
     router.stop();
     overlayManager.reset('app-stop');
+    appShell.destroy();
     themeController.destroy();
   }
 

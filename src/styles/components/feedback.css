@@ -167,3 +167,24 @@
   color: currentcolor;
   font-weight: 800;
 }
+
+.app-notifications {
+  right: max(var(--space-4), var(--safe-area-right));
+  bottom: max(var(--space-4), var(--safe-area-bottom));
+}
+
+@media (max-width: 34rem) {
+  .toast {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .toast > .icon-button {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .state-card {
+    min-height: 11rem;
+    padding: var(--space-5);
+  }
+}

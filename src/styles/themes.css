@@ -3,11 +3,47 @@
 :root[data-theme='dark'] {
   transition: color-scheme var(--transition-fast);
 }
-:root[data-theme='dark'] .app-topbar,
-:root[data-theme='dark'] .surface-card,
-:root[data-theme='dark'] .showcase-card,
-:root[data-theme='dark'] .state-card,
-:root[data-theme='dark'] .modal,
-:root[data-theme='dark'] .side-panel {
+
+:root[data-resolved-theme='dark'] .app-topbar,
+:root[data-resolved-theme='dark'] .surface-card,
+:root[data-resolved-theme='dark'] .showcase-card,
+:root[data-resolved-theme='dark'] .state-card,
+:root[data-resolved-theme='dark'] .modal,
+:root[data-resolved-theme='dark'] .side-panel,
+:root[data-resolved-theme='dark'] .dashboard-overview,
+:root[data-resolved-theme='dark'] .dashboard-metric,
+:root[data-resolved-theme='dark'] .dashboard-card,
+:root[data-resolved-theme='dark'] .materia-card,
+:root[data-resolved-theme='dark'] .materia-summary,
+:root[data-resolved-theme='dark'] .tema-accordion,
+:root[data-resolved-theme='dark'] .settings-card,
+:root[data-resolved-theme='dark'] .pesquisa-result {
   box-shadow: none;
+}
+
+:root[data-resolved-theme='dark'] .dashboard-overview {
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      color-mix(in srgb, var(--color-primary) 17%, transparent),
+      transparent 38%
+    ),
+    linear-gradient(135deg, var(--color-surface), var(--color-primary-soft));
+}
+
+:root[data-resolved-theme='dark'] :where(input, select, textarea, option) {
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+:root[data-resolved-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0.82;
+}
+
+:root[data-resolved-theme='dark'] .toast {
+  border-color: var(--color-border-strong);
+}
+
+:root[data-resolved-theme='dark'] .app-sidebar {
+  border-right-color: var(--color-border);
 }

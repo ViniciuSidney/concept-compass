@@ -3,6 +3,7 @@ import { createIcon } from '../icons/icon.js';
 import { createIconButton } from './icon-button.js';
 import { createNavigation } from './navigation.js';
 import { createToastManager } from './toast.js';
+import { createFocusTrap } from '../overlays/focus-trap.js';
 export function createAppShell(documentObject, { windowObject = window } = {}) {
   const shell = documentObject.createElement('div');
   const sidebar = documentObject.createElement('aside');
@@ -30,9 +31,13 @@ export function createAppShell(documentObject, { windowObject = window } = {}) {
   const announcements = documentObject.createElement('div');
   const navigation = createNavigation(documentObject);
   const toastManager = createToastManager(documentObject, notifications);
+  const navigationTrap = createFocusTrap(documentObject, sidebar);
+  const mobileNavigationMaxWidth = 54 * 16;
+  let navigationIsMobile = false;
   shell.className = 'app-shell';
   sidebar.className = 'app-sidebar';
   sidebar.id = 'app-sidebar';
+  sidebar.setAttribute('aria-label', 'Menu de navegação');
   sidebarHeader.className = 'app-sidebar__header';
   brandMark.className = 'app-brand__mark';
   brandMark.append(createIcon(documentObject, 'layers', { size: 24 }));
@@ -71,30 +76,62 @@ export function createAppShell(documentObject, { windowObject = window } = {}) {
   announcements.setAttribute('aria-atomic', 'true');
   content.append(topbar, main);
   shell.append(sidebar, backdrop, content, notifications, announcements);
-  function setNavigationOpen(open) {
-    shell.classList.toggle('is-navigation-open', open);
-    menuButton.setAttribute('aria-expanded', String(open));
+  function setNavigationOpen(open, { restoreFocus = false } = {}) {
+    const shouldOpen = Boolean(open && navigationIsMobile);
+    const wasOpen = shell.classList.contains('is-navigation-open');
+
+    shell.classList.toggle('is-navigation-open', shouldOpen);
+    menuButton.setAttribute('aria-expanded', String(shouldOpen));
     menuButton.setAttribute(
       'aria-label',
-      open ? 'Fechar menu de navegação' : 'Abrir menu de navegação',
+      shouldOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação',
     );
-    backdrop.hidden = !open;
-    documentObject.body.classList.toggle('has-open-navigation', open);
+    backdrop.hidden = !shouldOpen;
+    documentObject.body.classList.toggle('has-open-navigation', shouldOpen);
+
+    if (navigationIsMobile) {
+      sidebar.inert = !shouldOpen;
+      sidebar.setAttribute('aria-hidden', String(!shouldOpen));
+      content.inert = shouldOpen;
+      if (shouldOpen) content.setAttribute('aria-hidden', 'true');
+      else content.removeAttribute('aria-hidden');
+      sidebar.setAttribute('role', 'dialog');
+      sidebar.setAttribute('aria-modal', String(shouldOpen));
+    } else {
+      sidebar.inert = false;
+      sidebar.removeAttribute('aria-hidden');
+      sidebar.removeAttribute('role');
+      sidebar.removeAttribute('aria-modal');
+      content.inert = false;
+      content.removeAttribute('aria-hidden');
+    }
+
+    if (shouldOpen && !wasOpen) {
+      navigationTrap.activate(navigation.getActiveLink() ?? navigation.getFirstLink());
+    } else if (!shouldOpen && wasOpen) {
+      navigationTrap.deactivate({ restoreFocus: false });
+      if (restoreFocus) menuButton.focus();
+    }
+  }
+
+  function syncNavigationMode() {
+    const nextMobile = Number(windowObject.innerWidth) <= mobileNavigationMaxWidth;
+    if (nextMobile === navigationIsMobile) return;
+    navigationIsMobile = nextMobile;
+    setNavigationOpen(false);
   }
   menuButton.addEventListener('click', () =>
     setNavigationOpen(!shell.classList.contains('is-navigation-open')),
   );
   backdrop.addEventListener('click', () => {
-    setNavigationOpen(false);
-    menuButton.focus();
+    setNavigationOpen(false, { restoreFocus: true });
   });
   sidebar.addEventListener('click', (event) => {
     if (event.target.closest('a')) setNavigationOpen(false);
   });
   documentObject.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && shell.classList.contains('is-navigation-open')) {
-      setNavigationOpen(false);
-      menuButton.focus();
+      setNavigationOpen(false, { restoreFocus: true });
     }
   });
   function renderPage(page, route) {
@@ -110,6 +147,8 @@ export function createAppShell(documentObject, { windowObject = window } = {}) {
       announcements.textContent = message;
     });
   }
+  windowObject.addEventListener?.('resize', syncNavigationMode);
+  syncNavigationMode();
   return Object.freeze({
     element: shell,
     renderPage,
@@ -117,5 +156,12 @@ export function createAppShell(documentObject, { windowObject = window } = {}) {
     showToast: (options) => toastManager.show(options),
     clearToasts: toastManager.clear,
     closeNavigation: () => setNavigationOpen(false),
+    isNavigationMobile: () => navigationIsMobile,
+    isNavigationOpen: () => shell.classList.contains('is-navigation-open'),
+    destroy() {
+      setNavigationOpen(false);
+      navigationTrap.deactivate({ restoreFocus: false });
+      windowObject.removeEventListener?.('resize', syncNavigationMode);
+    },
   });
 }

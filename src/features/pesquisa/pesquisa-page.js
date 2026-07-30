@@ -132,6 +132,7 @@ export function createPesquisaPage(documentObject, route, context) {
     description.textContent = createResultDescription(matching.length, viewState.type);
     heading.append(title, description);
     grid.className = 'pesquisa-results__grid';
+    grid.setAttribute('role', 'list');
     matching.forEach((result) => grid.append(createPesquisaResultCard(documentObject, result)));
     results.append(heading, grid);
   }

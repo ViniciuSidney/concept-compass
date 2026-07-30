@@ -106,3 +106,80 @@ p {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* M10 — leitura ampliada, controles nativos e alto contraste */
+:where(main, section, article, aside, header, footer, div) {
+  min-width: 0;
+}
+
+:where(input, select, textarea) {
+  max-width: 100%;
+  color-scheme: inherit;
+}
+
+:where(input, textarea)::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+:where(button, a, input, select, textarea, summary) {
+  scroll-margin: 6rem 1rem;
+}
+
+:where(p, li, dd, dt, label, strong, span) {
+  overflow-wrap: anywhere;
+}
+
+html {
+  scrollbar-color: var(--color-border-strong) var(--color-background);
+  scrollbar-gutter: stable;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border: 0.16rem solid transparent;
+  border-radius: var(--radius-pill);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+
+  .button,
+  .icon-button,
+  .filter-chip,
+  .badge,
+  .surface-card,
+  .modal,
+  .side-panel,
+  .settings-card,
+  .dashboard-card,
+  .materia-card,
+  .tema-accordion,
+  .assunto-row {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+
+  .progress__fill,
+  .dashboard-state-row__fill,
+  .segmented-progress__segment.is-filled {
+    background: Highlight;
+  }
+}

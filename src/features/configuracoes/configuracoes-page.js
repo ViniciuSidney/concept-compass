@@ -86,6 +86,7 @@ export function createConfiguracoesPage(documentObject, _route, context) {
     const buttons = new Map();
 
     options.className = 'appearance-options';
+    options.setAttribute('role', 'group');
     options.setAttribute('aria-label', 'Escolher aparência');
     status.className = 'appearance-status';
     status.setAttribute('aria-live', 'polite');

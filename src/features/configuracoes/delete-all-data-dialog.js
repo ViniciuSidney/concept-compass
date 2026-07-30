@@ -1,4 +1,5 @@
 import { createButton } from '../../ui/components/button.js';
+import { createComponentId } from '../../ui/components/component-utils.js';
 import { createModal } from '../../ui/components/modal.js';
 
 export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, overlayManager }) {
@@ -32,6 +33,8 @@ export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, o
     variant: 'danger',
   });
   const modalHolder = { current: null };
+  const confirmationInputId = createComponentId('delete-all-confirmation');
+  const confirmationSupportId = `${confirmationInputId}-support`;
 
   content.className = 'delete-all-summary';
   reviewStep.className = 'delete-all-summary__step';
@@ -58,15 +61,17 @@ export function createDeleteAllDataDialog(documentObject, { counts, onConfirm, o
   finalWarning.textContent =
     'Segunda confirmação de 2. Depois de continuar, esta ação não poderá ser desfeita pela aplicação.';
   confirmationField.className = 'form-field delete-all-summary__confirmation-field';
-  confirmationLabel.setAttribute('for', 'delete-all-confirmation-input');
+  confirmationLabel.setAttribute('for', confirmationInputId);
   confirmationLabel.textContent = 'Digite EXCLUIR para confirmar';
-  confirmationInput.id = 'delete-all-confirmation-input';
+  confirmationInput.id = confirmationInputId;
   confirmationInput.name = 'deleteAllConfirmation';
   confirmationInput.type = 'text';
   confirmationInput.autocomplete = 'off';
   confirmationInput.autocapitalize = 'characters';
   confirmationInput.spellcheck = false;
   confirmationInput.placeholder = 'EXCLUIR';
+  confirmationInput.setAttribute('aria-describedby', confirmationSupportId);
+  confirmationSupport.id = confirmationSupportId;
   confirmationSupport.className = 'form-field__description';
   confirmationSupport.textContent =
     'A exclusão só será liberada quando o texto for digitado exatamente como mostrado.';

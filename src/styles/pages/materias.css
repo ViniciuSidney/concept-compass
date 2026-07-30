@@ -100,38 +100,38 @@
 
 .materia-card--azul,
 .materia-summary--azul {
-  --materia-accent: #3974e8;
-  --materia-accent-soft: #eaf1ff;
+  --materia-accent: var(--color-accent-blue);
+  --materia-accent-soft: var(--color-accent-blue-soft);
 }
 .materia-card--verde,
 .materia-summary--verde {
-  --materia-accent: #24825b;
-  --materia-accent-soft: #e7f7ef;
+  --materia-accent: var(--color-accent-green);
+  --materia-accent-soft: var(--color-accent-green-soft);
 }
 .materia-card--amarelo,
 .materia-summary--amarelo {
-  --materia-accent: #b87912;
-  --materia-accent-soft: #fff4db;
+  --materia-accent: var(--color-accent-yellow);
+  --materia-accent-soft: var(--color-accent-yellow-soft);
 }
 .materia-card--vermelho,
 .materia-summary--vermelho {
-  --materia-accent: #c23b4d;
-  --materia-accent-soft: #fdecef;
+  --materia-accent: var(--color-accent-red);
+  --materia-accent-soft: var(--color-accent-red-soft);
 }
 .materia-card--roxo,
 .materia-summary--roxo {
-  --materia-accent: #6558f5;
-  --materia-accent-soft: #eeeafd;
+  --materia-accent: var(--color-accent-purple);
+  --materia-accent-soft: var(--color-accent-purple-soft);
 }
 .materia-card--laranja,
 .materia-summary--laranja {
-  --materia-accent: #d26928;
-  --materia-accent-soft: #fff0e5;
+  --materia-accent: var(--color-accent-orange);
+  --materia-accent-soft: var(--color-accent-orange-soft);
 }
 .materia-card--cinza,
 .materia-summary--cinza {
-  --materia-accent: #697083;
-  --materia-accent-soft: #eef0f4;
+  --materia-accent: var(--color-accent-gray);
+  --materia-accent-soft: var(--color-accent-gray-soft);
 }
 
 .materia-icon {
@@ -155,32 +155,32 @@
   height: 3.4rem;
 }
 .materia-icon--azul {
-  --materia-icon-color: #3974e8;
-  --materia-icon-soft: #eaf1ff;
+  --materia-icon-color: var(--color-accent-blue);
+  --materia-icon-soft: var(--color-accent-blue-soft);
 }
 .materia-icon--verde {
-  --materia-icon-color: #24825b;
-  --materia-icon-soft: #e7f7ef;
+  --materia-icon-color: var(--color-accent-green);
+  --materia-icon-soft: var(--color-accent-green-soft);
 }
 .materia-icon--amarelo {
-  --materia-icon-color: #b87912;
-  --materia-icon-soft: #fff4db;
+  --materia-icon-color: var(--color-accent-yellow);
+  --materia-icon-soft: var(--color-accent-yellow-soft);
 }
 .materia-icon--vermelho {
-  --materia-icon-color: #c23b4d;
-  --materia-icon-soft: #fdecef;
+  --materia-icon-color: var(--color-accent-red);
+  --materia-icon-soft: var(--color-accent-red-soft);
 }
 .materia-icon--roxo {
-  --materia-icon-color: #6558f5;
-  --materia-icon-soft: #eeeafd;
+  --materia-icon-color: var(--color-accent-purple);
+  --materia-icon-soft: var(--color-accent-purple-soft);
 }
 .materia-icon--laranja {
-  --materia-icon-color: #d26928;
-  --materia-icon-soft: #fff0e5;
+  --materia-icon-color: var(--color-accent-orange);
+  --materia-icon-soft: var(--color-accent-orange-soft);
 }
 .materia-icon--cinza {
-  --materia-icon-color: #697083;
-  --materia-icon-soft: #eef0f4;
+  --materia-icon-color: var(--color-accent-gray);
+  --materia-icon-soft: var(--color-accent-gray-soft);
 }
 
 .materia-card__header,
@@ -403,25 +403,25 @@
 }
 
 .color-picker__option--azul {
-  --picker-color: #3974e8;
+  --picker-color: var(--color-accent-blue);
 }
 .color-picker__option--verde {
-  --picker-color: #24825b;
+  --picker-color: var(--color-accent-green);
 }
 .color-picker__option--amarelo {
-  --picker-color: #b87912;
+  --picker-color: var(--color-accent-yellow);
 }
 .color-picker__option--vermelho {
-  --picker-color: #c23b4d;
+  --picker-color: var(--color-accent-red);
 }
 .color-picker__option--roxo {
-  --picker-color: #6558f5;
+  --picker-color: var(--color-accent-purple);
 }
 .color-picker__option--laranja {
-  --picker-color: #d26928;
+  --picker-color: var(--color-accent-orange);
 }
 .color-picker__option--cinza {
-  --picker-color: #697083;
+  --picker-color: var(--color-accent-gray);
 }
 
 .delete-dialog {
@@ -496,4 +496,13 @@
 .materia-summary__stats span {
   color: var(--color-muted-strong);
   font-size: var(--font-size-xs);
+}
+
+.color-picker__option:has(input:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+:root[data-theme='dark'] .color-picker__swatch {
+  border-color: color-mix(in srgb, var(--picker-color) 64%, var(--color-text));
 }

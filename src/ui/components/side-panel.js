@@ -1,5 +1,6 @@
 import { appendContent, createComponentId } from './component-utils.js';
 import { createIconButton } from './icon-button.js';
+import { setOverlayInteractionState } from '../accessibility/background-interaction.js';
 import { createFocusTrap } from '../overlays/focus-trap.js';
 export function createSidePanel(
   documentObject,
@@ -41,7 +42,10 @@ export function createSidePanel(
   heading.append(titleElement);
   if (description) {
     const desc = documentObject.createElement('p');
+    const descriptionId = createComponentId('panel-description');
+    desc.id = descriptionId;
     desc.textContent = description;
+    panel.setAttribute('aria-describedby', descriptionId);
     heading.append(desc);
   }
   header.append(heading, closeButton);
@@ -59,7 +63,7 @@ export function createSidePanel(
     if (!isOpen) return;
     isOpen = false;
     overlay.hidden = true;
-    documentObject.body.classList.remove('has-open-overlay');
+    setOverlayInteractionState(documentObject, false);
     trap.deactivate();
     onClose?.(reason);
   }
@@ -68,8 +72,8 @@ export function createSidePanel(
     if (!overlay.isConnected) documentObject.body.append(overlay);
     isOpen = true;
     overlay.hidden = false;
-    documentObject.body.classList.add('has-open-overlay');
     trap.activate(closeButton);
+    setOverlayInteractionState(documentObject, true);
   }
   closeButton.addEventListener('click', () => close('close-button'));
   overlay.addEventListener('mousedown', (event) => {

@@ -148,6 +148,7 @@ export function createMateriaPage(documentObject, route, context) {
       const list = documentObject.createElement('div');
       const sections = selectTemaSections(data, materia.id);
       list.className = 'temas-list';
+      list.setAttribute('role', 'list');
 
       for (const section of sections) {
         const { tema } = section;

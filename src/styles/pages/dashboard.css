@@ -424,3 +424,30 @@
     align-self: flex-start;
   }
 }
+
+/* M10 — textos e cartões resilientes em zoom e larguras estreitas */
+.dashboard-overview__structure,
+.dashboard-item__badges {
+  min-width: 0;
+}
+
+@media (max-width: 34rem) {
+  .dashboard-overview__progress,
+  .dashboard-metric,
+  .dashboard-card__header,
+  .dashboard-card__body {
+    padding: var(--space-4);
+  }
+
+  .dashboard-metric {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-item__title,
+  .dashboard-item__content p,
+  .dashboard-materia-row__heading a {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}

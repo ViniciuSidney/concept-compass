@@ -81,6 +81,7 @@ export function createAssuntoRow(
   });
 
   row.className = `assunto-row${highlighted ? ' is-search-target' : ''}`;
+  row.setAttribute('role', 'listitem');
   row.setAttribute('data-assunto-id', assunto.id);
   openButton.type = 'button';
   openButton.className = 'assunto-row__open';
@@ -121,6 +122,7 @@ export function createAssuntoRow(
     date,
   );
   reorder.className = 'assunto-row__reorder';
+  reorder.setAttribute('role', 'group');
   reorder.setAttribute('aria-label', `Reordenar ${assunto.nome}`);
   reorder.append(moveUp, moveDown);
   actions.className = 'assunto-row__actions';

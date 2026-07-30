@@ -32,6 +32,7 @@
 
         if (choice === 'light' || choice === 'dark') root.dataset.theme = choice;
         root.dataset.themeChoice = choice;
+        root.dataset.resolvedTheme = resolved;
         root.style.colorScheme = resolved;
         document
           .querySelector('meta[name="theme-color"]')

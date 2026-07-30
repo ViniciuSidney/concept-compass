@@ -319,3 +319,60 @@
 .action-menu__item--danger {
   color: var(--color-danger);
 }
+
+/* M10 — alvos de toque, estados nativos e menus por teclado */
+.button,
+.icon-button,
+.search-field__control,
+.filter-chip {
+  min-height: var(--touch-target-min);
+}
+
+.button:focus-visible,
+.icon-button:focus-visible,
+.filter-chip:focus-visible,
+.action-menu__item:focus-visible {
+  position: relative;
+  z-index: 1;
+}
+
+.icon-button:disabled,
+.action-menu__item:disabled {
+  opacity: 0.5;
+}
+
+.badge {
+  border-color: color-mix(in srgb, currentcolor 22%, var(--color-border));
+}
+
+.progress__track,
+.dashboard-state-row__track {
+  border: 1px solid var(--color-border);
+}
+
+.action-menu__menu {
+  overscroll-behavior: contain;
+  background-clip: padding-box;
+}
+
+.action-menu__item {
+  min-height: var(--touch-target-min);
+}
+
+.action-menu__item:disabled {
+  cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+  .icon-button--small {
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+  }
+
+  .filter-chip,
+  .action-menu__item,
+  .appearance-option,
+  .color-picker__option {
+    min-height: var(--touch-target-min);
+  }
+}

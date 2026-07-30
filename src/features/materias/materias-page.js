@@ -48,6 +48,7 @@ export function createMateriasPage(documentObject, _route, context) {
 
   page.className = 'materias-page';
   toolbar.className = 'materias-toolbar';
+  toolbar.setAttribute('aria-label', 'Ferramentas de matérias');
   search.element.classList.add('materias-toolbar__search');
   sortGroup.className = 'materias-toolbar__sort';
   sortLabel.textContent = 'Ordenar por';
@@ -118,6 +119,7 @@ export function createMateriasPage(documentObject, _route, context) {
 
     const grid = documentObject.createElement('div');
     grid.className = 'materias-grid';
+    grid.setAttribute('role', 'list');
 
     for (const summary of summaries) {
       const { materia } = summary;

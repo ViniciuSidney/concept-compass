@@ -86,6 +86,7 @@ export function createTemaAccordion(
   });
 
   article.className = `tema-accordion${expanded ? ' is-expanded' : ''}${highlighted ? ' is-search-target' : ''}`;
+  article.setAttribute('role', 'listitem');
   article.setAttribute('data-tema-id', tema.id);
   header.className = 'tema-accordion__header';
   toggle.type = 'button';
@@ -112,6 +113,7 @@ export function createTemaAccordion(
   identity.append(title, description, summary);
   toggle.append(toggleIcon, identity);
   reorder.className = 'tema-accordion__reorder';
+  reorder.setAttribute('role', 'group');
   reorder.setAttribute('aria-label', `Reordenar tema ${tema.nome}`);
   reorder.append(moveUp, moveDown);
   headerActions.className = 'tema-accordion__actions';
@@ -127,6 +129,7 @@ export function createTemaAccordion(
   } else {
     const list = documentObject.createElement('div');
     list.className = 'assuntos-list';
+    list.setAttribute('role', 'list');
     assuntos.forEach((assunto, index) => {
       list.append(
         createAssuntoRow(documentObject, {

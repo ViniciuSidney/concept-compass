@@ -1,5 +1,6 @@
 import { appendContent, createComponentId } from './component-utils.js';
 import { createIconButton } from './icon-button.js';
+import { setOverlayInteractionState } from '../accessibility/background-interaction.js';
 import { createFocusTrap } from '../overlays/focus-trap.js';
 export function createModal(
   documentObject,
@@ -65,7 +66,7 @@ export function createModal(
     if (!isOpen) return;
     isOpen = false;
     overlay.hidden = true;
-    documentObject.body.classList.remove('has-open-overlay');
+    setOverlayInteractionState(documentObject, false);
     trap.deactivate();
     onClose?.(reason);
   }
@@ -74,8 +75,8 @@ export function createModal(
     if (!overlay.isConnected) documentObject.body.append(overlay);
     isOpen = true;
     overlay.hidden = false;
-    documentObject.body.classList.add('has-open-overlay');
     trap.activate(closeButton);
+    setOverlayInteractionState(documentObject, true);
   }
   closeButton.addEventListener('click', () => close('close-button'));
   overlay.addEventListener('mousedown', (event) => {

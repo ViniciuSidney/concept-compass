@@ -363,3 +363,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+.delete-all-summary__confirmation-field {
+  padding: var(--space-4);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+}
+
+.delete-all-summary__confirmation-field input {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}

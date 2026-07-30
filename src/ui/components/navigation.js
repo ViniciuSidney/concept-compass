@@ -29,10 +29,14 @@ export function createNavigation(documentObject) {
 
   navigation.append(list);
 
+  let activeLink = null;
+
   function setActiveRoute(routeId) {
+    activeLink = null;
     for (const [itemId, link] of links) {
       if (itemId === routeId || (routeId === 'materia' && itemId === 'materias')) {
         link.setAttribute('aria-current', 'page');
+        activeLink = link;
       } else {
         link.removeAttribute('aria-current');
       }
@@ -42,5 +46,7 @@ export function createNavigation(documentObject) {
   return Object.freeze({
     element: navigation,
     setActiveRoute,
+    getActiveLink: () => activeLink,
+    getFirstLink: () => links.values().next().value ?? null,
   });
 }

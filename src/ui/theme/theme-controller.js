@@ -25,6 +25,7 @@ export function createThemeController({ documentObject = document, windowObject 
     if (themeChoice === 'system') root.removeAttribute('data-theme');
     else root.setAttribute('data-theme', themeChoice);
     root.setAttribute('data-theme-choice', themeChoice);
+    root.setAttribute('data-resolved-theme', resolvedTheme);
     root.style.colorScheme = resolvedTheme;
     themeColor?.setAttribute('content', resolvedTheme === 'dark' ? '#10111b' : '#f5f6fb');
     for (const listener of listeners) listener(getState());

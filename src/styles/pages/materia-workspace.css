@@ -583,3 +583,59 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* M10 — adaptação estrutural do workspace */
+@media (max-width: 54rem) {
+  .materia-workspace__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .materia-workspace__header > .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 42rem) {
+  .tema-accordion__header {
+    grid-template-columns: 1fr;
+  }
+
+  .tema-accordion__toggle,
+  .tema-accordion__progress--header,
+  .tema-accordion__actions {
+    grid-column: 1;
+  }
+
+  .tema-accordion__toggle {
+    grid-row: 1;
+  }
+
+  .tema-accordion__progress--header {
+    grid-row: 2;
+  }
+
+  .tema-accordion__actions {
+    grid-row: 3;
+    width: 100%;
+  }
+
+  .assunto-row__open {
+    width: 100%;
+  }
+}
+
+@media (max-width: 34rem) {
+  .assunto-progress-control {
+    grid-template-columns: repeat(3, auto);
+  }
+
+  .assunto-progress-control .segmented-progress {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .assunto-progress-control > .icon-button {
+    width: 100%;
+  }
+}

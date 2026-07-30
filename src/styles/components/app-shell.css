@@ -133,3 +133,40 @@
   background: var(--color-overlay);
   cursor: pointer;
 }
+
+/* M10 — navegação responsiva, safe areas e foco */
+.app-sidebar {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(1.35rem, var(--safe-area-top)) max(1.35rem, var(--safe-area-right))
+    max(1.35rem, var(--safe-area-bottom)) max(1.35rem, var(--safe-area-left));
+}
+
+.app-navigation__link:focus-visible {
+  color: #fff;
+  background: rgb(255 255 255 / 8%);
+  outline-color: #bdb8ff;
+}
+
+.app-topbar {
+  padding-top: max(0.75rem, var(--safe-area-top));
+  padding-right: max(clamp(1.25rem, 3vw, 3.25rem), var(--safe-area-right));
+  padding-left: max(clamp(1.25rem, 3vw, 3.25rem), var(--safe-area-left));
+}
+
+.app-topbar__identity {
+  min-width: 0;
+}
+
+.app-topbar__identity strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-sidebar-backdrop {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+}

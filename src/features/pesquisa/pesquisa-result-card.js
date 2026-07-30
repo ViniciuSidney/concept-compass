@@ -28,6 +28,7 @@ export function createPesquisaResultCard(documentObject, result) {
   const presentation = TYPE_PRESENTATION[result.type];
 
   article.className = `pesquisa-result pesquisa-result--${result.type} pesquisa-result--${result.materia.corId}`;
+  article.setAttribute('role', 'listitem');
   header.className = 'pesquisa-result__header';
   iconArea.className = 'pesquisa-result__icon';
   iconArea.append(createIcon(documentObject, presentation.icon, { size: 22 }));
