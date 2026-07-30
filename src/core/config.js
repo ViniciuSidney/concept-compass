@@ -1,7 +1,7 @@
 export const APP_CONFIG = Object.freeze({
   name: 'Organizador de Conteúdos',
   shortName: 'Organizador',
-  version: '0.0.0-development',
+  version: '0.1.0',
   productVersion: 'v0.1',
   author: 'Vinícius Sidney',
   defaultTitle: 'Visão Geral',

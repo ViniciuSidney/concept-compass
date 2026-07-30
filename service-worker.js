@@ -1,4 +1,8 @@
 /*
- * Arquivo reservado pela arquitetura.
- * Não é registrado no M0. O funcionamento offline somente poderá ser avaliado no M11.
+ * Decisão da v0.1.0: service worker não ativado.
+ *
+ * A aplicação já é publicável como site estático no GitHub Pages. O cache offline foi
+ * adiado para uma versão posterior porque ainda não há um fluxo visual de atualização
+ * de cache validado em produção. Este arquivo permanece como ponto arquitetural
+ * reservado e não é registrado pelo código da aplicação.
  */
