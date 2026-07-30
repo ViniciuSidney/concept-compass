@@ -28,24 +28,28 @@ process.stdout.write('✓ arquivos de release, documentação, ícones e testes 
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 const lock = JSON.parse(await readFile(new URL('package-lock.json', root), 'utf8'));
-if (pkg.version !== '0.1.0' || lock.version !== '0.1.0') {
-  throw new Error('A versão técnica da release precisa ser 0.1.0 no pacote e no lockfile.');
+if (!/^0\.1\.\d+$/.test(pkg.version) || lock.version !== pkg.version) {
+  throw new Error('A versão técnica precisa pertencer à linha 0.1.x e coincidir com o lockfile.');
 }
 if (Object.keys(pkg.dependencies ?? {}).length !== 0) {
   throw new Error('Uma dependência de execução foi adicionada à release.');
 }
-for (const script of ['verify:m11', 'verify:all', 'release:check', 'generate:large-fixture']) {
+for (const script of [
+  'verify:m11',
+  'verify:branding',
+  'verify:all',
+  'release:check',
+  'generate:large-fixture',
+]) {
   if (!pkg.scripts?.[script]) throw new Error(`O script ${script} não foi registrado.`);
 }
 process.stdout.write(
-  '✓ versão 0.1.0, scripts de release e zero dependências de execução verificados\n',
+  '✓ linha 0.1.x, scripts de release e zero dependências de execução verificados\n',
 );
 
 const config = await readFile(new URL('src/core/config.js', root), 'utf8');
-if (!config.includes("version: '0.1.0'") || !config.includes("productVersion: 'v0.1'")) {
-  throw new Error(
-    'A configuração da aplicação não preserva a versão técnica e a versão do produto.',
-  );
+if (!config.includes(`version: '${pkg.version}'`) || !config.includes('productVersion:')) {
+  throw new Error('A configuração da aplicação não acompanha a versão técnica atual.');
 }
 
 const manifest = JSON.parse(await readFile(new URL('manifest.webmanifest', root), 'utf8'));
@@ -88,11 +92,14 @@ const readme = await readFile(new URL('README.md', root), 'utf8');
 const changelog = await readFile(new URL('CHANGELOG.md', root), 'utf8');
 const releaseNotes = await readFile(new URL('docs/release-v0.1.0.md', root), 'utf8');
 const backlog = await readFile(new URL('docs/backlog-v0.2.md', root), 'utf8');
-if (!readme.includes('candidato de release da v0.1.0') || !readme.includes('release:check')) {
-  throw new Error('O README não descreve corretamente o estado e o portão da release.');
+if (!readme.includes('Concept Compass') || !readme.includes('release:check')) {
+  throw new Error('O README não descreve corretamente a identidade e o portão da release.');
 }
-if (!changelog.includes('## [0.1.0] - 2026-07-30')) {
-  throw new Error('O CHANGELOG não contém a entrada oficial da v0.1.0.');
+if (
+  !changelog.includes('## [0.1.0] - 2026-07-30') ||
+  !changelog.includes('## [0.1.1] - 2026-07-30')
+) {
+  throw new Error('O CHANGELOG não preserva a v0.1.0 e a atualização v0.1.1.');
 }
 if (!releaseNotes.includes('tag planejada: `v0.1.0`') || !backlog.includes('metacognitivos')) {
   throw new Error('As notas da release ou o backlog da v0.2 estão incompletos.');
@@ -108,7 +115,7 @@ const forbiddenTracked = trackedFiles
   .filter(Boolean)
   .filter(
     (path) =>
-      /organizador-conteudos-backup-.*\.json$/i.test(path) ||
+      /(?:organizador-conteudos|concept-compass)-backup-.*\.json$/i.test(path) ||
       /\.real-data\.json$/i.test(path) ||
       path.startsWith('reports/'),
   );

@@ -1,74 +1,57 @@
-# Publicação no GitHub Pages — v0.1.0
+# Publicação no GitHub Pages — v0.1.1
 
 ## Estratégia escolhida
 
-A aplicação é estática e não possui etapa de build. A publicação recomendada usa:
+A aplicação é estática e não possui etapa de build. A publicação usa:
 
 - branch: `main`;
 - pasta: `/(root)`;
 - fonte: **Deploy from a branch**.
 
-O arquivo `.nojekyll` impede processamento desnecessário do conteúdo estático. Todos os caminhos da aplicação são relativos e as rotas usam fragmentos (`#`), mantendo compatibilidade com subpastas do GitHub Pages.
+O arquivo `.nojekyll` evita processamento desnecessário. Todos os caminhos são relativos e as rotas usam fragmentos (`#`), mantendo compatibilidade com subpastas do GitHub Pages.
 
 ## Antes de publicar
 
 ```bash
-npm install
+npm ci
 npm run release:check
-```
-
-Confirme também:
-
-```bash
 git status
-git log --oneline --decorate -5
 ```
 
 Nenhuma alteração pendente deve existir.
 
 ## Integração da versão
 
-Depois que todos os casos do M11 estiverem aprovados:
+Depois que a atualização estiver aprovada:
 
 ```bash
 git switch main
-git merge --no-ff dev
-git tag -a v0.1.0 -m "Organizador de Conteúdos v0.1.0"
+git merge --no-ff feat/renomeacao-concept-compass
+git tag -a v0.1.1 -m "Concept Compass v0.1.1"
 git push origin main
-git push origin v0.1.0
+git push origin v0.1.1
 ```
 
 A tag deve apontar para o mesmo commit publicado em `main`.
-
-## Configuração no GitHub
-
-No repositório:
-
-1. abra **Settings**;
-2. acesse **Pages**;
-3. em **Build and deployment**, escolha **Deploy from a branch**;
-4. selecione `main`;
-5. selecione `/(root)`;
-6. salve.
 
 ## Testes na versão publicada
 
 Execute pelo menos:
 
-- abrir Visão Geral, Matérias, Pesquisa e Configurações;
-- recarregar cada rota com fragmento;
+- confirmar **Concept Compass** na interface, título e manifesto;
+- conferir que dados anteriores continuam disponíveis;
 - criar Matéria, Tema e Assunto fictícios;
-- ajustar progresso;
-- exportar e importar backup;
+- ajustar progresso e pesquisar;
+- exportar um backup com o novo nome;
+- importar um backup antigo do Organizador de Conteúdos;
 - alternar aparência;
 - testar em desktop e celular;
-- verificar console e manifesto;
-- confirmar que uma atualização publicada aparece após recarregar.
+- verificar console e manifesto.
 
 ## Service worker
 
-A v0.1.0 não registra service worker. Essa decisão evita cache persistente sem uma interface de atualização validada. O arquivo reservado não interfere no funcionamento nem na publicação.
+A v0.1.1 não registra service worker. A decisão evita cache persistente sem uma interface de atualização validada.
 
 ## Dados reais
 
-Nunca inclua backups reais no repositório. O `.gitignore` bloqueia os nomes oficiais de backup, mas a conferência manual continua obrigatória.
+Nunca inclua backups reais no repositório. A conferência manual continua obrigatória.

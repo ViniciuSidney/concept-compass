@@ -7,7 +7,7 @@ export function downloadRawRecoveryData(
   rawData,
   { now = new Date() } = {},
 ) {
-  const fileName = `organizador-conteudos-dados-preservados-${createLocalDate(now)}.txt`;
+  const fileName = `concept-compass-dados-preservados-${createLocalDate(now)}.txt`;
   downloadTextFile(documentObject, windowObject, {
     content: String(rawData ?? ''),
     fileName,

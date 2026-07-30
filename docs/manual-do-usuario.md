@@ -1,8 +1,8 @@
-# Manual do usuário — Organizador de Conteúdos v0.1.0
+# Manual do usuário — Concept Compass v0.1.1
 
 ## 1. Finalidade
 
-O Organizador de Conteúdos serve para mapear o que estudar e acompanhar o avanço por meio da hierarquia:
+O Concept Compass serve para mapear o que estudar e acompanhar o avanço por meio da hierarquia:
 
 **Matéria → Tema → Assunto**
 

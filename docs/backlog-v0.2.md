@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Evoluir o Organizador de Conteúdos de mapa estrutural para registro central do aprendizado, sem perder a simplicidade da v0.1.
+Evoluir o Concept Compass de mapa estrutural para registro central do aprendizado, sem perder a simplicidade da v0.1.
 
 ## 1. Ficha do Assunto
 

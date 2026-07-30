@@ -72,7 +72,7 @@ export function createConfiguracoesPage(documentObject, _route, context) {
     const section = createSettingsCard(documentObject, {
       icon: 'sun',
       title: 'Aparência',
-      description: 'Escolha como o Organizador de Conteúdos deve ser exibido.',
+      description: `Escolha como o ${APP_CONFIG.name} deve ser exibido.`,
       className: 'settings-card--wide',
     });
     const options = documentObject.createElement('div');

@@ -4,6 +4,7 @@ import test from 'node:test';
 import { ImportError } from '../../src/core/errors.js';
 import {
   BACKUP_APP_NAME,
+  BACKUP_LEGACY_APP_NAMES,
   BACKUP_FORMAT_VERSION,
   createBackupDocument,
   createBackupFileName,
@@ -32,7 +33,7 @@ test('gera backup oficial com metadados, dados e preferências permitidas', () =
   const backup = validBackup();
 
   assert.equal(backup.app, BACKUP_APP_NAME);
-  assert.equal(backup.appVersion, 'v0.1');
+  assert.equal(backup.appVersion, 'v0.1.1');
   assert.equal(backup.formatVersion, BACKUP_FORMAT_VERSION);
   assert.equal(backup.exportedAt, NOW.toISOString());
   assert.deepEqual(backup.data, validData());
@@ -44,7 +45,7 @@ test('gera backup oficial com metadados, dados e preferências permitidas', () =
 test('nome do arquivo usa a data local e serialização termina em nova linha', () => {
   const backup = validBackup();
 
-  assert.equal(createBackupFileName(NOW), 'organizador-conteudos-backup-2026-07-29.json');
+  assert.equal(createBackupFileName(NOW), 'concept-compass-backup-2026-07-29.json');
   assert.equal(serializeBackup(backup).endsWith('\n'), true);
 });
 
@@ -56,6 +57,19 @@ test('interpreta backup válido e produz resumo', () => {
   assert.equal(summary.temas, 1);
   assert.equal(summary.assuntos, 1);
   assert.equal(summary.theme, 'system');
+});
+
+test('aceita backups da marca anterior e os normaliza para Concept Compass', () => {
+  const legacyBackup = validBackup({
+    app: BACKUP_LEGACY_APP_NAMES[0],
+    appVersion: 'v0.1',
+  });
+
+  const parsed = parseBackupText(JSON.stringify(legacyBackup), { today: '2026-07-29' });
+
+  assert.equal(parsed.app, BACKUP_APP_NAME);
+  assert.equal(parsed.appVersion, 'v0.1.1');
+  assert.deepEqual(parsed.data, validData());
 });
 
 test('rejeita JSON malformado sem tentar recuperar parcialmente', () => {

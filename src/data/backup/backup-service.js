@@ -9,7 +9,13 @@ import { migratePreferences } from '../migrations/preferences-migrations.js';
 
 export const BACKUP_FORMAT_VERSION = 1;
 export const BACKUP_APP_NAME = APP_CONFIG.name;
-export const BACKUP_FILE_PREFIX = 'organizador-conteudos-backup';
+export const BACKUP_LEGACY_APP_NAMES = APP_CONFIG.legacyNames;
+export const BACKUP_ACCEPTED_APP_NAMES = Object.freeze([
+  BACKUP_APP_NAME,
+  ...BACKUP_LEGACY_APP_NAMES,
+]);
+export const BACKUP_ACCEPTED_APP_VERSIONS = APP_CONFIG.backupCompatibleVersions;
+export const BACKUP_FILE_PREFIX = 'concept-compass-backup';
 
 export function createBackupDocument({ data, preferences, now = new Date(), today } = {}) {
   const exportedAt = createIsoTimestamp(now);
@@ -56,10 +62,10 @@ export function parseBackupText(text, { today = createLocalDate() } = {}) {
     });
   }
 
-  if (parsed.app !== BACKUP_APP_NAME) {
+  if (!BACKUP_ACCEPTED_APP_NAMES.includes(parsed.app)) {
     throw new ImportError('O arquivo pertence a outra aplicação.', {
       code: 'BACKUP_WRONG_APP',
-      details: { received: parsed.app ?? null, expected: BACKUP_APP_NAME },
+      details: { received: parsed.app ?? null, accepted: BACKUP_ACCEPTED_APP_NAMES },
     });
   }
 
@@ -70,10 +76,10 @@ export function parseBackupText(text, { today = createLocalDate() } = {}) {
     });
   }
 
-  if (parsed.appVersion !== APP_CONFIG.productVersion) {
+  if (!BACKUP_ACCEPTED_APP_VERSIONS.includes(parsed.appVersion)) {
     throw new ImportError('O backup foi criado por uma versão incompatível da aplicação.', {
       code: 'BACKUP_APP_VERSION_UNSUPPORTED',
-      details: { received: parsed.appVersion ?? null, supported: APP_CONFIG.productVersion },
+      details: { received: parsed.appVersion ?? null, accepted: BACKUP_ACCEPTED_APP_VERSIONS },
     });
   }
 

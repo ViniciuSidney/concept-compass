@@ -1,4 +1,4 @@
-# Testes manuais — Organizador de Conteúdos
+# Testes manuais — Concept Compass
 
 Os roteiros são executados em sequência e registram a evolução da v0.1.
 

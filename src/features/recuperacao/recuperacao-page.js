@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '../../core/config.js';
 import { parseBackupText } from '../../data/backup/backup-service.js';
 import { downloadRawRecoveryData } from '../../data/backup/recovery-download.js';
 import { createButton } from '../../ui/components/button.js';
@@ -167,7 +168,7 @@ function createRecoveryGuide(documentObject) {
   title.textContent = 'Como prosseguir com segurança';
   for (const text of [
     'Salve ou copie os dados brutos preservados.',
-    'Selecione um backup JSON válido do Organizador de Conteúdos.',
+    `Selecione um backup JSON válido do ${APP_CONFIG.name} ou da marca anterior.`,
     'Confira o resumo e confirme a substituição somente quando estiver seguro.',
   ]) {
     const item = documentObject.createElement('li');

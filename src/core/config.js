@@ -1,10 +1,14 @@
 export const APP_CONFIG = Object.freeze({
-  name: 'Organizador de Conteúdos',
-  shortName: 'Organizador',
-  version: '0.1.0',
-  productVersion: 'v0.1',
+  name: 'Concept Compass',
+  shortName: 'Compass',
+  version: '0.1.1',
+  productVersion: 'v0.1.1',
   author: 'Vinícius Sidney',
   defaultTitle: 'Visão Geral',
+  tagline: 'Mapeie, organize e acompanhe seu conhecimento.',
+  technicalId: 'organizador-de-conteudos',
+  legacyNames: Object.freeze(['Organizador de Conteúdos']),
+  backupCompatibleVersions: Object.freeze(['v0.1', 'v0.1.0', 'v0.1.1']),
 });
 
 export const NAVIGATION_ITEMS = Object.freeze([

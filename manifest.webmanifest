@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Organizador de Conteúdos",
-  "short_name": "Conteúdos",
-  "description": "Organize estudos em Matérias, Temas e Assuntos, acompanhe pontos de progresso e preserve seus dados localmente.",
+  "name": "Concept Compass",
+  "short_name": "Compass",
+  "description": "Mapeie, organize e acompanhe seu conhecimento em Matérias, Temas e Assuntos, com progresso e dados preservados localmente.",
   "lang": "pt-BR",
   "start_url": "./#/",
   "scope": "./",

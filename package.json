@@ -1,8 +1,8 @@
 {
   "name": "organizador-de-conteudos",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
-  "description": "Aplicação web local para organizar estudos em Matérias, Temas e Assuntos.",
+  "description": "Concept Compass — aplicação web local para mapear e acompanhar estudos em Matérias, Temas e Assuntos.",
   "type": "module",
   "scripts": {
     "serve": "node scripts/serve.mjs",
@@ -23,9 +23,10 @@
     "verify:m9": "node scripts/verify-m9.mjs",
     "verify:m10": "node scripts/verify-m10.mjs",
     "verify:m11": "node scripts/verify-m11.mjs",
-    "verify:all": "npm run verify:m2 && npm run verify:m3 && npm run verify:m4 && npm run verify:m5 && npm run verify:m6 && npm run verify:m7 && npm run verify:m8 && npm run verify:m8-1 && npm run verify:m8-1-1 && npm run verify:m9 && npm run verify:m10 && npm run verify:m11",
+    "verify:all": "npm run verify:m2 && npm run verify:m3 && npm run verify:m4 && npm run verify:m5 && npm run verify:m6 && npm run verify:m7 && npm run verify:m8 && npm run verify:m8-1 && npm run verify:m8-1-1 && npm run verify:m9 && npm run verify:m10 && npm run verify:m11 && npm run verify:branding",
     "release:check": "npm run check && npm run verify:all",
-    "generate:large-fixture": "node scripts/generate-large-fixture.mjs"
+    "generate:large-fixture": "node scripts/generate-large-fixture.mjs",
+    "verify:branding": "node scripts/verify-branding.mjs"
   },
   "engines": {
     "node": ">=20"
