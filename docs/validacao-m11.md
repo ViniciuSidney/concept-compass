@@ -2,7 +2,9 @@
 
 ## Estado
 
-O M10 foi aprovado manualmente. O M11 prepara o código como candidato de release, mas o fechamento oficial depende da execução de `tests/manual/m11.md` e da fumaça no GitHub Pages.
+**Aprovado manualmente em 30/07/2026.**
+
+O roteiro local do M11 foi executado e aprovado. Não há falhas críticas ou altas abertas, e a versão `0.1.0` está liberada para publicação, testes de fumaça no GitHub Pages e criação da Release oficial.
 
 ## Entregas implementadas
 
@@ -46,12 +48,17 @@ O comando deve confirmar:
 - zero dependências de execução;
 - documentação de release presente.
 
-## Pendências manuais
+## Resultado da validação local
 
-- regressão visual e funcional final;
-- importação e uso da massa ampliada no navegador;
-- inspeção do console;
-- publicação no GitHub Pages;
-- testes de fumaça na URL pública;
-- merge de `dev` em `main`;
-- tag `v0.1.0` e Release.
+- regressão visual e funcional final aprovada;
+- massa ampliada verificada;
+- console inspecionado sem falhas críticas ou altas;
+- `148` testes automatizados aprovados;
+- lint aprovado;
+- versão `0.1.0` confirmada.
+
+## Pendências de publicação
+
+- publicar ou atualizar o GitHub Pages;
+- executar os testes de fumaça na URL pública;
+- criar a GitHub Release `v0.1.0` após a fumaça publicada.
