@@ -70,3 +70,7 @@ A conferência visual e interativa deve ser realizada no navegador local porque 
 - nenhuma biblioteca visual ou dependência de execução;
 - nenhum service worker ativado;
 - publicação, cache, desempenho ampliado e fechamento da v0.1 permanecem no M11.
+
+## Resultado manual
+
+O usuário concluiu o roteiro do M10 e informou aprovação integral antes do início do M11. O marco está oficialmente concluído.
