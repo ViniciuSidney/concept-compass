@@ -1,5 +1,5 @@
 import { createBadge } from '../../ui/components/badge.js';
-import { createButton } from '../../ui/components/button.js';
+import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createSidePanel } from '../../ui/components/side-panel.js';
 import { createAssuntoProgressControl } from './assunto-progress-control.js';
 import {
@@ -14,6 +14,7 @@ export function createAssuntoDetailPanel(
   {
     assunto,
     tema,
+    studyStackUrl,
     onEdit,
     onMove,
     onDelete,
@@ -64,6 +65,7 @@ export function createAssuntoDetailPanel(
   }
   content.append(
     badges,
+    createStudyStackCallout(documentObject, studyStackUrl),
     createAssuntoProgressControl(documentObject, {
       assunto,
       onDecrease: () => runProgressAction('decrease-progress', onDecreaseProgress),
@@ -152,4 +154,23 @@ function createDetailGrid(documentObject, items) {
     list.append(item);
   }
   return list;
+}
+
+function createStudyStackCallout(documentObject, href) {
+  const section = documentObject.createElement('section');
+  const heading = documentObject.createElement('strong');
+  const description = documentObject.createElement('p');
+  const link = createButtonLink(documentObject, {
+    label: 'Abrir no Study Stack',
+    href,
+    icon: 'layers',
+    className: 'assunto-detail__study-stack-button',
+  });
+
+  section.className = 'assunto-detail__study-stack';
+  heading.textContent = 'Continue o estudo no seu caderno conectado';
+  description.textContent =
+    'Leve esta Matéria, Tema e Assunto para registrar a base teórica, práticas e evidências de aprendizagem.';
+  section.append(heading, description, link);
+  return section;
 }

@@ -148,3 +148,32 @@ function findElements(root, output = []) {
   for (const child of root.children ?? []) findElements(child, output);
   return output;
 }
+
+test('ação rápida do assunto abre o Study Stack com contexto e retorno profundo', () => {
+  const { documentObject, context } = createContext(validData());
+  const page = createMateriaPage(
+    documentObject,
+    { params: { materiaId: 'materia-1' }, query: {} },
+    context,
+  );
+  const action = findElement(
+    page,
+    (element) => element.tagName === 'BUTTON' && element.textContent === 'Abrir no Study Stack',
+  );
+
+  assert.ok(action);
+  action.dispatch('click');
+
+  const destination = new URL(context.windowObject.location.href);
+  const subjectContext = JSON.parse(destination.searchParams.get('subjectContext'));
+
+  assert.equal(destination.pathname, '/study-stack/');
+  assert.equal(destination.hash, '#/overview');
+  assert.equal(subjectContext.subject.matterName, 'Matemática');
+  assert.equal(subjectContext.subject.themeName, 'Álgebra');
+  assert.equal(subjectContext.subject.subjectName, 'Equação do primeiro grau');
+  assert.equal(
+    subjectContext.returnUrl,
+    'http://127.0.0.1:4173/#/materias/materia-1?tema=tema-1&assunto=assunto-1',
+  );
+});

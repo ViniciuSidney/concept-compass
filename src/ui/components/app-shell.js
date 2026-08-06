@@ -1,5 +1,4 @@
 import { APP_CONFIG } from '../../core/config.js';
-import { createIcon } from '../icons/icon.js';
 import { createIconButton } from './icon-button.js';
 import { createNavigation } from './navigation.js';
 import { createToastManager } from './toast.js';
@@ -9,6 +8,7 @@ export function createAppShell(documentObject, { windowObject = window } = {}) {
   const sidebar = documentObject.createElement('aside');
   const sidebarHeader = documentObject.createElement('div');
   const brandMark = documentObject.createElement('span');
+  const brandIcon = documentObject.createElement('img');
   const brandText = documentObject.createElement('div');
   const brandName = documentObject.createElement('strong');
   const brandSubtitle = documentObject.createElement('span');
@@ -40,7 +40,12 @@ export function createAppShell(documentObject, { windowObject = window } = {}) {
   sidebar.setAttribute('aria-label', 'Menu de navegação');
   sidebarHeader.className = 'app-sidebar__header';
   brandMark.className = 'app-brand__mark';
-  brandMark.append(createIcon(documentObject, 'layers', { size: 24 }));
+  brandMark.setAttribute('aria-hidden', 'true');
+  brandIcon.src = './assets/icons/app-icon.svg';
+  brandIcon.alt = '';
+  brandIcon.width = 44;
+  brandIcon.height = 44;
+  brandMark.append(brandIcon);
   brandText.className = 'app-brand__text';
   brandName.textContent = APP_CONFIG.name;
   brandSubtitle.textContent = APP_CONFIG.productVersion;

@@ -9,6 +9,13 @@ export const APP_CONFIG = Object.freeze({
   technicalId: 'organizador-de-conteudos',
   legacyNames: Object.freeze(['Organizador de Conteúdos']),
   backupCompatibleVersions: Object.freeze(['v0.1', 'v0.1.0', 'v0.1.1']),
+  integrations: Object.freeze({
+    studyStack: Object.freeze({
+      url: 'https://viniciusidney.github.io/study-stack/',
+      route: '/overview',
+      contractVersion: '1.0.0',
+    }),
+  }),
 });
 
 export const NAVIGATION_ITEMS = Object.freeze([

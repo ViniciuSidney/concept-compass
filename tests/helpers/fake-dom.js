@@ -192,7 +192,38 @@ export function createFakeDocument({ prefersDark = false } = {}) {
     },
   };
   const windowListeners = new Map();
+  let currentUrl = new URL('http://127.0.0.1:4173/#/');
+  const location = {
+    get href() {
+      return currentUrl.href;
+    },
+    set href(value) {
+      currentUrl = new URL(value, currentUrl.href);
+    },
+    get origin() {
+      return currentUrl.origin;
+    },
+    get pathname() {
+      return currentUrl.pathname;
+    },
+    get search() {
+      return currentUrl.search;
+    },
+    get hash() {
+      return currentUrl.hash;
+    },
+    set hash(value) {
+      currentUrl.hash = value;
+    },
+    assign(value) {
+      currentUrl = new URL(value, currentUrl.href);
+    },
+    replace(value) {
+      currentUrl = new URL(value, currentUrl.href);
+    },
+  };
   const windowObject = {
+    location,
     innerWidth: 1024,
     matchMedia() {
       return mediaQuery;

@@ -6,6 +6,7 @@ import {
   selectTemasByMateria,
 } from '../../domain/selectors/hierarchy-selectors.js';
 import { summarizeMateriaProgress } from '../../domain/services/progress-service.js';
+import { createStudyStackUrl } from '../../integrations/study-stack-link.js';
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createPageHeader } from '../../ui/components/page-header.js';
@@ -169,6 +170,7 @@ export function createMateriaPage(documentObject, route, context) {
             onMoveTemaUp: () => moveTema(tema, tema.ordem - 1),
             onMoveTemaDown: () => moveTema(tema, tema.ordem + 1),
             onOpenAssunto: (assunto) => openAssuntoDetails(assunto.id),
+            onOpenAssuntoInStudyStack: (assunto) => openAssuntoInStudyStack(assunto.id),
             onEditAssunto: (assunto) => openEditAssunto(assunto),
             onDeleteAssunto: (assunto) => openDeleteAssunto(assunto),
             onMoveAssuntoTo: (assunto) => openMoveAssunto(assunto),
@@ -578,13 +580,41 @@ export function createMateriaPage(documentObject, route, context) {
     dialog.open();
   }
 
+  function openAssuntoInStudyStack(assuntoId) {
+    const data = controller.getData();
+    const details = selectAssuntoDetails(data, assuntoId);
+    const currentMateria = selectMateriaById(data, materiaId);
+    if (!details || !currentMateria) return;
+
+    const destination = createStudyStackUrl({
+      materia: currentMateria,
+      tema: details.tema,
+      assunto: details.assunto,
+      location: windowObject.location,
+    });
+
+    if (typeof windowObject.location?.assign === 'function') {
+      windowObject.location.assign(destination);
+    } else if (windowObject.location) {
+      windowObject.location.href = destination;
+    }
+  }
+
   function openAssuntoDetails(assuntoId) {
     const details = selectAssuntoDetails(controller.getData(), assuntoId);
-    if (!details) return;
+    const currentMateria = selectMateriaById(controller.getData(), materiaId);
+    if (!details || !currentMateria) return;
 
+    const studyStackUrl = createStudyStackUrl({
+      materia: currentMateria,
+      tema: details.tema,
+      assunto: details.assunto,
+      location: windowObject.location,
+    });
     const panel = createAssuntoDetailPanel(documentObject, {
       assunto: details.assunto,
       tema: details.tema,
+      studyStackUrl,
       overlayManager,
       onEdit: () => openEditAssunto(details.assunto),
       onMove: () => openMoveAssunto(details.assunto),

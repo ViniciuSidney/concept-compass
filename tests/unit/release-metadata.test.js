@@ -44,3 +44,13 @@ test('service worker permanece conscientemente sem registro na v0.1.1', async ()
   assert.doesNotMatch(`${index}\n${main}`, /serviceWorker\s*\.\s*register/);
   assert.match(reserved, /service worker não ativado/i);
 });
+
+test('identidade visual usa bússola oficial no favicon, PWA e barra lateral', async () => {
+  const favicon = await readFile(new URL('favicon.svg', root), 'utf8');
+  const appIcon = await readFile(new URL('assets/icons/app-icon.svg', root), 'utf8');
+  const shell = await readFile(new URL('src/ui/components/app-shell.js', root), 'utf8');
+
+  assert.match(favicon, /Bússola conectada a pontos de conhecimento/);
+  assert.equal(favicon, appIcon);
+  assert.match(shell, /assets\/icons\/app-icon\.svg/);
+});

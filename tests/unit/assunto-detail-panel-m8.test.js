@@ -10,6 +10,7 @@ test('painel do assunto oferece movimentação além de edição e exclusão', (
   const panel = createAssuntoDetailPanel(documentObject, {
     assunto: assunto(),
     tema: tema(),
+    studyStackUrl: 'https://example.test/study-stack/#/overview',
     onEdit() {},
     onMove() {},
     onDelete() {},
@@ -20,4 +21,5 @@ test('painel do assunto oferece movimentação além de edição e exclusão', (
   assert.match(documentObject.body.textContent, /Mover assunto/);
   assert.match(documentObject.body.textContent, /Editar assunto/);
   assert.match(documentObject.body.textContent, /Excluir assunto/);
+  assert.match(documentObject.body.textContent, /Abrir no Study Stack/);
 });

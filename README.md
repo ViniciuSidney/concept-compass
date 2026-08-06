@@ -22,7 +22,25 @@ A v0.1.1 é uma atualização de identidade e compatibilidade. Ela preserva os d
 - aparência Claro, Escuro ou Seguir sistema;
 - exportação, importação, exclusão protegida e recuperação de dados;
 - funcionamento responsivo e acessível por teclado;
-- armazenamento local, sem conta, servidor ou envio de dados acadêmicos.
+- armazenamento local, sem conta, servidor ou envio de dados acadêmicos;
+- integração com o Study Stack a partir de cada Assunto, preservando Matéria, Tema e retorno profundo.
+
+## Integração com o Study Stack
+
+Em cada Assunto, a ação **Abrir no Study Stack** envia um contrato `1.0.0` com os identificadores e nomes da Matéria, do Tema e do Assunto. A URL de retorno aponta para o mesmo painel de origem no Concept Compass.
+
+A integração está disponível:
+
+- no menu de ações da linha do Assunto;
+- como ação principal no painel de detalhes do Assunto.
+
+O fluxo oficial é:
+
+```text
+Concept Compass → Assunto → Study Stack → Voltar ao Concept Compass
+```
+
+A configuração fica em `src/core/config.js`, e a montagem segura do contrato fica em `src/integrations/study-stack-link.js`.
 
 ## Compatibilidade da renomeação
 
@@ -95,6 +113,7 @@ O service worker continua inativo na v0.1.1 para evitar que cache antigo esconda
 - `docs/release-v0.1.1.md` — notas e checklist da atualização;
 - `docs/validacao-v0.1.1.md` — estado da validação;
 - `docs/backlog-v0.2.md` — próxima evolução planejada;
+- `docs/integracao-study-stack.md` — contrato e fluxo entre as aplicações;
 - `tests/manual/v0.1.1.md` — roteiro manual da renomeação.
 
 ## Próxima versão

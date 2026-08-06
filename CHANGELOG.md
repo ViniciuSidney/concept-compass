@@ -2,6 +2,20 @@
 
 Todas as mudanças relevantes do Concept Compass serão registradas neste arquivo.
 
+## [Não lançado]
+
+### Adicionado
+
+- ação **Abrir no Study Stack** no menu e no painel de detalhes de cada Assunto;
+- contrato de integração `1.0.0` com Matéria, Tema, Assunto e URL de retorno profundo;
+- nova identidade visual baseada em uma bússola conectada a pontos de conhecimento;
+- favicon, marca lateral e ícones PWA atualizados.
+
+### Validação
+
+- testes automatizados do contrato, do retorno profundo e da navegação para o Study Stack;
+- verificação dos ícones SVG e PNG nas superfícies oficiais da aplicação.
+
 ## [0.1.1] - 2026-07-30
 
 ### Alterado

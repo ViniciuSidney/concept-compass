@@ -27,6 +27,7 @@ test('cabeçalho do tema mantém o progresso visível mesmo com o acordeão fech
     onMoveTemaUp: noop,
     onMoveTemaDown: noop,
     onOpenAssunto: noop,
+    onOpenAssuntoInStudyStack: noop,
     onEditAssunto: noop,
     onDeleteAssunto: noop,
     onMoveAssuntoTo: noop,
