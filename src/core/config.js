@@ -14,6 +14,8 @@ export const APP_CONFIG = Object.freeze({
       url: 'https://viniciusidney.github.io/study-stack/',
       route: '/overview',
       contractVersion: '1.0.0',
+      summaryKey: 'study-stack:integration:progress:v1',
+      supportedSummaryContractVersions: Object.freeze(['1.0.0']),
     }),
   }),
 });

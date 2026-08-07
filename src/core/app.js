@@ -11,6 +11,7 @@ import { createMateriasPage } from '../features/materias/materias-page.js';
 import { createNaoEncontradoPage } from '../features/nao-encontrado/nao-encontrado-page.js';
 import { createPesquisaPage } from '../features/pesquisa/pesquisa-page.js';
 import { createRecuperacaoPage } from '../features/recuperacao/recuperacao-page.js';
+import { createStudyStackSummaryReader } from '../integrations/study-stack-summary-reader.js';
 import { createAppShell } from '../ui/components/app-shell.js';
 import { createOverlayManager } from '../ui/overlays/overlay-manager.js';
 import { createThemeController } from '../ui/theme/theme-controller.js';
@@ -34,6 +35,11 @@ export function createApp({ documentObject = document, windowObject = window } =
 
   const storageAdapter = createLocalStorageAdapter(windowObject.localStorage);
   const repository = createAppRepository({ storageAdapter });
+  const studyStackSummaryReader = createStudyStackSummaryReader({
+    storage: windowObject.localStorage,
+    config: APP_CONFIG.integrations.studyStack,
+  });
+  let studyStackFingerprint = studyStackSummaryReader.read().fingerprint;
   const dataResult = repository.loadData();
   if (dataResult.status === 'ready' && dataResult.migrated) {
     try {
@@ -63,6 +69,7 @@ export function createApp({ documentObject = document, windowObject = window } =
   const overlayManager = createOverlayManager();
   const appShell = createAppShell(documentObject, { windowObject });
   let router = null;
+  let integrationListenersInstalled = false;
 
   themeController.setTheme(preferences.theme);
   root.replaceChildren(appShell.element);
@@ -86,6 +93,7 @@ export function createApp({ documentObject = document, windowObject = window } =
       overlayManager,
       store,
       repository,
+      studyStackSummaryReader,
       windowObject,
       navigate: (href, options) => router?.navigate(href, options),
     });
@@ -106,6 +114,48 @@ export function createApp({ documentObject = document, windowObject = window } =
     appShell.renderPage(page, route);
   }
 
+  function syncStudyStackSummary() {
+    const snapshot = studyStackSummaryReader.read();
+    if (snapshot.fingerprint === studyStackFingerprint) return false;
+
+    studyStackFingerprint = snapshot.fingerprint;
+    const currentRoute = store.getState().ui.route;
+    if (currentRoute) renderRoute(currentRoute);
+    return true;
+  }
+
+  function onStorage(event) {
+    if (event?.key === APP_CONFIG.integrations.studyStack.summaryKey) {
+      syncStudyStackSummary();
+    }
+  }
+
+  function onFocus() {
+    syncStudyStackSummary();
+  }
+
+  function onVisibilityChange() {
+    if (documentObject.visibilityState !== 'hidden') {
+      syncStudyStackSummary();
+    }
+  }
+
+  function installIntegrationListeners() {
+    if (integrationListenersInstalled) return;
+    windowObject.addEventListener('storage', onStorage);
+    windowObject.addEventListener('focus', onFocus);
+    documentObject.addEventListener('visibilitychange', onVisibilityChange);
+    integrationListenersInstalled = true;
+  }
+
+  function removeIntegrationListeners() {
+    if (!integrationListenersInstalled) return;
+    windowObject.removeEventListener('storage', onStorage);
+    windowObject.removeEventListener('focus', onFocus);
+    documentObject.removeEventListener('visibilitychange', onVisibilityChange);
+    integrationListenersInstalled = false;
+  }
+
   router = createRouter({
     windowObject,
     onRouteChange: renderRoute,
@@ -116,10 +166,12 @@ export function createApp({ documentObject = document, windowObject = window } =
       router.navigate('/recuperacao', { replace: true });
     }
 
+    installIntegrationListeners();
     router.start();
   }
 
   function stop() {
+    removeIntegrationListeners();
     router.stop();
     overlayManager.reset('app-stop');
     appShell.destroy();
@@ -132,6 +184,7 @@ export function createApp({ documentObject = document, windowObject = window } =
     store,
     router,
     repository,
+    studyStackSummaryReader,
     themeController,
     overlayManager,
   });
