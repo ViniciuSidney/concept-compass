@@ -1,7 +1,9 @@
 import {
+  archiveMateria,
   deleteMateriaCascade,
   createMateria,
   reorderMaterias,
+  restoreMateria,
   updateMateria,
 } from '../../domain/services/materia-service.js';
 
@@ -70,6 +72,18 @@ export function createMateriasController({ store, repository }) {
     return result.materia;
   }
 
+  function archive(materiaId, options) {
+    const result = archiveMateria(getData(), materiaId, options);
+    persist(result.data);
+    return result.materia;
+  }
+
+  function restore(materiaId, options) {
+    const result = restoreMateria(getData(), materiaId, options);
+    persist(result.data);
+    return result.materia;
+  }
+
   function remove(materiaId) {
     const result = deleteMateriaCascade(getData(), materiaId);
     persist(result.data);
@@ -82,5 +96,5 @@ export function createMateriasController({ store, repository }) {
     return nextData.materias.find(({ id }) => id === materiaId);
   }
 
-  return Object.freeze({ getData, add, edit, remove, reorder });
+  return Object.freeze({ getData, add, edit, archive, restore, remove, reorder });
 }

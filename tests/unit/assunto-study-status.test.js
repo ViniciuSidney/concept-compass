@@ -117,12 +117,77 @@ test('assunto em andamento mostra progresso etapa aviso próxima ação e pendê
   assert.match(view.element.textContent, /4\/10/);
   assert.match(view.element.textContent, /Etapa atual: Prática/);
   assert.match(view.element.textContent, /Resolver a próxima lista válida/);
-  assert.match(view.element.textContent, /2 de 3/);
+  assert.match(view.element.textContent, /2\/3/);
   assert.match(view.element.textContent, /Próxima ação: Abrir Test Quest/);
   assert.match(view.element.textContent, /2 erros pendentes/);
   assert.match(view.element.textContent, /1 revisão pendente/);
   assert.match(view.element.textContent, /Sincronizado com o Study Stack/);
   assert.equal(view.actionLabel, 'Continuar estudo no Study Stack');
+});
+
+test('arquivamento local bloqueia o Study Stack mesmo sem resumo publicado', () => {
+  const { documentObject } = createFakeDocument();
+  const state = readAssuntoStudyStackState(documentObject, 'assunto-1');
+  const view = createAssuntoStudyStatus(documentObject, {
+    assunto: { ...assunto(), arquivado: true },
+    studyStackState: state,
+    onOpenStudyStack() {},
+  });
+
+  assert.match(view.element.textContent, /Estudo arquivado/);
+  assert.match(view.element.textContent, /Restaure o Assunto para voltar a acessar/);
+  assert.equal(view.actionVisible, false);
+  assert.equal(view.actionDisabled, true);
+  assert.doesNotMatch(view.element.textContent, /Iniciar estudo no Study Stack/);
+});
+
+test('arquivamento de Tema bloqueia o Study Stack sem arquivar o Assunto individualmente', () => {
+  const documentObject = setupWithSummary();
+  const state = readAssuntoStudyStackState(documentObject, 'assunto-1');
+  const view = createAssuntoStudyStatus(documentObject, {
+    assunto: { ...assunto(), arquivado: false },
+    studyStackState: state,
+    archiveContext: 'tema',
+    onOpenStudyStack() {},
+  });
+
+  assert.match(view.element.textContent, /Estudo arquivado/);
+  assert.match(view.element.textContent, /Restaure o Tema/);
+  assert.match(view.element.textContent, /4\/10/);
+  assert.equal(view.actionVisible, false);
+});
+
+test('carrossel compacto preserva contador acessível e navegação circular', () => {
+  const documentObject = setupWithSummary();
+  const state = readAssuntoStudyStackState(documentObject, 'assunto-1');
+  const view = createAssuntoStudyStatus(documentObject, {
+    assunto: assunto(),
+    studyStackState: state,
+    onOpenStudyStack() {},
+  });
+  const position = findElement(view.element, (element) =>
+    element.classList?.contains('assunto-study__position'),
+  );
+
+  assert.equal(position.textContent, '2/3');
+  assert.equal(position.getAttribute('aria-label'), 'Aviso 2 de 3');
+});
+
+test('arquivamento local preserva o resumo sincronizado mas remove a ação do Study Stack', () => {
+  const documentObject = setupWithSummary();
+  const state = readAssuntoStudyStackState(documentObject, 'assunto-1');
+  const view = createAssuntoStudyStatus(documentObject, {
+    assunto: { ...assunto(), arquivado: true },
+    studyStackState: state,
+    onOpenStudyStack() {},
+  });
+
+  assert.match(view.element.textContent, /Estudo arquivado/);
+  assert.match(view.element.textContent, /4\/10/);
+  assert.match(view.element.textContent, /Etapa atual: Prática/);
+  assert.match(view.element.textContent, /Sincronizado com o Study Stack/);
+  assert.match(view.element.textContent, /Restaure o Assunto/);
+  assert.equal(view.actionVisible, false);
 });
 
 test('carrossel começa no aviso recomendado e navega circularmente', () => {

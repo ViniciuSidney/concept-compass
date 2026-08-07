@@ -6,16 +6,36 @@ import { createAssuntoStudyDetail, readAssuntoStudyStackState } from './assunto-
 
 export function createAssuntoDetailPanel(
   documentObject,
-  { assunto, tema, studyStackUrl, onEdit, onMove, onDelete, overlayManager },
+  {
+    assunto,
+    tema,
+    materia = null,
+    studyStackUrl,
+    onEdit,
+    onMove,
+    onDelete,
+    onArchive,
+    onRestore,
+    overlayManager,
+  },
 ) {
   const content = documentObject.createElement('div');
   const badges = documentObject.createElement('div');
   const difficulty = getDifficultyPresentation(assunto.dificuldade);
+  const archived = Boolean(assunto.arquivado);
   const studyStackState = readAssuntoStudyStackState(documentObject, assunto.id);
+  const archiveContext = archived
+    ? 'assunto'
+    : tema?.arquivado
+      ? 'tema'
+      : materia?.arquivado
+        ? 'materia'
+        : null;
   const studyDetail = createAssuntoStudyDetail(documentObject, {
     assunto,
     studyStackState,
     studyStackUrl,
+    archiveContext,
   });
   const editButton = createButton(documentObject, {
     label: 'Editar assunto',
@@ -32,12 +52,20 @@ export function createAssuntoDetailPanel(
     icon: 'trash',
     variant: 'danger',
   });
+  const archiveButton = createButton(documentObject, {
+    label: archived ? 'Restaurar assunto' : 'Arquivar assunto',
+    icon: 'inbox',
+    variant: 'secondary',
+  });
   const footer = documentObject.createElement('div');
   const panelHolder = { current: null };
 
   content.className = 'assunto-detail';
   badges.className = 'assunto-detail__badges';
   badges.append(createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }));
+  if (archived) {
+    badges.append(createBadge(documentObject, { label: 'Arquivado', tone: 'neutral' }));
+  }
   content.append(
     studyDetail.element,
     badges,
@@ -58,7 +86,7 @@ export function createAssuntoDetailPanel(
     ]),
   );
   footer.className = 'overlay-actions';
-  footer.append(deleteButton, moveButton, editButton);
+  footer.append(deleteButton, archiveButton, moveButton, editButton);
 
   const panel = createSidePanel(documentObject, {
     title: assunto.nome,
@@ -78,6 +106,12 @@ export function createAssuntoDetailPanel(
     panel.close('move');
     globalThis.queueMicrotask(onMove);
   });
+
+  archiveButton.addEventListener('click', () => {
+    panel.close(archived ? 'restore' : 'archive');
+    globalThis.queueMicrotask(archived ? onRestore : onArchive);
+  });
+
   deleteButton.addEventListener('click', () => {
     panel.close('delete');
     globalThis.queueMicrotask(onDelete);

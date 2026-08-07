@@ -76,3 +76,36 @@ test('gera URL pública com envelope antes da rota hash do Study Stack', () => {
   assert.equal(context.subject.subjectId, 'assunto-1');
   assert.match(context.returnUrl, /tema=tema-1&assunto=assunto-1$/);
 });
+
+test('contrato informa quando o Assunto está arquivado no Concept Compass', () => {
+  const context = createStudyStackSubjectContext({
+    materia: materia(),
+    tema: tema(),
+    assunto: assunto({ arquivado: true }),
+    returnUrl: 'https://example.test/#/retorno',
+    sentAt: SENT_AT,
+  });
+
+  assert.equal(context.sourceArchived, true);
+  assert.equal(context.subject.subjectId, 'assunto-1');
+});
+
+test('contrato considera Tema ou Matéria arquivados como origem arquivada', () => {
+  const byTema = createStudyStackSubjectContext({
+    materia: materia(),
+    tema: tema({ arquivado: true }),
+    assunto: assunto(),
+    returnUrl: 'https://example.test/#/retorno',
+    sentAt: SENT_AT,
+  });
+  const byMateria = createStudyStackSubjectContext({
+    materia: materia({ arquivado: true }),
+    tema: tema(),
+    assunto: assunto(),
+    returnUrl: 'https://example.test/#/retorno',
+    sentAt: SENT_AT,
+  });
+
+  assert.equal(byTema.sourceArchived, true);
+  assert.equal(byMateria.sourceArchived, true);
+});

@@ -506,3 +506,16 @@
 :root[data-theme='dark'] .color-picker__swatch {
   border-color: color-mix(in srgb, var(--picker-color) 64%, var(--color-text));
 }
+
+.materia-card.is-archived {
+  background: color-mix(in srgb, var(--color-surface-soft) 88%, var(--color-border));
+  border-color: var(--color-border-strong);
+}
+
+.materia-card.is-archived .materia-card__description {
+  color: var(--color-muted-strong);
+}
+
+.materia-card__restore {
+  white-space: nowrap;
+}

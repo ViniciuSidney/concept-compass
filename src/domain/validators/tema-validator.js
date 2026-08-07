@@ -6,6 +6,7 @@ import {
   normalizeOptionalText,
   normalizeRequiredText,
   throwIfIssues,
+  validateBoolean,
   validateIdentifier,
   validateOrder,
 } from './validation-utils.js';
@@ -26,6 +27,7 @@ export function validateTemaRecord(value) {
     id: validateIdentifier(source.id, 'id', issues),
     materiaId: validateIdentifier(source.materiaId, 'materiaId', issues),
     ...normalizeFields(source, issues),
+    arquivado: validateBoolean(source.arquivado ?? false, 'arquivado', issues),
     ordem: validateOrder(source.ordem, 'ordem', issues),
     criadoEm: validateTimestamp(source.criadoEm, 'criadoEm', issues),
     atualizadoEm: validateTimestamp(source.atualizadoEm, 'atualizadoEm', issues),

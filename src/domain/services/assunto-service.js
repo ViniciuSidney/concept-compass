@@ -41,7 +41,12 @@ export function updateAssunto(
   const current = requireAssunto(data, assuntoId);
   const today = todayFactory();
   const normalizedInput = normalizeAssuntoInput(input, { today });
-  const assunto = { ...current, ...normalizedInput, atualizadoEm: nowFactory() };
+  const assunto = {
+    ...current,
+    ...normalizedInput,
+    arquivado: Boolean(current.arquivado),
+    atualizadoEm: nowFactory(),
+  };
   const nextData = validateAppData(
     {
       ...data,
@@ -51,6 +56,38 @@ export function updateAssunto(
   );
 
   return { data: nextData, assunto };
+}
+
+export function setAssuntoArchived(
+  data,
+  assuntoId,
+  arquivado,
+  { nowFactory = createIsoTimestamp, todayFactory = createLocalDate } = {},
+) {
+  const current = requireAssunto(data, assuntoId);
+  const today = todayFactory();
+  const assunto = {
+    ...current,
+    arquivado: Boolean(arquivado),
+    atualizadoEm: nowFactory(),
+  };
+  const nextData = validateAppData(
+    {
+      ...data,
+      assuntos: data.assuntos.map((item) => (item.id === assuntoId ? assunto : item)),
+    },
+    { today },
+  );
+
+  return { data: nextData, assunto: nextData.assuntos.find(({ id }) => id === assuntoId) };
+}
+
+export function archiveAssunto(data, assuntoId, options = {}) {
+  return setAssuntoArchived(data, assuntoId, true, options);
+}
+
+export function restoreAssunto(data, assuntoId, options = {}) {
+  return setAssuntoArchived(data, assuntoId, false, options);
 }
 
 export function setAssuntoProgress(

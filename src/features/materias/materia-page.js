@@ -72,10 +72,17 @@ export function createMateriaPage(documentObject, route, context) {
 
     const temas = selectTemasByMateria(data, materia.id);
     const assuntos = selectAssuntosByMateria(data, materia.id);
+    const materiaArchived = Boolean(materia.arquivado);
     const materiaMenu = createActionMenu(documentObject, {
       label: `Ações da matéria ${materia.nome}`,
       overlayManager,
       items: [
+        {
+          label: materiaArchived ? 'Restaurar matéria' : 'Arquivar matéria',
+          icon: 'inbox',
+          onSelect: () =>
+            materiaArchived ? restoreMateriaItem(materia) : archiveMateriaItem(materia),
+        },
         { label: 'Editar matéria', icon: 'edit', onSelect: () => openEditMateria(materia) },
         {
           label: 'Excluir matéria',
@@ -92,11 +99,18 @@ export function createMateriaPage(documentObject, route, context) {
         variant: 'secondary',
         icon: 'arrow-left',
       }),
-      createButton(documentObject, {
-        label: 'Novo tema',
-        icon: 'plus',
-        onClick: openCreateTema,
-      }),
+      materiaArchived
+        ? createButton(documentObject, {
+            label: 'Restaurar matéria',
+            icon: 'inbox',
+            variant: 'secondary',
+            onClick: () => restoreMateriaItem(materia),
+          })
+        : createButton(documentObject, {
+            label: 'Novo tema',
+            icon: 'plus',
+            onClick: openCreateTema,
+          }),
       materiaMenu.element,
     ];
     const header = createPageHeader(documentObject, {
@@ -113,12 +127,14 @@ export function createMateriaPage(documentObject, route, context) {
     const workspaceTitle = documentObject.createElement('h2');
     const workspaceDescription = documentObject.createElement('p');
 
+    page.classList.toggle('is-archived', materiaArchived);
     workspace.className = 'materia-workspace';
     workspaceHeader.className = 'materia-workspace__header';
     workspaceHeading.className = 'materia-workspace__heading';
     workspaceTitle.textContent = 'Temas da matéria';
-    workspaceDescription.textContent =
-      'Expanda um tema para organizar seus assuntos e acompanhar o progresso.';
+    workspaceDescription.textContent = materiaArchived
+      ? 'Esta Matéria está arquivada. Restaure-a para voltar a adicionar conteúdos e acessar o Study Stack.'
+      : 'Expanda um tema para organizar seus assuntos e acompanhar o progresso.';
     workspaceHeading.append(workspaceTitle, workspaceDescription);
     workspaceHeader.append(workspaceHeading);
     workspace.append(workspaceHeader);
@@ -130,9 +146,10 @@ export function createMateriaPage(documentObject, route, context) {
           message: 'Crie um tema para dividir esta matéria em grupos de assuntos relacionados.',
           icon: 'layers',
           action: createButton(documentObject, {
-            label: 'Criar primeiro tema',
-            icon: 'plus',
-            onClick: openCreateTema,
+            label: materiaArchived ? 'Restaurar matéria' : 'Criar primeiro tema',
+            icon: materiaArchived ? 'inbox' : 'plus',
+            variant: materiaArchived ? 'secondary' : 'primary',
+            onClick: materiaArchived ? () => restoreMateriaItem(materia) : openCreateTema,
           }),
         }),
       );
@@ -150,6 +167,7 @@ export function createMateriaPage(documentObject, route, context) {
             expanded: expandedTemaIds.has(tema.id),
             highlighted: deepLink.temaId === tema.id,
             focusedAssuntoId: deepLink.assuntoId,
+            materiaArchived,
             onToggle(isExpanded) {
               if (isExpanded) expandedTemaIds.add(tema.id);
               else expandedTemaIds.delete(tema.id);
@@ -157,6 +175,8 @@ export function createMateriaPage(documentObject, route, context) {
             onAddAssunto: () => openCreateAssunto(tema),
             onEditTema: () => openEditTema(tema),
             onDeleteTema: () => openDeleteTema(tema),
+            onArchiveTema: () => archiveTemaItem(tema),
+            onRestoreTema: () => restoreTemaItem(tema),
             onMoveTema: () => openMoveTema(tema),
             onMoveTemaUp: () => moveTema(tema, tema.ordem - 1),
             onMoveTemaDown: () => moveTema(tema, tema.ordem + 1),
@@ -164,6 +184,8 @@ export function createMateriaPage(documentObject, route, context) {
             onOpenAssuntoInStudyStack: (assunto) => openAssuntoInStudyStack(assunto.id),
             onEditAssunto: (assunto) => openEditAssunto(assunto),
             onDeleteAssunto: (assunto) => openDeleteAssunto(assunto),
+            onArchiveAssunto: (assunto) => archiveAssuntoItem(assunto),
+            onRestoreAssunto: (assunto) => restoreAssuntoItem(assunto),
             onMoveAssuntoTo: (assunto) => openMoveAssunto(assunto),
             onMoveAssunto: (assunto, targetIndex) => moveAssunto(assunto, targetIndex),
             onDecreaseAssuntoProgress: (assunto) => changeProgress(assunto, -1),
@@ -212,6 +234,42 @@ export function createMateriaPage(documentObject, route, context) {
     form.open();
   }
 
+  function archiveMateriaItem(materia) {
+    const current = selectMateriaById(controller.getData(), materia.id);
+    if (!current || current.arquivado) return;
+
+    try {
+      const updated = controller.archiveMateria(current.id);
+      render();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Matéria arquivada',
+        message: `${updated.nome} foi arquivada. Sua estrutura e o histórico de estudo permanecem preservados.`,
+      });
+      appShell.announce(`Matéria ${updated.nome} arquivada.`);
+    } catch (error) {
+      showOperationError('Não foi possível arquivar a matéria', error);
+    }
+  }
+
+  function restoreMateriaItem(materia) {
+    const current = selectMateriaById(controller.getData(), materia.id);
+    if (!current || !current.arquivado) return;
+
+    try {
+      const updated = controller.restoreMateria(current.id);
+      render();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Matéria restaurada',
+        message: `${updated.nome} voltou ao fluxo ativo de estudos.`,
+      });
+      appShell.announce(`Matéria ${updated.nome} restaurada.`);
+    } catch (error) {
+      showOperationError('Não foi possível restaurar a matéria', error);
+    }
+  }
+
   function openDeleteMateria(materia) {
     const current = selectMateriaById(controller.getData(), materia.id);
     if (!current) return;
@@ -236,6 +294,9 @@ export function createMateriaPage(documentObject, route, context) {
   }
 
   function openCreateTema() {
+    const currentMateria = selectMateriaById(controller.getData(), materiaId);
+    if (!currentMateria || currentMateria.arquivado) return;
+
     const form = createTemaFormModal(documentObject, {
       overlayManager,
       windowObject,
@@ -274,6 +335,44 @@ export function createMateriaPage(documentObject, route, context) {
       },
     });
     form.open();
+  }
+
+  function archiveTemaItem(tema) {
+    const current = selectTemaById(controller.getData(), tema.id);
+    if (!current || current.arquivado) return;
+
+    try {
+      const updated = controller.archiveTema(current.id);
+      expandedTemaIds.add(updated.id);
+      render();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Tema arquivado',
+        message: `${updated.nome} foi arquivado. Os Assuntos e o histórico continuam preservados.`,
+      });
+      appShell.announce(`Tema ${updated.nome} arquivado.`);
+    } catch (error) {
+      showOperationError('Não foi possível arquivar o tema', error);
+    }
+  }
+
+  function restoreTemaItem(tema) {
+    const current = selectTemaById(controller.getData(), tema.id);
+    if (!current || !current.arquivado) return;
+
+    try {
+      const updated = controller.restoreTema(current.id);
+      expandedTemaIds.add(updated.id);
+      render();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Tema restaurado',
+        message: `${updated.nome} voltou ao fluxo ativo de estudos.`,
+      });
+      appShell.announce(`Tema ${updated.nome} restaurado.`);
+    } catch (error) {
+      showOperationError('Não foi possível restaurar o tema', error);
+    }
   }
 
   function openDeleteTema(tema) {
@@ -359,8 +458,10 @@ export function createMateriaPage(documentObject, route, context) {
   }
 
   function openCreateAssunto(tema) {
-    const current = selectTemaById(controller.getData(), tema.id);
-    if (!current) return;
+    const data = controller.getData();
+    const current = selectTemaById(data, tema.id);
+    const parentMateria = current ? selectMateriaById(data, current.materiaId) : null;
+    if (!current || current.arquivado || parentMateria?.arquivado) return;
 
     const form = createAssuntoFormModal(documentObject, {
       overlayManager,
@@ -401,6 +502,44 @@ export function createMateriaPage(documentObject, route, context) {
       },
     });
     form.open();
+  }
+
+  function archiveAssuntoItem(assunto) {
+    const current = selectAssuntoById(controller.getData(), assunto.id);
+    if (!current || current.arquivado) return;
+
+    try {
+      const updated = controller.archiveAssunto(current.id);
+      expandedTemaIds.add(updated.temaId);
+      render();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Assunto arquivado',
+        message: `${updated.nome} foi arquivado. O histórico do Study Stack permanece preservado.`,
+      });
+      appShell.announce(`Assunto ${updated.nome} arquivado.`);
+    } catch (error) {
+      showOperationError('Não foi possível arquivar o assunto', error);
+    }
+  }
+
+  function restoreAssuntoItem(assunto) {
+    const current = selectAssuntoById(controller.getData(), assunto.id);
+    if (!current || !current.arquivado) return;
+
+    try {
+      const updated = controller.restoreAssunto(current.id);
+      expandedTemaIds.add(updated.temaId);
+      render();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Assunto restaurado',
+        message: `${updated.nome} voltou a permitir acesso ao Study Stack.`,
+      });
+      appShell.announce(`Assunto ${updated.nome} restaurado.`);
+    } catch (error) {
+      showOperationError('Não foi possível restaurar o assunto', error);
+    }
   }
 
   function openAdjustProgress(assunto) {
@@ -577,6 +716,23 @@ export function createMateriaPage(documentObject, route, context) {
     const currentMateria = selectMateriaById(data, materiaId);
     if (!details || !currentMateria) return;
 
+    const archiveContext = details.assunto.arquivado
+      ? 'Assunto'
+      : details.tema?.arquivado
+        ? 'Tema'
+        : currentMateria.arquivado
+          ? 'Matéria'
+          : null;
+
+    if (archiveContext) {
+      appShell.showToast({
+        tone: 'info',
+        title: `${archiveContext} arquivado`,
+        message: `Restaure ${archiveContext === 'Matéria' ? 'a' : 'o'} ${archiveContext} antes de abrir o Study Stack.`,
+      });
+      return;
+    }
+
     const destination = createStudyStackUrl({
       materia: currentMateria,
       tema: details.tema,
@@ -605,11 +761,14 @@ export function createMateriaPage(documentObject, route, context) {
     const panel = createAssuntoDetailPanel(documentObject, {
       assunto: details.assunto,
       tema: details.tema,
+      materia: currentMateria,
       studyStackUrl,
       overlayManager,
       onEdit: () => openEditAssunto(details.assunto),
       onMove: () => openMoveAssunto(details.assunto),
       onDelete: () => openDeleteAssunto(details.assunto),
+      onArchive: () => archiveAssuntoItem(details.assunto),
+      onRestore: () => restoreAssuntoItem(details.assunto),
       onDecreaseProgress: () => changeProgress(details.assunto, -1),
       onIncreaseProgress: () => changeProgress(details.assunto, 1),
       onIncreaseProgressTotal: () => increaseProgressTotal(details.assunto),

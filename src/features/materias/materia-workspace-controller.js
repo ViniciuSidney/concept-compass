@@ -1,4 +1,5 @@
 import {
+  archiveAssunto,
   changeAssuntoProgress,
   completeAssuntoProgress,
   createAssunto,
@@ -7,17 +8,25 @@ import {
   moveAssunto,
   reorderAssuntos,
   resetAssuntoProgress,
+  restoreAssunto,
   setAssuntoProgress,
   updateAssunto,
 } from '../../domain/services/assunto-service.js';
 import {
+  archiveTema,
   createTema,
   deleteTemaCascade,
   moveTema,
   reorderTemas,
+  restoreTema,
   updateTema,
 } from '../../domain/services/tema-service.js';
-import { deleteMateriaCascade, updateMateria } from '../../domain/services/materia-service.js';
+import {
+  archiveMateria,
+  deleteMateriaCascade,
+  restoreMateria,
+  updateMateria,
+} from '../../domain/services/materia-service.js';
 
 export function createMateriaWorkspaceController({ store, repository }) {
   if (!store || !repository) {
@@ -78,6 +87,18 @@ export function createMateriaWorkspaceController({ store, repository }) {
     return result.materia;
   }
 
+  function archiveMateriaItem(materiaId, options) {
+    const result = archiveMateria(getData(), materiaId, options);
+    persist(result.data);
+    return result.materia;
+  }
+
+  function restoreMateriaItem(materiaId, options) {
+    const result = restoreMateria(getData(), materiaId, options);
+    persist(result.data);
+    return result.materia;
+  }
+
   function removeMateria(materiaId) {
     const result = deleteMateriaCascade(getData(), materiaId);
     persist(result.data);
@@ -92,6 +113,18 @@ export function createMateriaWorkspaceController({ store, repository }) {
 
   function editTema(temaId, input, options) {
     const result = updateTema(getData(), temaId, input, options);
+    persist(result.data);
+    return result.tema;
+  }
+
+  function archiveTemaItem(temaId, options) {
+    const result = archiveTema(getData(), temaId, options);
+    persist(result.data);
+    return result.tema;
+  }
+
+  function restoreTemaItem(temaId, options) {
+    const result = restoreTema(getData(), temaId, options);
     persist(result.data);
     return result.tema;
   }
@@ -122,6 +155,18 @@ export function createMateriaWorkspaceController({ store, repository }) {
 
   function editAssunto(assuntoId, input, options) {
     const result = updateAssunto(getData(), assuntoId, input, options);
+    persist(result.data);
+    return result.assunto;
+  }
+
+  function archiveAssuntoItem(assuntoId, options) {
+    const result = archiveAssunto(getData(), assuntoId, options);
+    persist(result.data);
+    return result.assunto;
+  }
+
+  function restoreAssuntoItem(assuntoId, options) {
+    const result = restoreAssunto(getData(), assuntoId, options);
     persist(result.data);
     return result.assunto;
   }
@@ -177,14 +222,20 @@ export function createMateriaWorkspaceController({ store, repository }) {
   return Object.freeze({
     getData,
     editMateria,
+    archiveMateria: archiveMateriaItem,
+    restoreMateria: restoreMateriaItem,
     removeMateria,
     addTema,
     editTema,
+    archiveTema: archiveTemaItem,
+    restoreTema: restoreTemaItem,
     removeTema,
     reorderTema,
     moveTemaTo,
     addAssunto,
     editAssunto,
+    archiveAssunto: archiveAssuntoItem,
+    restoreAssunto: restoreAssuntoItem,
     adjustAssuntoProgress,
     changeProgress,
     increaseProgressTotal,

@@ -116,7 +116,7 @@
   backdrop-filter: blur(14px);
 }
 .app-topbar__menu-button {
-  display: none;
+  display: grid;
 }
 .app-topbar__identity {
   display: grid;

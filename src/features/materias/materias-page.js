@@ -130,6 +130,8 @@ export function createMateriasPage(documentObject, _route, context) {
           canMoveUp: materia.ordem > 0,
           canMoveDown: materia.ordem < total - 1,
           onEdit: () => openEditForm(materia),
+          onArchive: () => archiveMateriaItem(materia),
+          onRestore: () => restoreMateriaItem(materia),
           onDelete: () => openDeleteDialog(materia),
           onMoveUp: () => moveMateria(materia, materia.ordem - 1),
           onMoveDown: () => moveMateria(materia, materia.ordem + 1),
@@ -175,6 +177,52 @@ export function createMateriasPage(documentObject, _route, context) {
       },
     });
     form.open();
+  }
+
+  function archiveMateriaItem(materia) {
+    const current = controller.getData().materias.find(({ id }) => id === materia.id);
+    if (!current || current.arquivado) return;
+
+    try {
+      const updated = controller.archive(current.id);
+      renderResults();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Matéria arquivada',
+        message: `${updated.nome} foi arquivada. Temas, Assuntos e histórico permanecem preservados.`,
+      });
+      appShell.announce(`Matéria ${updated.nome} arquivada.`);
+    } catch (error) {
+      appShell.showToast({
+        tone: 'danger',
+        title: 'Não foi possível arquivar a matéria',
+        message: error?.message || 'Ocorreu uma falha inesperada.',
+        duration: 0,
+      });
+    }
+  }
+
+  function restoreMateriaItem(materia) {
+    const current = controller.getData().materias.find(({ id }) => id === materia.id);
+    if (!current || !current.arquivado) return;
+
+    try {
+      const updated = controller.restore(current.id);
+      renderResults();
+      appShell.showToast({
+        tone: 'success',
+        title: 'Matéria restaurada',
+        message: `${updated.nome} voltou ao fluxo ativo de estudos.`,
+      });
+      appShell.announce(`Matéria ${updated.nome} restaurada.`);
+    } catch (error) {
+      appShell.showToast({
+        tone: 'danger',
+        title: 'Não foi possível restaurar a matéria',
+        message: error?.message || 'Ocorreu uma falha inesperada.',
+        duration: 0,
+      });
+    }
   }
 
   function openDeleteDialog(materia) {

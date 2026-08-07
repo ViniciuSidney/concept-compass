@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import { createEmptyData } from '../../src/domain/constants.js';
 import {
+  archiveAssunto,
   changeAssuntoProgress,
   completeAssuntoProgress,
   createAssunto,
@@ -10,19 +11,24 @@ import {
   increaseAssuntoProgressTotal,
   moveAssunto,
   resetAssuntoProgress,
+  restoreAssunto,
   setAssuntoProgress,
   updateAssunto,
 } from '../../src/domain/services/assunto-service.js';
 import {
+  archiveMateria,
   createMateria,
   deleteMateriaCascade,
   reorderMaterias,
+  restoreMateria,
   updateMateria,
 } from '../../src/domain/services/materia-service.js';
 import {
+  archiveTema,
   createTema,
   deleteTemaCascade,
   moveTema,
+  restoreTema,
   updateTema,
 } from '../../src/domain/services/tema-service.js';
 
@@ -66,9 +72,12 @@ test('constrói hierarquia completa e aplica padrões do assunto', () => {
     { idFactory, nowFactory, todayFactory },
   );
 
+  assert.equal(data.materias[0].arquivado, false);
+  assert.equal(data.temas[0].arquivado, false);
   assert.equal(result.assunto.pontosProgresso, 0);
   assert.equal(result.assunto.metaPontosProgresso, 5);
   assert.equal(result.assunto.precisaReforco, false);
+  assert.equal(result.assunto.arquivado, false);
   assert.equal(result.assunto.dificuldade, 'nao_definida');
   assert.equal(result.assunto.ultimoEstudoEm, null);
 });
@@ -141,6 +150,123 @@ test('operações rápidas de progresso respeitam limites e preservam o assunto'
   assert.equal(data.assuntos[0].pontosProgresso, 4);
   assert.equal(data.assuntos[0].metaPontosProgresso, 8);
   assert.equal(data.assuntos[0].precisaReforco, true);
+});
+
+test('arquiva e restaura matéria preservando hierarquia e IDs dos descendentes', () => {
+  const { idFactory, nowFactory, laterFactory, todayFactory } = createFactories();
+  let data = createEmptyData();
+  ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
+  ({ data } = createTema(data, data.materias[0].id, { nome: 'T' }, { idFactory, nowFactory }));
+  ({ data } = createAssunto(
+    data,
+    data.temas[0].id,
+    { nome: 'S' },
+    { idFactory, nowFactory, todayFactory },
+  ));
+  const originalTemaId = data.temas[0].id;
+  const originalAssuntoId = data.assuntos[0].id;
+
+  const archived = archiveMateria(data, data.materias[0].id, { nowFactory: laterFactory });
+  assert.equal(archived.materia.arquivado, true);
+  assert.equal(archived.data.temas[0].id, originalTemaId);
+  assert.equal(archived.data.temas[0].arquivado, false);
+  assert.equal(archived.data.assuntos[0].id, originalAssuntoId);
+  assert.equal(archived.data.assuntos[0].arquivado, false);
+
+  const restored = restoreMateria(archived.data, archived.materia.id, { nowFactory });
+  assert.equal(restored.materia.arquivado, false);
+  assert.equal(restored.data.temas[0].id, originalTemaId);
+  assert.equal(restored.data.assuntos[0].id, originalAssuntoId);
+});
+
+test('arquiva e restaura tema sem alterar estado próprio dos Assuntos', () => {
+  const { idFactory, nowFactory, laterFactory, todayFactory } = createFactories();
+  let data = createEmptyData();
+  ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
+  ({ data } = createTema(data, data.materias[0].id, { nome: 'T' }, { idFactory, nowFactory }));
+  ({ data } = createAssunto(
+    data,
+    data.temas[0].id,
+    { nome: 'S' },
+    { idFactory, nowFactory, todayFactory },
+  ));
+
+  const archived = archiveTema(data, data.temas[0].id, { nowFactory: laterFactory });
+  assert.equal(archived.tema.arquivado, true);
+  assert.equal(archived.data.assuntos[0].arquivado, false);
+
+  const restored = restoreTema(archived.data, archived.tema.id, { nowFactory });
+  assert.equal(restored.tema.arquivado, false);
+  assert.equal(restored.data.assuntos[0].arquivado, false);
+});
+
+test('arquiva e restaura assunto preservando vínculo, conteúdo e dados legados', () => {
+  const { idFactory, nowFactory, laterFactory, todayFactory } = createFactories();
+  let data = createEmptyData();
+  ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
+  ({ data } = createTema(data, data.materias[0].id, { nome: 'T' }, { idFactory, nowFactory }));
+  ({ data } = createAssunto(
+    data,
+    data.temas[0].id,
+    {
+      nome: 'S',
+      pontosProgresso: 3,
+      metaPontosProgresso: 7,
+      precisaReforco: true,
+      observacoes: 'Preservar',
+    },
+    { idFactory, nowFactory, todayFactory },
+  ));
+
+  const original = data.assuntos[0];
+  const archived = archiveAssunto(data, original.id, {
+    nowFactory: laterFactory,
+    todayFactory,
+  });
+
+  assert.equal(archived.assunto.id, original.id);
+  assert.equal(archived.assunto.temaId, original.temaId);
+  assert.equal(archived.assunto.nome, original.nome);
+  assert.equal(archived.assunto.pontosProgresso, 3);
+  assert.equal(archived.assunto.metaPontosProgresso, 7);
+  assert.equal(archived.assunto.precisaReforco, true);
+  assert.equal(archived.assunto.observacoes, 'Preservar');
+  assert.equal(archived.assunto.arquivado, true);
+  assert.equal(archived.assunto.atualizadoEm, '2026-07-24T13:00:00.000Z');
+
+  const restored = restoreAssunto(archived.data, original.id, {
+    nowFactory,
+    todayFactory,
+  });
+  assert.equal(restored.assunto.id, original.id);
+  assert.equal(restored.assunto.arquivado, false);
+});
+
+test('editar assunto arquivado não o restaura implicitamente', () => {
+  const { idFactory, nowFactory, laterFactory, todayFactory } = createFactories();
+  let data = createEmptyData();
+  ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
+  ({ data } = createTema(data, data.materias[0].id, { nome: 'T' }, { idFactory, nowFactory }));
+  ({ data } = createAssunto(
+    data,
+    data.temas[0].id,
+    { nome: 'S' },
+    { idFactory, nowFactory, todayFactory },
+  ));
+  ({ data } = archiveAssunto(data, data.assuntos[0].id, {
+    nowFactory: laterFactory,
+    todayFactory,
+  }));
+
+  const updated = updateAssunto(
+    data,
+    data.assuntos[0].id,
+    { nome: 'S editado' },
+    { nowFactory, todayFactory },
+  );
+
+  assert.equal(updated.assunto.nome, 'S editado');
+  assert.equal(updated.assunto.arquivado, true);
 });
 
 test('move tema preservando assuntos e normaliza origem e destino', () => {

@@ -55,7 +55,7 @@ export function createStudyStackSubjectContext({
       subjectId: safeAssunto.id,
       subjectName: safeAssunto.nome,
     }),
-    sourceArchived: Boolean(safeAssunto.arquivado),
+    sourceArchived: Boolean(safeMateria.arquivado || safeTema.arquivado || safeAssunto.arquivado),
     returnUrl,
     navigationContext: Object.freeze({
       route: 'materia',

@@ -86,6 +86,7 @@ function normalizeFields(source, issues, today) {
     pontosProgresso,
     metaPontosProgresso,
     precisaReforco: validateBoolean(source.precisaReforco ?? false, 'precisaReforco', issues),
+    arquivado: validateBoolean(source.arquivado ?? false, 'arquivado', issues),
     dificuldade: validateEnum(
       source.dificuldade ?? DIFFICULTIES.NAO_DEFINIDA,
       DIFFICULTY_VALUES,

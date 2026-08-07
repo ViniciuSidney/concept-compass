@@ -1,5 +1,6 @@
 import { readStudyStackProgressAggregate } from '../../integrations/study-stack-progress-aggregate.js';
 import { createActionMenu } from '../../ui/components/action-menu.js';
+import { createBadge } from '../../ui/components/badge.js';
 import { createButton } from '../../ui/components/button.js';
 import { createComponentId } from '../../ui/components/component-utils.js';
 import { createIconButton } from '../../ui/components/icon-button.js';
@@ -14,10 +15,13 @@ export function createTemaAccordion(
     expanded,
     highlighted = false,
     focusedAssuntoId = null,
+    materiaArchived = false,
     onToggle,
     onAddAssunto,
     onEditTema,
     onDeleteTema,
+    onArchiveTema,
+    onRestoreTema,
     onMoveTema,
     onMoveTemaUp,
     onMoveTemaDown,
@@ -25,6 +29,8 @@ export function createTemaAccordion(
     onOpenAssuntoInStudyStack,
     onEditAssunto,
     onDeleteAssunto,
+    onArchiveAssunto,
+    onRestoreAssunto,
     onMoveAssuntoTo,
     onMoveAssunto,
     onDecreaseAssuntoProgress,
@@ -37,6 +43,8 @@ export function createTemaAccordion(
   },
 ) {
   const { tema, assuntos, canMoveUp, canMoveDown } = section;
+  const archived = Boolean(tema.arquivado);
+  const effectivelyArchived = archived || Boolean(materiaArchived);
   const article = documentObject.createElement('article');
   const header = documentObject.createElement('header');
   const toggle = documentObject.createElement('button');
@@ -54,7 +62,8 @@ export function createTemaAccordion(
     label: 'Novo assunto',
     icon: 'plus',
     size: 'small',
-    onClick: onAddAssunto,
+    disabled: effectivelyArchived,
+    onClick: effectivelyArchived ? null : onAddAssunto,
   });
   const moveUp = createIconButton(documentObject, {
     icon: 'arrow-up',
@@ -76,13 +85,18 @@ export function createTemaAccordion(
     label: `Ações do tema ${tema.nome}`,
     overlayManager,
     items: [
+      {
+        label: archived ? 'Restaurar tema' : 'Arquivar tema',
+        icon: 'inbox',
+        onSelect: archived ? onRestoreTema : onArchiveTema,
+      },
       { label: 'Editar tema', icon: 'edit', onSelect: onEditTema },
       { label: 'Mover tema', icon: 'move', onSelect: onMoveTema },
       { label: 'Excluir tema', icon: 'trash', danger: true, onSelect: onDeleteTema },
     ],
   });
 
-  article.className = `tema-accordion${expanded ? ' is-expanded' : ''}${highlighted ? ' is-search-target' : ''}`;
+  article.className = `tema-accordion${expanded ? ' is-expanded' : ''}${highlighted ? ' is-search-target' : ''}${archived ? ' is-archived' : ''}`;
   article.setAttribute('role', 'listitem');
   article.setAttribute('data-tema-id', tema.id);
   header.className = 'tema-accordion__header';
@@ -108,13 +122,30 @@ export function createTemaAccordion(
   summary.className = 'tema-accordion__summary';
   summary.textContent = `${assuntos.length} ${assuntos.length === 1 ? 'assunto' : 'assuntos'}`;
   identity.append(title, description, summary);
+  if (archived) {
+    identity.append(createBadge(documentObject, { label: 'Arquivado', tone: 'neutral' }));
+  }
   toggle.append(toggleIcon, identity);
   reorder.className = 'tema-accordion__reorder';
   reorder.setAttribute('role', 'group');
   reorder.setAttribute('aria-label', `Reordenar tema ${tema.nome}`);
   reorder.append(moveUp, moveDown);
   headerActions.className = 'tema-accordion__actions';
-  headerActions.append(addButton, reorder, menu.element);
+  if (archived) {
+    headerActions.append(
+      createButton(documentObject, {
+        label: 'Restaurar tema',
+        icon: 'inbox',
+        variant: 'secondary',
+        size: 'small',
+        className: 'tema-accordion__restore',
+        onClick: onRestoreTema,
+      }),
+    );
+  } else {
+    headerActions.append(addButton);
+  }
+  headerActions.append(reorder, menu.element);
   header.append(toggle, headerProgress, headerActions);
 
   body.id = bodyId;
@@ -122,7 +153,9 @@ export function createTemaAccordion(
   body.hidden = !expanded;
 
   if (assuntos.length === 0) {
-    body.append(createInlineEmptyState(documentObject, tema.nome, onAddAssunto));
+    body.append(
+      createInlineEmptyState(documentObject, tema.nome, onAddAssunto, effectivelyArchived),
+    );
   } else {
     const list = documentObject.createElement('div');
     list.className = 'assuntos-list';
@@ -137,6 +170,8 @@ export function createTemaAccordion(
           onOpenStudyStack: () => onOpenAssuntoInStudyStack(assunto),
           onEdit: () => onEditAssunto(assunto),
           onDelete: () => onDeleteAssunto(assunto),
+          onArchive: () => onArchiveAssunto(assunto),
+          onRestore: () => onRestoreAssunto(assunto),
           onMove: () => onMoveAssuntoTo(assunto),
           onMoveUp: () => onMoveAssunto(assunto, index - 1),
           onMoveDown: () => onMoveAssunto(assunto, index + 1),
@@ -146,6 +181,13 @@ export function createTemaAccordion(
           onAdjustProgress: () => onAdjustAssuntoProgress(assunto),
           onCompleteProgress: () => onCompleteAssuntoProgress(assunto),
           onResetProgress: () => onResetAssuntoProgress(assunto),
+          archiveContext: assunto.arquivado
+            ? 'assunto'
+            : archived
+              ? 'tema'
+              : materiaArchived
+                ? 'materia'
+                : null,
           overlayManager,
           highlighted: focusedAssuntoId === assunto.id,
         }),
@@ -173,22 +215,25 @@ function createTemaProgress(documentObject, assuntos) {
   return area;
 }
 
-function createInlineEmptyState(documentObject, temaNome, onAddAssunto) {
+function createInlineEmptyState(documentObject, temaNome, onAddAssunto, archived = false) {
   const state = documentObject.createElement('div');
   const text = documentObject.createElement('div');
   const title = documentObject.createElement('strong');
   const description = documentObject.createElement('p');
   const button = createButton(documentObject, {
-    label: 'Criar primeiro assunto',
-    icon: 'plus',
+    label: archived ? 'Conteúdo arquivado' : 'Criar primeiro assunto',
+    icon: archived ? 'inbox' : 'plus',
     variant: 'secondary',
     size: 'small',
-    onClick: onAddAssunto,
+    disabled: archived,
+    onClick: archived ? null : onAddAssunto,
   });
 
   state.className = 'tema-empty-state';
   title.textContent = `Nenhum assunto em ${temaNome}`;
-  description.textContent = 'Adicione conteúdos específicos para acompanhar pontos e dificuldade.';
+  description.textContent = archived
+    ? 'Restaure este conteúdo para voltar a adicionar Assuntos.'
+    : 'Adicione conteúdos específicos para acompanhar pontos e dificuldade.';
   text.append(title, description);
   state.append(text, button);
   return state;

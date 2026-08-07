@@ -1,5 +1,6 @@
 import { createActionMenu } from '../../ui/components/action-menu.js';
-import { createButtonLink } from '../../ui/components/button.js';
+import { createBadge } from '../../ui/components/badge.js';
+import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createIconButton } from '../../ui/components/icon-button.js';
 import { readStudyStackProgressAggregate } from '../../integrations/study-stack-progress-aggregate.js';
 import { createMateriaIcon } from './materia-icon.js';
@@ -13,12 +14,15 @@ export function createMateriaCard(
     canMoveDown = false,
     showReorder = true,
     onEdit,
+    onArchive,
+    onRestore,
     onDelete,
     onMoveUp,
     onMoveDown,
   },
 ) {
   const { materia, temasCount, assuntosCount, assuntos = [] } = summary;
+  const archived = Boolean(materia.arquivado);
   const studyProgress = readStudyStackProgressAggregate(documentObject, assuntos);
   const article = documentObject.createElement('article');
   const header = documentObject.createElement('header');
@@ -36,12 +40,17 @@ export function createMateriaCard(
   const menu = createActionMenu(documentObject, {
     label: `Ações de ${materia.nome}`,
     items: [
+      {
+        label: archived ? 'Restaurar matéria' : 'Arquivar matéria',
+        icon: 'inbox',
+        onSelect: archived ? onRestore : onArchive,
+      },
       { label: 'Editar matéria', icon: 'edit', onSelect: onEdit },
       { label: 'Excluir matéria', icon: 'trash', danger: true, onSelect: onDelete },
     ],
   });
 
-  article.className = `materia-card materia-card--${materia.corId}`;
+  article.className = `materia-card materia-card--${materia.corId}${archived ? ' is-archived' : ''}`;
   article.setAttribute('role', 'listitem');
   header.className = 'materia-card__header';
   identity.className = 'materia-card__identity';
@@ -53,7 +62,11 @@ export function createMateriaCard(
   title.append(titleLink);
   description.className = 'materia-card__description';
   description.textContent = materia.descricao || 'Sem descrição cadastrada.';
-  titleGroup.append(title, description);
+  titleGroup.append(title);
+  if (archived) {
+    titleGroup.append(createBadge(documentObject, { label: 'Arquivada', tone: 'neutral' }));
+  }
+  titleGroup.append(description);
   identity.append(icon, titleGroup);
   header.append(identity, menu.element);
 
@@ -98,6 +111,18 @@ export function createMateriaCard(
     );
   }
   actions.className = 'materia-card__actions';
+  if (archived) {
+    actions.append(
+      createButton(documentObject, {
+        label: 'Restaurar matéria',
+        icon: 'inbox',
+        variant: 'secondary',
+        size: 'small',
+        className: 'materia-card__restore',
+        onClick: onRestore,
+      }),
+    );
+  }
   actions.append(
     createButtonLink(documentObject, {
       label: 'Abrir matéria',

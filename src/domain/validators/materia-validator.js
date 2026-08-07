@@ -6,6 +6,7 @@ import {
   normalizeOptionalText,
   normalizeRequiredText,
   throwIfIssues,
+  validateBoolean,
   validateEnum,
   validateIdentifier,
   validateOrder,
@@ -35,6 +36,7 @@ export function validateMateriaRecord(value) {
   const normalized = {
     id: validateIdentifier(source.id, 'id', issues),
     ...normalizeMateriaInputSafely(source, issues),
+    arquivado: validateBoolean(source.arquivado ?? false, 'arquivado', issues),
     ordem: validateOrder(source.ordem, 'ordem', issues),
     criadoEm: validateTimestamp(source.criadoEm, 'criadoEm', issues),
     atualizadoEm: validateTimestamp(source.atualizadoEm, 'atualizadoEm', issues),

@@ -25,6 +25,20 @@
   }
 }
 
+@media (min-width: 54.001rem) {
+  .app-sidebar {
+    transition: transform var(--transition-medium);
+  }
+
+  .app-shell.is-sidebar-collapsed .app-sidebar {
+    transform: translateX(-105%);
+  }
+
+  .app-shell.is-sidebar-collapsed .app-content {
+    margin-left: 0;
+  }
+}
+
 @media (max-width: 54rem) {
   .app-content {
     margin-left: 0;
@@ -234,6 +248,11 @@
   .settings-actions .button,
   .recovery-actions .button {
     width: 100%;
+  }
+
+  .page-header__actions > .button,
+  .page-header__actions > .action-menu {
+    flex: 0 0 auto;
   }
 
   .page-header__actions .action-menu > .icon-button {

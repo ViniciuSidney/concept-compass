@@ -15,6 +15,7 @@ export function createMateria(
   const materia = {
     id: idFactory(),
     ...normalizedInput,
+    arquivado: false,
     ordem: data.materias.length,
     criadoEm: timestamp,
     atualizadoEm: timestamp,
@@ -41,6 +42,34 @@ export function updateMateria(data, materiaId, input, { nowFactory = createIsoTi
   });
 
   return { data: nextData, materia };
+}
+
+export function setMateriaArchived(
+  data,
+  materiaId,
+  arquivado,
+  { nowFactory = createIsoTimestamp } = {},
+) {
+  const current = requireMateria(data, materiaId);
+  const materia = {
+    ...current,
+    arquivado: Boolean(arquivado),
+    atualizadoEm: nowFactory(),
+  };
+  const nextData = validateAppData({
+    ...data,
+    materias: data.materias.map((item) => (item.id === materiaId ? materia : item)),
+  });
+
+  return { data: nextData, materia: nextData.materias.find(({ id }) => id === materiaId) };
+}
+
+export function archiveMateria(data, materiaId, options = {}) {
+  return setMateriaArchived(data, materiaId, true, options);
+}
+
+export function restoreMateria(data, materiaId, options = {}) {
+  return setMateriaArchived(data, materiaId, false, options);
 }
 
 export function reorderMaterias(data, materiaId, targetIndex) {

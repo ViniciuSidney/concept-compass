@@ -22,6 +22,7 @@ export function createTema(
     id: idFactory(),
     materiaId,
     ...normalizedInput,
+    arquivado: false,
     ordem: selectTemasByMateria(data, materiaId).length,
     criadoEm: timestamp,
     atualizadoEm: timestamp,
@@ -41,6 +42,29 @@ export function updateTema(data, temaId, input, { nowFactory = createIsoTimestam
   });
 
   return { data: nextData, tema };
+}
+
+export function setTemaArchived(data, temaId, arquivado, { nowFactory = createIsoTimestamp } = {}) {
+  const current = requireTema(data, temaId);
+  const tema = {
+    ...current,
+    arquivado: Boolean(arquivado),
+    atualizadoEm: nowFactory(),
+  };
+  const nextData = validateAppData({
+    ...data,
+    temas: data.temas.map((item) => (item.id === temaId ? tema : item)),
+  });
+
+  return { data: nextData, tema: nextData.temas.find(({ id }) => id === temaId) };
+}
+
+export function archiveTema(data, temaId, options = {}) {
+  return setTemaArchived(data, temaId, true, options);
+}
+
+export function restoreTema(data, temaId, options = {}) {
+  return setTemaArchived(data, temaId, false, options);
 }
 
 export function reorderTemas(data, temaId, targetIndex) {

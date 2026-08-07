@@ -25,7 +25,25 @@
   gap: var(--space-3);
 }
 
+.assunto-study__heading--with-carousel {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 0.75fr) minmax(15rem, 1.6fr) minmax(10rem, 0.85fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.assunto-study__heading--with-carousel .assunto-study__eyebrow {
+  justify-self: start;
+}
+
+.assunto-study__heading--with-carousel .assunto-study__title {
+  min-width: 0;
+  justify-self: end;
+  overflow-wrap: anywhere;
+}
+
 .assunto-study__eyebrow {
+  min-width: 0;
   color: var(--color-muted);
   font-size: var(--font-size-xs);
   font-weight: 750;
@@ -64,18 +82,81 @@
 
 .assunto-study__carousel {
   display: grid;
-  gap: var(--space-1);
-  padding: var(--space-2);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  justify-self: end;
+  gap: var(--space-2);
+  width: min(100%, 42rem);
+  padding: 0.35rem 0.45rem;
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
   border-radius: var(--radius-small);
 }
 
-.assunto-study__carousel-controls {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+.assunto-study__carousel--header {
+  justify-self: stretch;
+  width: 100%;
+  min-width: 0;
+  padding: 0.25rem 0.35rem;
+}
+
+.assunto-study__carousel--completed {
+  background: color-mix(in srgb, var(--color-success-soft) 82%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-success) 42%, var(--color-border));
+}
+
+.assunto-study__carousel--completed .assunto-study__position {
+  color: var(--color-success);
+  opacity: 1;
+}
+
+.assunto-study__carousel--recommended {
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-warning) 44%, var(--color-border));
+}
+
+.assunto-study__carousel--recommended .assunto-study__position {
+  color: var(--color-warning);
+  opacity: 1;
+}
+
+.assunto-study__carousel--pending {
+  background: color-mix(in srgb, var(--color-warning-soft) 78%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
+}
+
+.assunto-study__carousel--pending .assunto-study__position {
+  color: var(--color-warning);
+  opacity: 0.9;
+}
+
+.assunto-study__carousel--header .assunto-study__notice-text {
+  -webkit-line-clamp: 1;
+}
+
+.assunto-study__carousel--header .assunto-study__position {
+  min-width: 2rem;
+  font-size: 0.7rem;
+}
+
+.assunto-study__carousel--header .assunto-study__carousel-navigation .icon-button {
+  min-width: 1.85rem;
+  width: 1.85rem;
+  min-height: 1.85rem;
+  height: 1.85rem;
+}
+
+.assunto-study__carousel-navigation {
+  display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.15rem;
+}
+
+.assunto-study__carousel-navigation .icon-button {
+  min-width: 2rem;
+  width: 2rem;
+  min-height: 2rem;
+  height: 2rem;
 }
 
 .assunto-study__notice-text,
@@ -90,14 +171,23 @@
 }
 
 .assunto-study__notice-text {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
   color: var(--color-text);
-  text-align: center;
-  font-weight: 700;
+  text-align: left;
+  font-weight: 650;
+  line-height: 1.35;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .assunto-study__position {
+  min-width: 2.5rem;
   text-align: center;
+  white-space: nowrap;
+  opacity: 0.76;
 }
 
 .assunto-study__next-action {
@@ -215,10 +305,41 @@
   color: var(--color-warning);
 }
 
+@media (max-width: 72.5rem) {
+  .assunto-study__heading--with-carousel {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'eyebrow title'
+      'carousel carousel';
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .assunto-study__heading--with-carousel .assunto-study__eyebrow {
+    grid-area: eyebrow;
+  }
+
+  .assunto-study__heading--with-carousel .assunto-study__carousel {
+    grid-area: carousel;
+    margin-top: var(--space-1);
+  }
+
+  .assunto-study__heading--with-carousel .assunto-study__title {
+    grid-area: title;
+  }
+
+  .assunto-study__carousel--header .assunto-study__notice-text {
+    -webkit-line-clamp: 2;
+  }
+}
+
 @media (max-width: 42rem) {
-  .assunto-study__heading {
+  .assunto-study__heading:not(.assunto-study__heading--with-carousel) {
     display: grid;
     gap: var(--space-1);
+  }
+
+  .assunto-study__heading--with-carousel {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .assunto-study__title,
@@ -226,8 +347,24 @@
     text-align: left;
   }
 
+  .assunto-study__heading--with-carousel .assunto-study__title {
+    text-align: right;
+  }
+
   .assunto-study__summary {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .assunto-study__carousel {
+    width: 100%;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .assunto-study__carousel--header .assunto-study__carousel-navigation .icon-button {
+    min-width: 2.5rem;
+    width: 2.5rem;
+    min-height: 2.5rem;
+    height: 2.5rem;
   }
 
   .assunto-study__activity {
@@ -237,4 +374,37 @@
   .assunto-form__tracking-grid--points {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 30rem) {
+  .assunto-study__heading--with-carousel {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'eyebrow'
+      'title'
+      'carousel';
+  }
+
+  .assunto-study__heading--with-carousel .assunto-study__title {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .assunto-study__carousel--header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+}
+
+.assunto-study--archived {
+  background: color-mix(in srgb, var(--color-muted) 7%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-muted-strong) 26%, var(--color-border));
+}
+
+.assunto-row.is-archived {
+  border-color: color-mix(in srgb, var(--color-muted-strong) 22%, var(--color-border));
+}
+
+.assunto-row.is-archived .assunto-row__title,
+.assunto-row.is-archived .assunto-row__description {
+  color: var(--color-muted-strong);
 }

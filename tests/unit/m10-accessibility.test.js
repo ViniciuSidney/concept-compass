@@ -38,6 +38,36 @@ test('navegação móvel fica fora da árvore quando fechada e prende foco quand
   assert.equal(documentObject.activeElement, menuButton);
 });
 
+test('menu lateral pode ser recolhido e expandido também no desktop', () => {
+  const { documentObject, windowObject } = createFakeDocument();
+  windowObject.innerWidth = 1280;
+  const shell = createAppShell(documentObject, { windowObject });
+  documentObject.body.append(shell.element);
+
+  const sidebar = findByClass(shell.element, 'app-sidebar');
+  const menuButton = findByClass(shell.element, 'app-topbar__menu-button');
+
+  assert.equal(shell.isNavigationMobile(), false);
+  assert.equal(shell.isSidebarCollapsed(), false);
+  assert.equal(menuButton.getAttribute('aria-label'), 'Recolher menu lateral');
+  assert.equal(menuButton.getAttribute('aria-expanded'), 'true');
+
+  menuButton.click();
+
+  assert.equal(shell.isSidebarCollapsed(), true);
+  assert.equal(shell.element.classList.contains('is-sidebar-collapsed'), true);
+  assert.equal(sidebar.inert, true);
+  assert.equal(sidebar.getAttribute('aria-hidden'), 'true');
+  assert.equal(menuButton.getAttribute('aria-label'), 'Expandir menu lateral');
+  assert.equal(menuButton.getAttribute('aria-expanded'), 'false');
+
+  menuButton.click();
+
+  assert.equal(shell.isSidebarCollapsed(), false);
+  assert.equal(sidebar.inert, false);
+  assert.equal(sidebar.getAttribute('aria-hidden'), null);
+});
+
 test('modal e painel descrevem conteúdo e isolam a aplicação ao abrir', () => {
   const { documentObject } = createFakeDocument();
   const root = documentObject.createElement('div');

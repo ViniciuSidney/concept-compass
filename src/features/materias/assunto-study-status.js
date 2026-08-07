@@ -44,9 +44,19 @@ export function readAssuntoStudyStackState(documentObject, subjectId) {
   }
 }
 
-export function getAssuntoStudyPresentation(studyStackState) {
+export function getAssuntoStudyPresentation(
+  studyStackState,
+  assunto = null,
+  { archiveContext = null } = {},
+) {
+  const locallyArchived = Boolean(assunto?.arquivado);
+  const effectiveArchiveContext = locallyArchived ? 'assunto' : archiveContext;
   const status = studyStackState?.status ?? 'missing';
   const subject = studyStackState?.subject ?? null;
+
+  if (effectiveArchiveContext) {
+    return createArchivedPresentation(effectiveArchiveContext, status === 'ready');
+  }
 
   if (status === 'update_required') {
     return Object.freeze({
@@ -85,14 +95,7 @@ export function getAssuntoStudyPresentation(studyStackState) {
   const consolidated = subject.status === 'consolidated' || subject.consolidated;
 
   if (archived) {
-    return Object.freeze({
-      state: 'archived',
-      title: 'Estudo arquivado',
-      actionLabel: null,
-      actionVisible: false,
-      actionDisabled: true,
-      synchronized: true,
-    });
+    return createArchivedPresentation('assunto', true);
   }
 
   if (consolidated) {
@@ -116,11 +119,30 @@ export function getAssuntoStudyPresentation(studyStackState) {
   });
 }
 
+function createArchivedPresentation(archiveContext, synchronized) {
+  const archiveMessages = {
+    assunto: 'Restaure o Assunto para voltar a acessar o Study Stack.',
+    tema: 'Restaure o Tema para voltar a acessar o Study Stack.',
+    materia: 'Restaure a Matéria para voltar a acessar o Study Stack.',
+  };
+
+  return Object.freeze({
+    state: 'archived',
+    title: 'Estudo arquivado',
+    actionLabel: null,
+    actionVisible: false,
+    actionDisabled: true,
+    synchronized,
+    archiveContext,
+    archiveMessage: archiveMessages[archiveContext] ?? archiveMessages.assunto,
+  });
+}
+
 export function createAssuntoStudyStatus(
   documentObject,
-  { assunto, studyStackState, onOpenStudyStack },
+  { assunto, studyStackState, onOpenStudyStack, archiveContext = null },
 ) {
-  const presentation = getAssuntoStudyPresentation(studyStackState);
+  const presentation = getAssuntoStudyPresentation(studyStackState, assunto, { archiveContext });
   const subject = studyStackState?.subject ?? null;
   const section = documentObject.createElement('section');
   const heading = documentObject.createElement('div');
@@ -129,12 +151,22 @@ export function createAssuntoStudyStatus(
 
   section.className = `assunto-study assunto-study--${presentation.state}`;
   section.setAttribute('aria-label', `Situação do estudo de ${assunto.nome}`);
-  heading.className = 'assunto-study__heading';
+  const noticeCarousel =
+    subject &&
+    studyStackState?.status === 'ready' &&
+    Array.isArray(subject.notices) &&
+    subject.notices.length > 0
+      ? createNoticeCarousel(documentObject, subject, { header: true })
+      : null;
+
+  heading.className = `assunto-study__heading${noticeCarousel ? ' assunto-study__heading--with-carousel' : ''}`;
   eyebrow.className = 'assunto-study__eyebrow';
   eyebrow.textContent = 'Situação do estudo';
   title.className = 'assunto-study__title';
   title.textContent = presentation.title;
-  heading.append(eyebrow, title);
+  heading.append(eyebrow);
+  if (noticeCarousel) heading.append(noticeCarousel);
+  heading.append(title);
   section.append(heading);
 
   appendStudyContent(documentObject, section, {
@@ -142,6 +174,7 @@ export function createAssuntoStudyStatus(
     studyStackState,
     presentation,
     detailed: false,
+    skipNotices: Boolean(noticeCarousel),
   });
 
   if (presentation.actionVisible) {
@@ -167,9 +200,9 @@ export function createAssuntoStudyStatus(
 
 export function createAssuntoStudyDetail(
   documentObject,
-  { assunto, studyStackState, studyStackUrl },
+  { assunto, studyStackState, studyStackUrl, archiveContext = null },
 ) {
-  const presentation = getAssuntoStudyPresentation(studyStackState);
+  const presentation = getAssuntoStudyPresentation(studyStackState, assunto, { archiveContext });
   const subject = studyStackState?.subject ?? null;
   const section = documentObject.createElement('section');
   const heading = documentObject.createElement('div');
@@ -226,7 +259,7 @@ export function createAssuntoStudyDetail(
 function appendStudyContent(
   documentObject,
   section,
-  { subject, studyStackState, presentation, detailed },
+  { subject, studyStackState, presentation, detailed, skipNotices = false },
 ) {
   if (subject && studyStackState.status === 'ready') {
     section.append(createStudySummary(documentObject, subject));
@@ -235,7 +268,7 @@ function appendStudyContent(
       section.append(createStageBreakdown(documentObject, subject.stageProgress));
     }
 
-    if (Array.isArray(subject.notices) && subject.notices.length > 0) {
+    if (!skipNotices && Array.isArray(subject.notices) && subject.notices.length > 0) {
       section.append(createNoticeCarousel(documentObject, subject));
     }
 
@@ -261,9 +294,11 @@ function appendStudyContent(
     if (presentation.state === 'archived') {
       const archived = documentObject.createElement('p');
       archived.className = 'assunto-study__notice-text';
-      archived.textContent = 'Restaure o Assunto para voltar a acessar o Study Stack.';
+      archived.textContent = presentation.archiveMessage;
       section.append(archived);
     }
+  } else if (presentation.state === 'archived') {
+    section.append(createSupportText(documentObject, presentation.archiveMessage));
   } else if (presentation.state === 'pending') {
     section.append(
       createSupportText(
@@ -368,11 +403,11 @@ function createNextAction(documentObject, nextAction, detailed) {
   return section;
 }
 
-function createNoticeCarousel(documentObject, subject) {
+function createNoticeCarousel(documentObject, subject, { header = false } = {}) {
   const carousel = documentObject.createElement('div');
-  const controls = documentObject.createElement('div');
   const message = documentObject.createElement('p');
   const position = documentObject.createElement('span');
+  const navigation = documentObject.createElement('div');
   const notices = subject.notices;
   const recommendedIndex = Math.max(
     0,
@@ -401,17 +436,28 @@ function createNoticeCarousel(documentObject, subject) {
     },
   });
 
-  carousel.className = 'assunto-study__carousel';
-  controls.className = 'assunto-study__carousel-controls';
+  carousel.className = `assunto-study__carousel${header ? ' assunto-study__carousel--header' : ''}`;
+  position.className = 'assunto-study__position';
   message.className = 'assunto-study__notice-text';
   message.setAttribute('aria-live', 'polite');
-  position.className = 'assunto-study__position';
-  controls.append(previous, message, next);
-  carousel.append(controls, position);
+  navigation.className = 'assunto-study__carousel-navigation';
+  navigation.setAttribute('role', 'group');
+  navigation.setAttribute('aria-label', 'Navegar pelos avisos do Study Stack');
+  navigation.append(previous, next);
+  carousel.append(position, message, navigation);
 
   function renderNotice() {
-    message.textContent = notices[currentIndex].message;
-    position.textContent = `${currentIndex + 1} de ${notices.length}`;
+    const notice = notices[currentIndex];
+    message.textContent = notice.message;
+    message.setAttribute('title', notice.message);
+    position.textContent = `${currentIndex + 1}/${notices.length}`;
+    position.setAttribute('aria-label', `Aviso ${currentIndex + 1} de ${notices.length}`);
+    carousel.classList.remove(
+      'assunto-study__carousel--completed',
+      'assunto-study__carousel--recommended',
+      'assunto-study__carousel--pending',
+    );
+    carousel.classList.add(`assunto-study__carousel--${notice.type}`);
   }
 
   renderNotice();
