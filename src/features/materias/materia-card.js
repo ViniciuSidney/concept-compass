@@ -1,8 +1,9 @@
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createButtonLink } from '../../ui/components/button.js';
 import { createIconButton } from '../../ui/components/icon-button.js';
+import { readStudyStackProgressAggregate } from '../../integrations/study-stack-progress-aggregate.js';
 import { createMateriaIcon } from './materia-icon.js';
-import { createProgressBar } from '../../ui/components/progress-bar.js';
+import { createStudyProgressIndicator } from './study-progress-indicator.js';
 
 export function createMateriaCard(
   documentObject,
@@ -17,7 +18,8 @@ export function createMateriaCard(
     onMoveDown,
   },
 ) {
-  const { materia, temasCount, assuntosCount, progress, progressSummary } = summary;
+  const { materia, temasCount, assuntosCount, assuntos = [] } = summary;
+  const studyProgress = readStudyStackProgressAggregate(documentObject, assuntos);
   const article = documentObject.createElement('article');
   const header = documentObject.createElement('header');
   const identity = documentObject.createElement('div');
@@ -62,20 +64,14 @@ export function createMateriaCard(
   );
 
   progressArea.className = 'materia-card__progress';
-  if (progress === null) {
-    const emptyProgress = documentObject.createElement('p');
-    emptyProgress.className = 'materia-card__no-progress';
-    emptyProgress.textContent = 'Sem assuntos';
-    progressArea.append(emptyProgress);
-  } else {
-    progressArea.append(
-      createProgressBar(documentObject, {
-        value: progress,
-        label: `Progresso da matéria · ${progressSummary.points}/${progressSummary.total} pontos`,
-        size: 'small',
-      }),
-    );
-  }
+  progressArea.append(
+    createStudyProgressIndicator(documentObject, {
+      aggregate: studyProgress,
+      label: 'Progresso da matéria',
+      size: 'small',
+      emptyLabel: 'Sem assuntos',
+    }),
+  );
 
   footer.className = 'materia-card__footer';
   reorder.className = 'materia-card__reorder';

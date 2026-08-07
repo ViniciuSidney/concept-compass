@@ -5,12 +5,11 @@ import {
   selectTemaById,
   selectTemasByMateria,
 } from '../../domain/selectors/hierarchy-selectors.js';
-import { summarizeMateriaProgress } from '../../domain/services/progress-service.js';
 import { createStudyStackUrl } from '../../integrations/study-stack-link.js';
+import { readStudyStackProgressAggregate } from '../../integrations/study-stack-progress-aggregate.js';
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createPageHeader } from '../../ui/components/page-header.js';
-import { createProgressBar } from '../../ui/components/progress-bar.js';
 import { createEmptyState } from '../../ui/states/empty-state.js';
 import { createErrorState } from '../../ui/states/error-state.js';
 import { createAssuntoDeleteDialog } from './assunto-delete-dialog.js';
@@ -31,6 +30,7 @@ import { createTemaDeleteDialog } from './tema-delete-dialog.js';
 import { createTemaFormModal } from './tema-form.js';
 import { selectMateriaImpact } from './materias-selectors.js';
 import { createStructureMoveDialog } from './structure-move-dialog.js';
+import { createStudyProgressIndicator } from './study-progress-indicator.js';
 import {
   describeAssuntoOrigin,
   describeTemaOrigin,
@@ -72,8 +72,6 @@ export function createMateriaPage(documentObject, route, context) {
 
     const temas = selectTemasByMateria(data, materia.id);
     const assuntos = selectAssuntosByMateria(data, materia.id);
-    const progressSummary = summarizeMateriaProgress(data, materia.id);
-    const progress = progressSummary?.percentage ?? null;
     const materiaMenu = createActionMenu(documentObject, {
       label: `Ações da matéria ${materia.nome}`,
       overlayManager,
@@ -108,14 +106,7 @@ export function createMateriaPage(documentObject, route, context) {
       description: materia.descricao || 'Sem descrição cadastrada.',
       actions,
     });
-    const summary = createMateriaSummary(
-      documentObject,
-      materia,
-      temas.length,
-      assuntos.length,
-      progress,
-      progressSummary,
-    );
+    const summary = createMateriaSummary(documentObject, materia, temas.length, assuntos);
     const workspace = documentObject.createElement('section');
     const workspaceHeader = documentObject.createElement('div');
     const workspaceHeading = documentObject.createElement('div');
@@ -660,38 +651,26 @@ function renderNotFound(documentObject, page) {
   );
 }
 
-function createMateriaSummary(
-  documentObject,
-  materia,
-  temasCount,
-  assuntosCount,
-  progress,
-  progressSummary,
-) {
+function createMateriaSummary(documentObject, materia, temasCount, assuntos) {
   const summary = documentObject.createElement('section');
   const stats = documentObject.createElement('div');
   const progressCard = documentObject.createElement('div');
+  const studyProgress = readStudyStackProgressAggregate(documentObject, assuntos);
 
   summary.className = `materia-summary materia-summary--${materia.corId}`;
   stats.className = 'materia-summary__stats';
   stats.append(
     createSummaryStat(documentObject, temasCount, 'Temas'),
-    createSummaryStat(documentObject, assuntosCount, 'Assuntos'),
+    createSummaryStat(documentObject, assuntos.length, 'Assuntos'),
   );
   progressCard.className = 'materia-summary__progress';
-
-  if (progress === null) {
-    const label = documentObject.createElement('p');
-    label.textContent = 'Progresso: Sem assuntos';
-    progressCard.append(label);
-  } else {
-    progressCard.append(
-      createProgressBar(documentObject, {
-        value: progress,
-        label: `Progresso geral · ${progressSummary.points}/${progressSummary.total} pontos`,
-      }),
-    );
-  }
+  progressCard.append(
+    createStudyProgressIndicator(documentObject, {
+      aggregate: studyProgress,
+      label: 'Progresso geral',
+      emptyLabel: 'Progresso: sem assuntos',
+    }),
+  );
 
   summary.append(stats, progressCard);
   return summary;

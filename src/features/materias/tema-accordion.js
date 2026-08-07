@@ -1,10 +1,11 @@
+import { readStudyStackProgressAggregate } from '../../integrations/study-stack-progress-aggregate.js';
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createButton } from '../../ui/components/button.js';
 import { createComponentId } from '../../ui/components/component-utils.js';
 import { createIconButton } from '../../ui/components/icon-button.js';
-import { createProgressBar } from '../../ui/components/progress-bar.js';
 import { createIcon } from '../../ui/icons/icon.js';
 import { createAssuntoRow } from './assunto-row.js';
+import { createStudyProgressIndicator } from './study-progress-indicator.js';
 
 export function createTemaAccordion(
   documentObject,
@@ -35,7 +36,7 @@ export function createTemaAccordion(
     overlayManager,
   },
 ) {
-  const { tema, assuntos, progress, progressSummary, canMoveUp, canMoveDown } = section;
+  const { tema, assuntos, canMoveUp, canMoveDown } = section;
   const article = documentObject.createElement('article');
   const header = documentObject.createElement('header');
   const toggle = documentObject.createElement('button');
@@ -44,12 +45,7 @@ export function createTemaAccordion(
   const title = documentObject.createElement('strong');
   const description = documentObject.createElement('span');
   const summary = documentObject.createElement('span');
-  const headerProgress = createTemaProgress(
-    documentObject,
-    progress,
-    progressSummary,
-    assuntos.length,
-  );
+  const headerProgress = createTemaProgress(documentObject, assuntos);
   const headerActions = documentObject.createElement('div');
   const reorder = documentObject.createElement('div');
   const body = documentObject.createElement('div');
@@ -162,22 +158,16 @@ export function createTemaAccordion(
   return article;
 }
 
-function createTemaProgress(documentObject, progress, progressSummary, assuntosCount) {
+function createTemaProgress(documentObject, assuntos) {
   const area = documentObject.createElement('div');
+  const studyProgress = readStudyStackProgressAggregate(documentObject, assuntos);
   area.className = 'tema-accordion__progress tema-accordion__progress--header';
-
-  if (progress === null) {
-    const text = documentObject.createElement('p');
-    text.textContent = assuntosCount === 0 ? 'Progresso: sem assuntos' : 'Progresso indisponível';
-    area.append(text);
-    return area;
-  }
-
   area.append(
-    createProgressBar(documentObject, {
-      value: progress,
-      label: `Progresso do tema · ${progressSummary.points}/${progressSummary.total} pontos`,
+    createStudyProgressIndicator(documentObject, {
+      aggregate: studyProgress,
+      label: 'Progresso do tema',
       size: 'small',
+      emptyLabel: 'Progresso: sem assuntos',
     }),
   );
   return area;

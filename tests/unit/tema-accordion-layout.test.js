@@ -45,7 +45,8 @@ test('cabeçalho do tema mantém o progresso visível mesmo com o acordeão fech
   const headerProgress = header.children[1];
 
   assert.equal(headerProgress.classList.contains('tema-accordion__progress--header'), true);
-  assert.match(headerProgress.textContent, /3\/5 pontos/);
+  assert.match(headerProgress.textContent, /0\/10/);
+  assert.doesNotMatch(headerProgress.textContent, /3\/5/);
   assert.equal(body.hidden, true);
   assert.equal(
     body.children.some((child) => child.classList?.contains('tema-accordion__progress')),

@@ -50,7 +50,8 @@ test('matéria com hierarquia apresenta tema, assunto e acompanhamento sincroniz
   assert.match(page.textContent, /Equação do primeiro grau/);
   assert.match(page.textContent, /Estudo ainda não iniciado/);
   assert.match(page.textContent, /Não definida/);
-  assert.match(page.textContent, /Progresso do tema/);
+  assert.match(page.textContent, /Progresso geral · 0\/10/);
+  assert.match(page.textContent, /Progresso do tema · 0\/10/);
 });
 
 test('matéria inexistente preserva tratamento de erro do M4', () => {

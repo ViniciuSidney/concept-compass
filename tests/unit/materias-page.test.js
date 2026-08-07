@@ -46,5 +46,6 @@ test('tela de Matérias apresenta card com contagens e abertura', () => {
   assert.match(page.textContent, /Matemática/);
   assert.match(page.textContent, /1Temas/);
   assert.match(page.textContent, /1Assuntos/);
+  assert.match(page.textContent, /Progresso da matéria · 0\/10/);
   assert.match(page.textContent, /Abrir matéria/);
 });

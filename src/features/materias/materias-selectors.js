@@ -17,11 +17,15 @@ export function selectMateriaSummaries(
 ) {
   const normalizedQuery = normalizeSearchText(query);
   const summaries = data.materias.map((materia) => {
+    const assuntos = selectAssuntosByMateria(data, materia.id);
     const progressSummary = summarizeMateriaProgress(data, materia.id);
     return {
       materia,
       temasCount: selectTemasByMateria(data, materia.id).length,
-      assuntosCount: selectAssuntosByMateria(data, materia.id).length,
+      assuntosCount: assuntos.length,
+      assuntos,
+      // Compatibilidade temporária: estes campos legados permanecem no seletor,
+      // mas a interface de progresso já não os utiliza.
       progress: progressSummary?.percentage ?? null,
       progressSummary,
     };

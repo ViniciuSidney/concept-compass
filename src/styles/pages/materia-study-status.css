@@ -203,6 +203,18 @@
   border-radius: var(--radius-small);
 }
 
+.study-progress-state {
+  margin: 0;
+  color: var(--color-muted-strong);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.study-progress-state--pending,
+.study-progress-state--update_required {
+  color: var(--color-warning);
+}
+
 @media (max-width: 42rem) {
   .assunto-study__heading {
     display: grid;
