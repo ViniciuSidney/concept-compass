@@ -11,6 +11,7 @@ import { createMateriasPage } from '../features/materias/materias-page.js';
 import { createNaoEncontradoPage } from '../features/nao-encontrado/nao-encontrado-page.js';
 import { createPesquisaPage } from '../features/pesquisa/pesquisa-page.js';
 import { createRecuperacaoPage } from '../features/recuperacao/recuperacao-page.js';
+import { configureStudyStackDeletionBridge } from '../integrations/study-stack-deletion-bridge.js';
 import { createStudyStackSummaryReader } from '../integrations/study-stack-summary-reader.js';
 import { createAppShell } from '../ui/components/app-shell.js';
 import { createOverlayManager } from '../ui/overlays/overlay-manager.js';
@@ -38,6 +39,15 @@ export function createApp({ documentObject = document, windowObject = window } =
   const studyStackSummaryReader = createStudyStackSummaryReader({
     storage: windowObject.localStorage,
     config: APP_CONFIG.integrations.studyStack,
+  });
+  const studyStackDeletionBridge = configureStudyStackDeletionBridge({
+    storage: windowObject.localStorage,
+    config: Object.freeze({
+      contractVersion: APP_CONFIG.integrations.studyStack.deletionContractVersion,
+      sourceApp: 'concept_compass',
+      commandKey: APP_CONFIG.integrations.studyStack.deletionCommandKey,
+      acknowledgementKey: APP_CONFIG.integrations.studyStack.deletionAcknowledgementKey,
+    }),
   });
   let studyStackFingerprint = studyStackSummaryReader.read().fingerprint;
   const dataResult = repository.loadData();
@@ -71,6 +81,7 @@ export function createApp({ documentObject = document, windowObject = window } =
   let router = null;
   let integrationListenersInstalled = false;
 
+  reconcileStudyStackDeletions();
   themeController.setTheme(preferences.theme);
   root.replaceChildren(appShell.element);
   root.removeAttribute('aria-busy');
@@ -94,6 +105,7 @@ export function createApp({ documentObject = document, windowObject = window } =
       store,
       repository,
       studyStackSummaryReader,
+      studyStackDeletionBridge,
       windowObject,
       navigate: (href, options) => router?.navigate(href, options),
     });
@@ -114,6 +126,14 @@ export function createApp({ documentObject = document, windowObject = window } =
     appShell.renderPage(page, route);
   }
 
+  function reconcileStudyStackDeletions() {
+    try {
+      return studyStackDeletionBridge.reconcile(store.getState().data);
+    } catch {
+      return false;
+    }
+  }
+
   function syncStudyStackSummary() {
     const snapshot = studyStackSummaryReader.read();
     if (snapshot.fingerprint === studyStackFingerprint) return false;
@@ -131,11 +151,13 @@ export function createApp({ documentObject = document, windowObject = window } =
   }
 
   function onFocus() {
+    reconcileStudyStackDeletions();
     syncStudyStackSummary();
   }
 
   function onVisibilityChange() {
     if (documentObject.visibilityState !== 'hidden') {
+      reconcileStudyStackDeletions();
       syncStudyStackSummary();
     }
   }
@@ -185,6 +207,7 @@ export function createApp({ documentObject = document, windowObject = window } =
     router,
     repository,
     studyStackSummaryReader,
+    studyStackDeletionBridge,
     themeController,
     overlayManager,
   });

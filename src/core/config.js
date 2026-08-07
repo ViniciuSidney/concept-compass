@@ -16,6 +16,9 @@ export const APP_CONFIG = Object.freeze({
       contractVersion: '1.0.0',
       summaryKey: 'study-stack:integration:progress:v1',
       supportedSummaryContractVersions: Object.freeze(['1.0.0']),
+      deletionContractVersion: '1.0.0',
+      deletionCommandKey: 'study-stack:integration:deletion-commands:v1',
+      deletionAcknowledgementKey: 'study-stack:integration:deletion-acks:v1',
     }),
   }),
 });

@@ -27,6 +27,11 @@ import {
   restoreMateria,
   updateMateria,
 } from '../../domain/services/materia-service.js';
+import {
+  selectAssuntosByMateria,
+  selectAssuntosByTema,
+} from '../../domain/selectors/hierarchy-selectors.js';
+import { runStudyStackDeletionCascade } from '../../integrations/study-stack-deletion-bridge.js';
 
 export function createMateriaWorkspaceController({ store, repository }) {
   if (!store || !repository) {
@@ -100,9 +105,18 @@ export function createMateriaWorkspaceController({ store, repository }) {
   }
 
   function removeMateria(materiaId) {
-    const result = deleteMateriaCascade(getData(), materiaId);
-    persist(result.data);
-    return result.removed;
+    const currentData = getData();
+    const subjectIds = selectAssuntosByMateria(currentData, materiaId).map(({ id }) => id);
+
+    return runStudyStackDeletionCascade({
+      data: currentData,
+      subjectIds,
+      deleteLocal() {
+        const result = deleteMateriaCascade(currentData, materiaId);
+        persist(result.data);
+        return result.removed;
+      },
+    });
   }
 
   function addTema(materiaId, input, options) {
@@ -130,9 +144,18 @@ export function createMateriaWorkspaceController({ store, repository }) {
   }
 
   function removeTema(temaId) {
-    const result = deleteTemaCascade(getData(), temaId);
-    persist(result.data);
-    return result.removed;
+    const currentData = getData();
+    const subjectIds = selectAssuntosByTema(currentData, temaId).map(({ id }) => id);
+
+    return runStudyStackDeletionCascade({
+      data: currentData,
+      subjectIds,
+      deleteLocal() {
+        const result = deleteTemaCascade(currentData, temaId);
+        persist(result.data);
+        return result.removed;
+      },
+    });
   }
 
   function reorderTema(temaId, targetIndex) {
@@ -202,9 +225,17 @@ export function createMateriaWorkspaceController({ store, repository }) {
   }
 
   function removeAssunto(assuntoId, options) {
-    const nextData = deleteAssunto(getData(), assuntoId, options);
-    persist(nextData);
-    return { assuntos: 1 };
+    const currentData = getData();
+
+    return runStudyStackDeletionCascade({
+      data: currentData,
+      subjectIds: [assuntoId],
+      deleteLocal() {
+        const nextData = deleteAssunto(currentData, assuntoId, options);
+        persist(nextData);
+        return { assuntos: 1 };
+      },
+    });
   }
 
   function reorderAssunto(assuntoId, targetIndex, options) {

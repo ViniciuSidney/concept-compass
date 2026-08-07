@@ -9,6 +9,8 @@ export function createMateriaDeleteDialog(
   const warning = documentObject.createElement('div');
   const message = documentObject.createElement('p');
   const impactList = documentObject.createElement('ul');
+  const preservation = documentObject.createElement('p');
+  const backupHint = documentObject.createElement('p');
   const error = documentObject.createElement('p');
   const cancel = createButton(documentObject, { label: 'Cancelar', variant: 'secondary' });
   const confirm = createButton(documentObject, {
@@ -20,23 +22,33 @@ export function createMateriaDeleteDialog(
 
   content.className = 'delete-dialog';
   warning.className = 'delete-dialog__warning';
-  message.textContent = `A matéria “${materia.nome}” será removida permanentemente.`;
+  message.textContent = `A Matéria “${materia.nome}” será removida permanentemente.`;
   impactList.append(
     createImpactItem(documentObject, impact.temas, 'tema', 'temas'),
-    createImpactItem(documentObject, impact.assuntos, 'assunto', 'assuntos'),
+    createImpactItem(
+      documentObject,
+      impact.assuntos,
+      'Assunto com histórico no Study Stack',
+      'Assuntos com históricos no Study Stack',
+    ),
   );
+  preservation.textContent =
+    'Essa ação não poderá ser desfeita. Para preservar a estrutura e os históricos, arquive a Matéria em vez de excluí-la.';
+  backupHint.textContent =
+    'Antes de continuar, considere criar um backup em Configurações caso queira manter uma cópia dos dados atuais.';
   error.className = 'form-general-error';
   error.setAttribute('role', 'alert');
   error.hidden = true;
-  warning.append(message, impactList);
+  warning.append(message, impactList, preservation, backupHint);
   content.append(warning, error);
   footer.className = 'overlay-actions';
   footer.append(cancel, confirm);
 
   const modalHolder = { current: null };
   const modal = createModal(documentObject, {
-    title: 'Excluir matéria?',
-    description: 'Essa ação também remove toda a estrutura relacionada e não pode ser desfeita.',
+    title: 'Excluir esta Matéria definitivamente?',
+    description:
+      'Toda a estrutura relacionada será removida e cada Assunto será excluído do Study Stack pelo identificador interno correspondente.',
     content,
     footer,
     closeOnBackdrop: false,

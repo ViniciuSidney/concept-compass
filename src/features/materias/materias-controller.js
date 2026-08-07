@@ -6,6 +6,8 @@ import {
   restoreMateria,
   updateMateria,
 } from '../../domain/services/materia-service.js';
+import { selectAssuntosByMateria } from '../../domain/selectors/hierarchy-selectors.js';
+import { runStudyStackDeletionCascade } from '../../integrations/study-stack-deletion-bridge.js';
 
 export function createMateriasController({ store, repository }) {
   if (!store || !repository) {
@@ -85,9 +87,18 @@ export function createMateriasController({ store, repository }) {
   }
 
   function remove(materiaId) {
-    const result = deleteMateriaCascade(getData(), materiaId);
-    persist(result.data);
-    return result.removed;
+    const currentData = getData();
+    const subjectIds = selectAssuntosByMateria(currentData, materiaId).map(({ id }) => id);
+
+    return runStudyStackDeletionCascade({
+      data: currentData,
+      subjectIds,
+      deleteLocal() {
+        const result = deleteMateriaCascade(currentData, materiaId);
+        persist(result.data);
+        return result.removed;
+      },
+    });
   }
 
   function reorder(materiaId, targetIndex) {
