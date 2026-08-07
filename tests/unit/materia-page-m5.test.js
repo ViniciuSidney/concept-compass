@@ -42,13 +42,13 @@ test('matéria sem temas apresenta workspace e ação inicial', () => {
   assert.match(page.textContent, /Criar primeiro tema/);
 });
 
-test('matéria com hierarquia apresenta tema, assunto e acompanhamento', () => {
+test('matéria com hierarquia apresenta tema, assunto e acompanhamento sincronizado', () => {
   const { documentObject, context } = createContext(validData());
   const page = createMateriaPage(documentObject, { params: { materiaId: 'materia-1' } }, context);
 
   assert.match(page.textContent, /Álgebra/);
   assert.match(page.textContent, /Equação do primeiro grau/);
-  assert.match(page.textContent, /Não iniciado/);
+  assert.match(page.textContent, /Estudo ainda não iniciado/);
   assert.match(page.textContent, /Não definida/);
   assert.match(page.textContent, /Progresso do tema/);
 });
@@ -149,7 +149,7 @@ function findElements(root, output = []) {
   return output;
 }
 
-test('ação rápida do assunto abre o Study Stack com contexto e retorno profundo', () => {
+test('ação principal do assunto inicia o Study Stack com contexto e retorno profundo', () => {
   const { documentObject, context } = createContext(validData());
   const page = createMateriaPage(
     documentObject,
@@ -158,7 +158,8 @@ test('ação rápida do assunto abre o Study Stack com contexto e retorno profun
   );
   const action = findElement(
     page,
-    (element) => element.tagName === 'BUTTON' && element.textContent === 'Abrir no Study Stack',
+    (element) =>
+      element.tagName === 'BUTTON' && element.textContent === 'Iniciar estudo no Study Stack',
   );
 
   assert.ok(action);

@@ -1,12 +1,8 @@
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createBadge } from '../../ui/components/badge.js';
 import { createIconButton } from '../../ui/components/icon-button.js';
-import { createAssuntoProgressControl } from './assunto-progress-control.js';
-import {
-  formatLocalDate,
-  getDifficultyPresentation,
-  getProgressPresentation,
-} from './assunto-presentation.js';
+import { getDifficultyPresentation } from './assunto-presentation.js';
+import { createAssuntoStudyStatus, readAssuntoStudyStackState } from './assunto-study-status.js';
 
 export function createAssuntoRow(
   documentObject,
@@ -21,12 +17,6 @@ export function createAssuntoRow(
     onMove,
     onMoveUp,
     onMoveDown,
-    onDecreaseProgress,
-    onIncreaseProgress,
-    onIncreaseProgressTotal,
-    onAdjustProgress,
-    onCompleteProgress,
-    onResetProgress,
     overlayManager,
     highlighted = false,
   },
@@ -37,11 +27,15 @@ export function createAssuntoRow(
   const title = documentObject.createElement('span');
   const description = documentObject.createElement('p');
   const meta = documentObject.createElement('div');
-  const date = documentObject.createElement('span');
   const actions = documentObject.createElement('div');
   const reorder = documentObject.createElement('div');
-  const progress = getProgressPresentation(assunto);
   const difficulty = getDifficultyPresentation(assunto.dificuldade);
+  const studyStackState = readAssuntoStudyStackState(documentObject, assunto.id);
+  const studyStatus = createAssuntoStudyStatus(documentObject, {
+    assunto,
+    studyStackState,
+    onOpenStudyStack,
+  });
   const moveUp = createIconButton(documentObject, {
     icon: 'arrow-up',
     label: `Mover ${assunto.nome} para cima`,
@@ -58,28 +52,27 @@ export function createAssuntoRow(
     disabled: index === total - 1,
     onClick: onMoveDown,
   });
+  const menuItems = [];
+
+  if (studyStatus.actionVisible) {
+    menuItems.push({
+      label: studyStatus.actionLabel,
+      icon: 'layers',
+      disabled: studyStatus.actionDisabled,
+      onSelect: onOpenStudyStack,
+    });
+  }
+
+  menuItems.push(
+    { label: 'Editar assunto', icon: 'edit', onSelect: onEdit },
+    { label: 'Mover assunto', icon: 'move', onSelect: onMove },
+    { label: 'Excluir assunto', icon: 'trash', danger: true, onSelect: onDelete },
+  );
+
   const menu = createActionMenu(documentObject, {
     label: `Ações de ${assunto.nome}`,
     overlayManager,
-    items: [
-      { label: 'Ajustar progresso', icon: 'settings', onSelect: onAdjustProgress },
-      {
-        label: 'Concluir meta',
-        icon: 'check',
-        disabled: assunto.pontosProgresso >= assunto.metaPontosProgresso,
-        onSelect: onCompleteProgress,
-      },
-      {
-        label: 'Reiniciar progresso',
-        icon: 'warning',
-        disabled: assunto.pontosProgresso === 0,
-        onSelect: onResetProgress,
-      },
-      { label: 'Abrir no Study Stack', icon: 'layers', onSelect: onOpenStudyStack },
-      { label: 'Editar assunto', icon: 'edit', onSelect: onEdit },
-      { label: 'Mover assunto', icon: 'move', onSelect: onMove },
-      { label: 'Excluir assunto', icon: 'trash', danger: true, onSelect: onDelete },
-    ],
+    items: menuItems,
   });
 
   row.className = `assunto-row${highlighted ? ' is-search-target' : ''}`;
@@ -96,33 +89,8 @@ export function createAssuntoRow(
   description.className = 'assunto-row__description';
   description.textContent = assunto.descricao || 'Sem descrição cadastrada.';
   meta.className = 'assunto-row__meta';
-  meta.append(
-    createBadge(documentObject, { label: progress.label, tone: progress.tone }),
-    createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }),
-  );
-  if (assunto.precisaReforco) {
-    meta.append(
-      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
-    );
-  }
-  date.className = 'assunto-row__date';
-  date.textContent = assunto.ultimoEstudoEm
-    ? `Último estudo: ${formatLocalDate(assunto.ultimoEstudoEm)}`
-    : 'Último estudo não informado';
-  content.append(
-    openButton,
-    description,
-    createAssuntoProgressControl(documentObject, {
-      assunto,
-      compact: true,
-      onDecrease: onDecreaseProgress,
-      onIncrease: onIncreaseProgress,
-      onIncreaseTotal: onIncreaseProgressTotal,
-      onAdjust: onAdjustProgress,
-    }),
-    meta,
-    date,
-  );
+  meta.append(createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }));
+  content.append(openButton, studyStatus.element, description, meta);
   reorder.className = 'assunto-row__reorder';
   reorder.setAttribute('role', 'group');
   reorder.setAttribute('aria-label', `Reordenar ${assunto.nome}`);
