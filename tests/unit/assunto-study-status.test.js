@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import { APP_CONFIG } from '../../src/core/config.js';
 import {
+  createAssuntoStudyDetail,
   createAssuntoStudyStatus,
   readAssuntoStudyStackState,
 } from '../../src/features/materias/assunto-study-status.js';
@@ -191,6 +192,26 @@ test('contrato incompatível bloqueia a ação e não interpreta progresso', () 
   assert.match(view.element.textContent, /Atualização necessária/);
   assert.doesNotMatch(view.element.textContent, /4\/10/);
   assert.equal(view.actionDisabled, true);
+});
+
+test('detalhe sincronizado apresenta progresso completo por etapa e recomendação', () => {
+  const documentObject = setupWithSummary();
+  const state = readAssuntoStudyStackState(documentObject, 'assunto-1');
+  const view = createAssuntoStudyDetail(documentObject, {
+    assunto: assunto(),
+    studyStackState: state,
+    studyStackUrl: 'https://example.test/study-stack/#/overview',
+  });
+
+  assert.match(view.element.textContent, /Progresso por etapa/);
+  assert.match(view.element.textContent, /Base2\/2/);
+  assert.match(view.element.textContent, /Prática2\/3/);
+  assert.match(view.element.textContent, /Análise0\/2/);
+  assert.match(view.element.textContent, /Revisão0\/2/);
+  assert.match(view.element.textContent, /Consolidação0\/1/);
+  assert.match(view.element.textContent, /Próxima ação recomendada/);
+  assert.match(view.element.textContent, /Faltam listas válidas/);
+  assert.equal(view.actionLabel, 'Continuar estudo no Study Stack');
 });
 
 function findElement(root, predicate) {

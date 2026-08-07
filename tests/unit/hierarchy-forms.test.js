@@ -38,7 +38,7 @@ function collectElements(root) {
   return result;
 }
 
-test('modal de assunto usa layout amplo e agrupa campos para reduzir rolagem no desktop', () => {
+test('modal de assunto usa layout amplo com conteúdo organizado e sem acompanhamento manual', () => {
   const { documentObject, windowObject } = createFakeDocument();
   const modal = createAssuntoFormModal(documentObject, {
     windowObject,
@@ -58,5 +58,9 @@ test('modal de assunto usa layout amplo e agrupa campos para reduzir rolagem no 
 
   assert.ok(dialog?.classList.contains('modal--assunto-form'));
   assert.equal(contentGrid?.children.length, 2);
-  assert.equal(trackingGrid?.children.length, 4);
+  assert.equal(trackingGrid?.children.length, 1);
+  assert.doesNotMatch(modal.element.textContent, /Pontos atuais/);
+  assert.doesNotMatch(modal.element.textContent, /Meta de progresso/);
+  assert.doesNotMatch(modal.element.textContent, /Último estudo/);
+  assert.doesNotMatch(modal.element.textContent, /precisa de reforço/i);
 });

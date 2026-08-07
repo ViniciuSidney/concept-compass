@@ -1,6 +1,6 @@
 import { APP_CONFIG } from '../../core/config.js';
 import { createStudyStackSummaryReader } from '../../integrations/study-stack-summary-reader.js';
-import { createButton } from '../../ui/components/button.js';
+import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createIconButton } from '../../ui/components/icon-button.js';
 
 const STAGE_LABELS = Object.freeze({
@@ -10,6 +10,8 @@ const STAGE_LABELS = Object.freeze({
   review: 'Revisão',
   consolidation: 'Consolidação',
 });
+
+const STAGE_ORDER = Object.freeze(['base', 'practice', 'analysis', 'review', 'consolidation']);
 
 function createMissingState(status = 'missing') {
   return Object.freeze({
@@ -135,18 +137,110 @@ export function createAssuntoStudyStatus(
   heading.append(eyebrow, title);
   section.append(heading);
 
+  appendStudyContent(documentObject, section, {
+    subject,
+    studyStackState,
+    presentation,
+    detailed: false,
+  });
+
+  if (presentation.actionVisible) {
+    section.append(
+      createButton(documentObject, {
+        label: presentation.actionLabel,
+        icon: 'layers',
+        size: 'small',
+        disabled: presentation.actionDisabled,
+        className: 'assunto-study__action',
+        onClick: presentation.actionDisabled ? null : onOpenStudyStack,
+      }),
+    );
+  }
+
+  return Object.freeze({
+    element: section,
+    actionLabel: presentation.actionLabel,
+    actionVisible: presentation.actionVisible,
+    actionDisabled: presentation.actionDisabled,
+  });
+}
+
+export function createAssuntoStudyDetail(
+  documentObject,
+  { assunto, studyStackState, studyStackUrl },
+) {
+  const presentation = getAssuntoStudyPresentation(studyStackState);
+  const subject = studyStackState?.subject ?? null;
+  const section = documentObject.createElement('section');
+  const heading = documentObject.createElement('div');
+  const eyebrow = documentObject.createElement('span');
+  const title = documentObject.createElement('strong');
+
+  section.className = `assunto-study assunto-study-detail assunto-study--${presentation.state}`;
+  section.setAttribute('aria-label', `Situação detalhada do estudo de ${assunto.nome}`);
+  heading.className = 'assunto-study__heading';
+  eyebrow.className = 'assunto-study__eyebrow';
+  eyebrow.textContent = 'Situação do estudo';
+  title.className = 'assunto-study__title';
+  title.textContent = presentation.title;
+  heading.append(eyebrow, title);
+  section.append(heading);
+
+  appendStudyContent(documentObject, section, {
+    subject,
+    studyStackState,
+    presentation,
+    detailed: true,
+  });
+
+  if (presentation.actionVisible) {
+    if (presentation.actionDisabled) {
+      section.append(
+        createButton(documentObject, {
+          label: presentation.actionLabel,
+          icon: 'layers',
+          disabled: true,
+          className: 'assunto-study__action',
+        }),
+      );
+    } else {
+      section.append(
+        createButtonLink(documentObject, {
+          label: presentation.actionLabel,
+          href: studyStackUrl,
+          icon: 'layers',
+          className: 'assunto-study__action',
+        }),
+      );
+    }
+  }
+
+  return Object.freeze({
+    element: section,
+    actionLabel: presentation.actionLabel,
+    actionVisible: presentation.actionVisible,
+    actionDisabled: presentation.actionDisabled,
+  });
+}
+
+function appendStudyContent(
+  documentObject,
+  section,
+  { subject, studyStackState, presentation, detailed },
+) {
   if (subject && studyStackState.status === 'ready') {
     section.append(createStudySummary(documentObject, subject));
+
+    if (detailed) {
+      section.append(createStageBreakdown(documentObject, subject.stageProgress));
+    }
 
     if (Array.isArray(subject.notices) && subject.notices.length > 0) {
       section.append(createNoticeCarousel(documentObject, subject));
     }
 
     if (subject.nextAction?.label && presentation.state !== 'consolidated') {
-      const nextAction = documentObject.createElement('p');
-      nextAction.className = 'assunto-study__next-action';
-      nextAction.textContent = `Próxima ação: ${subject.nextAction.label}`;
-      section.append(nextAction);
+      section.append(createNextAction(documentObject, subject.nextAction, detailed));
     }
 
     const pendingText = createPendingText(subject);
@@ -199,26 +293,6 @@ export function createAssuntoStudyStatus(
     sync.textContent = 'Sincronizado com o Study Stack';
     section.append(sync);
   }
-
-  if (presentation.actionVisible) {
-    section.append(
-      createButton(documentObject, {
-        label: presentation.actionLabel,
-        icon: 'layers',
-        size: 'small',
-        disabled: presentation.actionDisabled,
-        className: 'assunto-study__action',
-        onClick: presentation.actionDisabled ? null : onOpenStudyStack,
-      }),
-    );
-  }
-
-  return Object.freeze({
-    element: section,
-    actionLabel: presentation.actionLabel,
-    actionVisible: presentation.actionVisible,
-    actionDisabled: presentation.actionDisabled,
-  });
 }
 
 function createStudySummary(documentObject, subject) {
@@ -238,6 +312,60 @@ function createStudySummary(documentObject, subject) {
     : 'Última atividade: ainda não registrada';
   summary.append(progress, stage, activity);
   return summary;
+}
+
+function createStageBreakdown(documentObject, stageProgress) {
+  const section = documentObject.createElement('section');
+  const title = documentObject.createElement('h3');
+  const list = documentObject.createElement('div');
+
+  section.className = 'assunto-study-detail__stages';
+  title.className = 'assunto-study-detail__section-title';
+  title.textContent = 'Progresso por etapa';
+  list.className = 'assunto-study-detail__stage-list';
+  list.setAttribute('role', 'list');
+
+  for (const stageKey of STAGE_ORDER) {
+    const progress = stageProgress?.[stageKey];
+    if (!progress) continue;
+
+    const item = documentObject.createElement('div');
+    const label = documentObject.createElement('span');
+    const value = documentObject.createElement('strong');
+
+    item.className = 'assunto-study-detail__stage-item';
+    item.setAttribute('role', 'listitem');
+    label.textContent = STAGE_LABELS[stageKey] ?? stageKey;
+    value.textContent = `${progress.current}/${progress.maximum}`;
+    item.append(label, value);
+    list.append(item);
+  }
+
+  section.append(title, list);
+  return section;
+}
+
+function createNextAction(documentObject, nextAction, detailed) {
+  if (!detailed) {
+    const paragraph = documentObject.createElement('p');
+    paragraph.className = 'assunto-study__next-action';
+    paragraph.textContent = `Próxima ação: ${nextAction.label}`;
+    return paragraph;
+  }
+
+  const section = documentObject.createElement('section');
+  const title = documentObject.createElement('span');
+  const label = documentObject.createElement('strong');
+  const description = documentObject.createElement('p');
+
+  section.className = 'assunto-study-detail__next-action';
+  title.className = 'assunto-study__eyebrow';
+  title.textContent = 'Próxima ação recomendada';
+  label.textContent = nextAction.label;
+  description.textContent =
+    nextAction.description || 'Continue pelo Study Stack para avançar neste Assunto.';
+  section.append(title, label, description);
+  return section;
 }
 
 function createNoticeCarousel(documentObject, subject) {

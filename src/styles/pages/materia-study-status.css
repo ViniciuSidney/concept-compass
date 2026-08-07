@@ -125,6 +125,84 @@
   margin-top: var(--space-1);
 }
 
+.assunto-study-detail {
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-medium);
+}
+
+.assunto-study-detail .assunto-study__progress {
+  font-size: var(--font-size-lg);
+}
+
+.assunto-study-detail__stages,
+.assunto-study-detail__next-action {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--color-surface) 86%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+}
+
+.assunto-study-detail__section-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.assunto-study-detail__stage-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.assunto-study-detail__stage-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  color: var(--color-muted-strong);
+  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.assunto-study-detail__stage-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.assunto-study-detail__stage-item strong {
+  color: var(--color-text);
+}
+
+.assunto-study-detail__next-action strong {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.assunto-study-detail__next-action p {
+  margin: 0;
+  color: var(--color-muted-strong);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.assunto-form__tracking-grid--points {
+  grid-template-columns: minmax(0, 18rem);
+}
+
+.assunto-form__study-note {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-muted-strong);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-soft));
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-small);
+}
+
 @media (max-width: 42rem) {
   .assunto-study__heading {
     display: grid;
@@ -142,5 +220,9 @@
 
   .assunto-study__activity {
     grid-column: 1 / -1;
+  }
+
+  .assunto-form__tracking-grid--points {
+    grid-template-columns: 1fr;
   }
 }

@@ -5,7 +5,7 @@ import { createAssuntoDetailPanel } from '../../src/features/materias/assunto-de
 import { createFakeDocument } from '../helpers/fake-dom.js';
 import { assunto, tema } from '../fixtures/data-builders.js';
 
-test('painel do assunto oferece movimentação além de edição e exclusão', () => {
+test('painel do assunto mantém ações estruturais e remove progresso manual', () => {
   const { documentObject } = createFakeDocument();
   const panel = createAssuntoDetailPanel(documentObject, {
     assunto: assunto(),
@@ -21,5 +21,9 @@ test('painel do assunto oferece movimentação além de edição e exclusão', (
   assert.match(documentObject.body.textContent, /Mover assunto/);
   assert.match(documentObject.body.textContent, /Editar assunto/);
   assert.match(documentObject.body.textContent, /Excluir assunto/);
-  assert.match(documentObject.body.textContent, /Abrir no Study Stack/);
+  assert.match(documentObject.body.textContent, /Iniciar estudo no Study Stack/);
+  assert.match(documentObject.body.textContent, /Situação do estudo/);
+  assert.doesNotMatch(documentObject.body.textContent, /Ajustar progresso/);
+  assert.doesNotMatch(documentObject.body.textContent, /Pontos de progresso/);
+  assert.doesNotMatch(documentObject.body.textContent, /Progresso percentual/);
 });

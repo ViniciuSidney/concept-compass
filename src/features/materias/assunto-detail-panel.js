@@ -1,42 +1,25 @@
 import { createBadge } from '../../ui/components/badge.js';
-import { createButton, createButtonLink } from '../../ui/components/button.js';
+import { createButton } from '../../ui/components/button.js';
 import { createSidePanel } from '../../ui/components/side-panel.js';
-import { createAssuntoProgressControl } from './assunto-progress-control.js';
-import {
-  formatIsoDate,
-  formatLocalDate,
-  getDifficultyPresentation,
-  getProgressPresentation,
-} from './assunto-presentation.js';
+import { formatIsoDate, getDifficultyPresentation } from './assunto-presentation.js';
+import { createAssuntoStudyDetail, readAssuntoStudyStackState } from './assunto-study-status.js';
 
 export function createAssuntoDetailPanel(
   documentObject,
-  {
-    assunto,
-    tema,
-    studyStackUrl,
-    onEdit,
-    onMove,
-    onDelete,
-    onDecreaseProgress,
-    onIncreaseProgress,
-    onIncreaseProgressTotal,
-    onAdjustProgress,
-    overlayManager,
-  },
+  { assunto, tema, studyStackUrl, onEdit, onMove, onDelete, overlayManager },
 ) {
   const content = documentObject.createElement('div');
   const badges = documentObject.createElement('div');
-  const progress = getProgressPresentation(assunto);
   const difficulty = getDifficultyPresentation(assunto.dificuldade);
+  const studyStackState = readAssuntoStudyStackState(documentObject, assunto.id);
+  const studyDetail = createAssuntoStudyDetail(documentObject, {
+    assunto,
+    studyStackState,
+    studyStackUrl,
+  });
   const editButton = createButton(documentObject, {
     label: 'Editar assunto',
     icon: 'edit',
-    variant: 'secondary',
-  });
-  const adjustButton = createButton(documentObject, {
-    label: 'Ajustar progresso',
-    icon: 'settings',
     variant: 'secondary',
   });
   const moveButton = createButton(documentObject, {
@@ -54,25 +37,10 @@ export function createAssuntoDetailPanel(
 
   content.className = 'assunto-detail';
   badges.className = 'assunto-detail__badges';
-  badges.append(
-    createBadge(documentObject, { label: progress.label, tone: progress.tone }),
-    createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }),
-  );
-  if (assunto.precisaReforco) {
-    badges.append(
-      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
-    );
-  }
+  badges.append(createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }));
   content.append(
+    studyDetail.element,
     badges,
-    createStudyStackCallout(documentObject, studyStackUrl),
-    createAssuntoProgressControl(documentObject, {
-      assunto,
-      onDecrease: () => runProgressAction('decrease-progress', onDecreaseProgress),
-      onIncrease: () => runProgressAction('increase-progress', onIncreaseProgress),
-      onIncreaseTotal: () => runProgressAction('increase-total', onIncreaseProgressTotal),
-      onAdjust: () => runProgressAction('adjust-progress', onAdjustProgress),
-    }),
     createDetailSection(
       documentObject,
       'Descrição',
@@ -85,15 +53,12 @@ export function createAssuntoDetailPanel(
     ),
     createDetailGrid(documentObject, [
       ['Tema', tema?.nome ?? 'Tema não encontrado'],
-      ['Pontos de progresso', `${assunto.pontosProgresso} de ${assunto.metaPontosProgresso}`],
-      ['Progresso percentual', `${Math.round(progress.percentage)}%`],
-      ['Último estudo', formatLocalDate(assunto.ultimoEstudoEm)],
       ['Criado em', formatIsoDate(assunto.criadoEm)],
       ['Atualizado em', formatIsoDate(assunto.atualizadoEm)],
     ]),
   );
   footer.className = 'overlay-actions';
-  footer.append(deleteButton, moveButton, adjustButton, editButton);
+  footer.append(deleteButton, moveButton, editButton);
 
   const panel = createSidePanel(documentObject, {
     title: assunto.nome,
@@ -105,18 +70,9 @@ export function createAssuntoDetailPanel(
   });
   panelHolder.current = panel;
 
-  function runProgressAction(reason, action) {
-    panel.close(reason);
-    globalThis.queueMicrotask(action);
-  }
-
   editButton.addEventListener('click', () => {
     panel.close('edit');
     globalThis.queueMicrotask(onEdit);
-  });
-  adjustButton.addEventListener('click', () => {
-    panel.close('adjust-progress');
-    globalThis.queueMicrotask(onAdjustProgress);
   });
   moveButton.addEventListener('click', () => {
     panel.close('move');
@@ -154,23 +110,4 @@ function createDetailGrid(documentObject, items) {
     list.append(item);
   }
   return list;
-}
-
-function createStudyStackCallout(documentObject, href) {
-  const section = documentObject.createElement('section');
-  const heading = documentObject.createElement('strong');
-  const description = documentObject.createElement('p');
-  const link = createButtonLink(documentObject, {
-    label: 'Abrir no Study Stack',
-    href,
-    icon: 'layers',
-    className: 'assunto-detail__study-stack-button',
-  });
-
-  section.className = 'assunto-detail__study-stack';
-  heading.textContent = 'Continue o estudo no seu caderno conectado';
-  description.textContent =
-    'Leve esta Matéria, Tema e Assunto para registrar a base teórica, práticas e evidências de aprendizagem.';
-  section.append(heading, description, link);
-  return section;
 }
