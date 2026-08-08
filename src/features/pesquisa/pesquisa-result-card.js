@@ -1,17 +1,31 @@
 import { createBadge } from '../../ui/components/badge.js';
 import { createButtonLink } from '../../ui/components/button.js';
 import { createIcon } from '../../ui/icons/icon.js';
-import {
-  formatLocalDate,
-  getDifficultyPresentation,
-  getProgressPresentation,
-} from '../materias/assunto-presentation.js';
+import { formatIsoDate, getDifficultyPresentation } from '../materias/assunto-presentation.js';
+import { getAssuntoStudyPresentation } from '../materias/assunto-study-status.js';
 import { SEARCH_TYPES } from './pesquisa-selectors.js';
 
 const TYPE_PRESENTATION = Object.freeze({
   [SEARCH_TYPES.MATERIA]: Object.freeze({ label: 'Matéria', icon: 'book' }),
   [SEARCH_TYPES.TEMA]: Object.freeze({ label: 'Tema', icon: 'layers' }),
   [SEARCH_TYPES.ASSUNTO]: Object.freeze({ label: 'Assunto', icon: 'dashboard' }),
+});
+
+const STUDY_STATE_TONES = Object.freeze({
+  not_started: 'not-started',
+  in_progress: 'studying',
+  consolidated: 'consolidated',
+  archived: 'neutral',
+  pending: 'warning',
+  update_required: 'warning',
+});
+
+const STAGE_LABELS = Object.freeze({
+  base: 'Base',
+  practice: 'Prática',
+  analysis: 'Análise',
+  review: 'Revisão',
+  consolidation: 'Consolidação',
 });
 
 export function createPesquisaResultCard(documentObject, result) {
@@ -88,28 +102,56 @@ function appendMetadata(documentObject, meta, result) {
     return;
   }
 
-  const progress = getProgressPresentation(result.assunto);
+  const study = getAssuntoStudyPresentation(result.studyStackState, result.assunto, {
+    archiveContext: result.archiveContext,
+  });
+  const subject = result.studyStackState?.subject ?? null;
   const difficulty = getDifficultyPresentation(result.assunto.dificuldade);
+
   meta.append(
-    createBadge(documentObject, { label: progress.label, tone: progress.tone }),
+    createBadge(documentObject, {
+      label: study.title,
+      tone: STUDY_STATE_TONES[study.state] ?? 'neutral',
+    }),
     createBadge(documentObject, { label: difficulty.label, tone: difficulty.tone }),
-    createMetaText(
-      documentObject,
-      `${result.assunto.pontosProgresso}/${result.assunto.metaPontosProgresso} pontos · ${Math.round(progress.percentage)}%`,
-    ),
   );
-  if (result.assunto.precisaReforco) {
+
+  if (subject && result.studyStackState?.status === 'ready') {
+    const maximum = Number(subject.maxProgress) || 10;
+    const current = Math.min(maximum, Math.max(0, Number(subject.progress) || 0));
+    const percentage = maximum > 0 ? Math.round((current / maximum) * 100) : 0;
+    const pending = (Number(subject.pendingErrors) || 0) + (Number(subject.pendingReviews) || 0);
+
     meta.append(
-      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
-    );
-  }
-  if (result.assunto.ultimoEstudoEm) {
-    meta.append(
+      createMetaText(documentObject, `${current}/${maximum} pontos · ${percentage}%`),
       createMetaText(
         documentObject,
-        `Último estudo: ${formatLocalDate(result.assunto.ultimoEstudoEm)}`,
+        `Etapa atual: ${STAGE_LABELS[subject.currentStage] ?? subject.currentStage}`,
       ),
     );
+
+    if (pending > 0) {
+      meta.append(
+        createBadge(documentObject, {
+          label: `${pending} ${pending === 1 ? 'pendência' : 'pendências'}`,
+          tone: 'warning',
+        }),
+      );
+    }
+
+    if (subject.lastActivityAt) {
+      meta.append(
+        createMetaText(
+          documentObject,
+          `Última atividade: ${formatIsoDate(subject.lastActivityAt)}`,
+        ),
+      );
+    }
+    return;
+  }
+
+  if (study.state === 'not_started') {
+    meta.append(createMetaText(documentObject, '0/10 pontos · 0%'));
   }
 }
 

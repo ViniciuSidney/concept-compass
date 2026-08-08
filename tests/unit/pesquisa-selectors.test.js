@@ -28,9 +28,9 @@ function createData() {
         nome: 'Equação do primeiro grau',
         descricao: 'Resolução de problemas',
         observacoes: 'Revisar operações inversas',
-        pontosProgresso: 1,
+        pontosProgresso: 5,
         metaPontosProgresso: 5,
-        precisaReforco: false,
+        precisaReforco: true,
         dificuldade: DIFFICULTIES.MEDIA,
         ordem: 0,
       }),
@@ -42,6 +42,29 @@ function createData() {
         ordem: 0,
       }),
     ],
+  };
+}
+
+function studySnapshot() {
+  return {
+    status: 'ready',
+    receivedContractVersion: '1.0.0',
+    summary: {
+      updatedAt: '2026-08-08T05:00:00.000Z',
+      subjects: {
+        a1: {
+          subjectId: 'a1',
+          status: 'in_progress',
+          progress: 6,
+          maxProgress: 10,
+          sourceArchived: false,
+          consolidated: false,
+          pendingErrors: 1,
+          pendingReviews: 0,
+          lastActivityAt: '2026-08-08T03:00:00.000Z',
+        },
+      },
+    },
   };
 }
 
@@ -96,6 +119,18 @@ test('resultados geram navegação profunda para tema e assunto', () => {
   assert.equal(subject.href, '#/materias/m1?tema=t1&assunto=a1');
   assert.equal(subject.materia.nome, 'Matemática');
   assert.equal(subject.tema.nome, 'Álgebra');
+});
+
+test('resultado de Assunto carrega somente o estado sincronizado do Study Stack', () => {
+  const subject = selectSearchResults(createData(), {
+    query: 'equação',
+    studyStackSnapshot: studySnapshot(),
+  })[0];
+
+  assert.equal(subject.studyStackState.status, 'ready');
+  assert.equal(subject.studyStackState.subject.progress, 6);
+  assert.equal(subject.studyStackState.subject.maxProgress, 10);
+  assert.equal(subject.studyStackState.subject.pendingErrors, 1);
 });
 
 test('título exato aparece antes de correspondência em descrição', () => {

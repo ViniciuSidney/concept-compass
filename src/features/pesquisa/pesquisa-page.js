@@ -1,3 +1,4 @@
+import { readStudyStackSnapshot } from '../../integrations/study-stack-subject-state.js';
 import { createButton, createButtonLink } from '../../ui/components/button.js';
 import { createFilterChip } from '../../ui/components/filter-chip.js';
 import { createPageHeader } from '../../ui/components/page-header.js';
@@ -16,6 +17,7 @@ import {
 export function createPesquisaPage(documentObject, route, context) {
   const { store, windowObject } = context;
   const data = store.getState().data;
+  const studyStackSnapshot = readStudyStackSnapshot(context.studyStackSummaryReader);
   const page = documentObject.createElement('div');
   const header = createPageHeader(documentObject, {
     eyebrow: 'Localização',
@@ -61,7 +63,10 @@ export function createPesquisaPage(documentObject, route, context) {
 
   function renderResults() {
     const counts = selectSearchCounts(data, { query: viewState.query });
-    const matching = selectSearchResults(data, viewState);
+    const matching = selectSearchResults(data, {
+      ...viewState,
+      studyStackSnapshot,
+    });
     renderFilters(counts);
     results.replaceChildren();
 

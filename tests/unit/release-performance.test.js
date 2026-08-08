@@ -19,23 +19,71 @@ import { createLargeData } from '../fixtures/large-data-builder.js';
 
 const MAX_TOTAL_MS = 5_000;
 
+function createStudyStackSnapshot(data) {
+  const temasById = new Map(data.temas.map((tema) => [tema.id, tema]));
+
+  const subjects = Object.fromEntries(
+    data.assuntos.map((assunto, index) => {
+      const tema = temasById.get(assunto.temaId);
+      const progress = (index % 10) + 1;
+      const consolidated = progress === 10;
+      const lastActivityAt = `2026-07-${String((index % 28) + 1).padStart(2, '0')}T12:00:00.000Z`;
+
+      return [
+        assunto.id,
+        {
+          subjectId: assunto.id,
+          matterId: tema?.materiaId ?? '',
+          themeId: assunto.temaId,
+          progress,
+          maxProgress: 10,
+          status: consolidated ? 'consolidated' : 'in_progress',
+          sourceArchived: false,
+          pendingErrors: index % 11 === 0 ? 1 : 0,
+          pendingReviews: index % 17 === 0 ? 1 : 0,
+          lastActivityAt,
+          consolidated,
+        },
+      ];
+    }),
+  );
+
+  return {
+    status: 'ready',
+    summary: {
+      contractVersion: '1.0.0',
+      sourceApp: 'study_stack',
+      updatedAt: '2026-07-30T12:00:00.000Z',
+      subjects,
+    },
+    fingerprint: 'release-performance-fixture',
+    receivedContractVersion: '1.0.0',
+    errors: [],
+  };
+}
+
 test('massa ampliada permanece válida e utilizável nos seletores principais', () => {
   const startedAt = performance.now();
   const source = createLargeData();
   const data = validateAppData(source, { today: '2026-07-30' });
+  const studyStackSnapshot = createStudyStackSnapshot(data);
 
   assert.equal(data.materias.length, 24);
   assert.equal(data.temas.length, 240);
   assert.equal(data.assuntos.length, 2_880);
 
-  const summary = selectDashboardSummary(data);
-  const distribution = selectProgressDistribution(data);
-  const priorities = selectStudyPriorities(data, { limit: 12 });
-  const recent = selectRecentStudies(data, { limit: 12 });
-  const highlights = selectMateriaProgressHighlights(data, { limit: 8 });
+  const summary = selectDashboardSummary(data, studyStackSnapshot);
+  const distribution = selectProgressDistribution(data, studyStackSnapshot);
+  const priorities = selectStudyPriorities(data, { limit: 12, studyStackSnapshot });
+  const recent = selectRecentStudies(data, { limit: 12, studyStackSnapshot });
+  const highlights = selectMateriaProgressHighlights(data, {
+    limit: 8,
+    studyStackSnapshot,
+  });
   const searchResults = selectSearchResults(data, {
     query: 'revisao estrategica',
     type: SEARCH_TYPES.ASSUNTO,
+    studyStackSnapshot,
   });
   const searchCounts = selectSearchCounts(data, { query: 'revisao estrategica' });
 

@@ -1,32 +1,39 @@
 import { DIFFICULTIES } from '../../domain/constants.js';
+import { readStudyStackSnapshot } from '../../integrations/study-stack-subject-state.js';
 import { createBadge } from '../../ui/components/badge.js';
 import { createButtonLink } from '../../ui/components/button.js';
 import { createPageHeader } from '../../ui/components/page-header.js';
 import { createProgressBar } from '../../ui/components/progress-bar.js';
 import { createIcon } from '../../ui/icons/icon.js';
 import { createEmptyState } from '../../ui/states/empty-state.js';
-import {
-  getDifficultyPresentation,
-  getProgressPresentation,
-  formatLocalDate,
-} from '../materias/assunto-presentation.js';
+import { formatIsoDate, getDifficultyPresentation } from '../materias/assunto-presentation.js';
 import {
   selectDashboardSummary,
   selectMateriaProgressHighlights,
-  selectRecentStudies,
   selectProgressDistribution,
+  selectRecentStudies,
   selectStudyPriorities,
 } from './dashboard-selectors.js';
 
+const STUDY_STATUS_PRESENTATION = Object.freeze({
+  not_started: Object.freeze({ label: 'Não iniciado', tone: 'not-started' }),
+  in_progress: Object.freeze({ label: 'Em andamento', tone: 'studying' }),
+  consolidated: Object.freeze({ label: 'Consolidado', tone: 'consolidated' }),
+  archived: Object.freeze({ label: 'Arquivado', tone: 'neutral' }),
+  pending: Object.freeze({ label: 'Sincronização pendente', tone: 'warning' }),
+  update_required: Object.freeze({ label: 'Atualização necessária', tone: 'warning' }),
+});
+
 export function createDashboardPage(documentObject, _route, context) {
   const data = context.store.getState().data;
-  const summary = selectDashboardSummary(data);
+  const studyStackSnapshot = readStudyStackSnapshot(context.studyStackSummaryReader);
+  const summary = selectDashboardSummary(data, studyStackSnapshot);
   const page = documentObject.createElement('div');
   const header = createPageHeader(documentObject, {
     eyebrow: 'Visão Geral',
     title: 'Seu mapa de estudos',
     description:
-      'Acompanhe o avanço da sua organização e identifique rapidamente o que merece atenção.',
+      'Acompanhe o avanço sincronizado com o Study Stack e identifique rapidamente o que merece atenção.',
     actions: createButtonLink(documentObject, {
       label: data.materias.length ? 'Abrir matérias' : 'Criar matéria',
       href: '#/materias',
@@ -57,7 +64,7 @@ export function createDashboardPage(documentObject, _route, context) {
   page.append(
     createOverview(documentObject, summary),
     createMetrics(documentObject, summary),
-    createDashboardGallery(documentObject, data),
+    createDashboardGallery(documentObject, data, studyStackSnapshot, summary.studyStatus),
   );
 
   return page;
@@ -85,16 +92,13 @@ function createOverview(documentObject, summary) {
   progressArea.className = 'dashboard-overview__progress';
   value.className = 'dashboard-overview__value';
   value.textContent = summary.progress === null ? '—' : `${Math.round(summary.progress)}%`;
-  label.textContent =
-    summary.progress === null
-      ? 'Sem assuntos avaliáveis'
-      : `${summary.points} de ${summary.totalPoints} pontos`;
+  label.textContent = createProgressLabel(summary);
   progressArea.append(value, label);
   if (summary.progress !== null) {
     progressArea.append(
       createProgressBar(documentObject, {
         value: summary.progress,
-        label: 'Progresso geral dos assuntos',
+        label: 'Progresso geral sincronizado dos assuntos',
         showValue: false,
       }),
     );
@@ -124,6 +128,7 @@ function createMetrics(documentObject, summary) {
   const section = documentObject.createElement('section');
   const title = documentObject.createElement('h2');
   const grid = documentObject.createElement('div');
+  const blocked = isBlockedStudyStatus(summary.studyStatus);
 
   section.className = 'dashboard-section dashboard-metrics-section';
   title.className = 'visually-hidden';
@@ -149,11 +154,15 @@ function createMetrics(documentObject, summary) {
       icon: 'dashboard',
     }),
     createMetricCard(documentObject, {
-      label: 'Precisam de reforço',
-      value: summary.reforcoCount,
-      note: summary.reforcoCount ? 'Pedem atenção prioritária' : 'Nenhuma pendência marcada',
+      label: 'Pendências no Study Stack',
+      value: blocked ? '—' : summary.pendenciasCount,
+      note: blocked
+        ? createSyncUnavailableMessage(summary.studyStatus)
+        : summary.pendenciasCount
+          ? 'Erros ou revisões ainda pedem atenção'
+          : 'Nenhuma pendência sincronizada',
       icon: 'warning',
-      tone: summary.reforcoCount ? 'warning' : 'success',
+      tone: blocked || summary.pendenciasCount ? 'warning' : 'success',
     }),
   );
 
@@ -161,7 +170,7 @@ function createMetrics(documentObject, summary) {
   return section;
 }
 
-function createDashboardGallery(documentObject, data) {
+function createDashboardGallery(documentObject, data, studyStackSnapshot, studyStatus) {
   const gallery = documentObject.createElement('div');
   const leftColumn = documentObject.createElement('div');
   const rightColumn = documentObject.createElement('div');
@@ -171,24 +180,24 @@ function createDashboardGallery(documentObject, data) {
   rightColumn.className = 'dashboard-gallery__column';
 
   leftColumn.append(
-    createProgressDistributionSection(documentObject, data),
-    createMateriaHighlightsSection(documentObject, data),
+    createProgressDistributionSection(documentObject, data, studyStackSnapshot, studyStatus),
+    createMateriaHighlightsSection(documentObject, data, studyStackSnapshot, studyStatus),
   );
   rightColumn.append(
-    createPrioritiesSection(documentObject, data),
-    createRecentStudiesSection(documentObject, data),
+    createPrioritiesSection(documentObject, data, studyStackSnapshot, studyStatus),
+    createRecentStudiesSection(documentObject, data, studyStackSnapshot, studyStatus),
   );
   gallery.append(leftColumn, rightColumn);
   return gallery;
 }
 
-function createProgressDistributionSection(documentObject, data) {
+function createProgressDistributionSection(documentObject, data, studyStackSnapshot, studyStatus) {
   const section = createDashboardCard(documentObject, {
     title: 'Situação do progresso',
     className: 'dashboard-card--distribution',
-    description: 'Distribuição entre assuntos não iniciados, em andamento e com a meta concluída.',
+    description:
+      'Distribuição sincronizada entre assuntos não iniciados, em andamento, consolidados e arquivados.',
   });
-  const distribution = selectProgressDistribution(data);
   const list = documentObject.createElement('div');
   list.className = 'dashboard-state-list';
 
@@ -199,21 +208,23 @@ function createProgressDistributionSection(documentObject, data) {
     return section.element;
   }
 
+  if (isBlockedStudyStatus(studyStatus)) {
+    section.body.append(
+      createInlineEmpty(documentObject, createSyncUnavailableMessage(studyStatus)),
+    );
+    return section.element;
+  }
+
+  const distribution = selectProgressDistribution(data, studyStackSnapshot);
+
   for (const entry of distribution) {
     const row = documentObject.createElement('div');
     const header = documentObject.createElement('div');
     const count = documentObject.createElement('span');
     const track = documentObject.createElement('div');
     const fill = documentObject.createElement('span');
-    const presentation = {
-      label: entry.label,
-      tone:
-        entry.status === 'complete'
-          ? 'consolidated'
-          : entry.status === 'in_progress'
-            ? 'studying'
-            : 'not-started',
-    };
+    const presentation = getStudyStatusPresentation(entry.status);
+    const fillTone = entry.status === 'archived' ? 'not-started' : presentation.tone;
 
     row.className = 'dashboard-state-row';
     header.className = 'dashboard-state-row__header';
@@ -224,7 +235,7 @@ function createProgressDistributionSection(documentObject, data) {
     track.setAttribute('aria-valuemin', '0');
     track.setAttribute('aria-valuemax', '100');
     track.setAttribute('aria-valuenow', String(entry.percentage));
-    fill.className = `dashboard-state-row__fill dashboard-state-row__fill--${presentation.tone}`;
+    fill.className = `dashboard-state-row__fill dashboard-state-row__fill--${fillTone}`;
     fill.style.setProperty('--state-percentage', `${entry.percentage}%`);
     track.append(fill);
     header.append(createBadge(documentObject, presentation), count);
@@ -236,11 +247,12 @@ function createProgressDistributionSection(documentObject, data) {
   return section.element;
 }
 
-function createPrioritiesSection(documentObject, data) {
+function createPrioritiesSection(documentObject, data, studyStackSnapshot, studyStatus) {
   const section = createDashboardCard(documentObject, {
     title: 'Prioridades de estudo',
     className: 'dashboard-card--priorities',
-    description: 'Reforços, progresso em andamento e assuntos difíceis aparecem primeiro.',
+    description:
+      'Pendências do Study Stack, estudos em andamento e assuntos difíceis aparecem primeiro.',
     action: createButtonLink(documentObject, {
       label: 'Ver matérias',
       href: '#/materias',
@@ -250,14 +262,22 @@ function createPrioritiesSection(documentObject, data) {
       iconPosition: 'end',
     }),
   });
-  const priorities = selectStudyPriorities(data);
+
+  if (isBlockedStudyStatus(studyStatus)) {
+    section.body.append(
+      createInlineEmpty(documentObject, createSyncUnavailableMessage(studyStatus)),
+    );
+    return section.element;
+  }
+
+  const priorities = selectStudyPriorities(data, { studyStackSnapshot });
 
   if (priorities.length === 0) {
     section.body.append(
       createInlineEmpty(
         documentObject,
         data.assuntos.length
-          ? 'Nenhum assunto está marcado como prioridade automática.'
+          ? 'Nenhum assunto aparece como prioridade automática neste momento.'
           : 'Cadastre assuntos para começar a receber prioridades.',
       ),
     );
@@ -271,13 +291,21 @@ function createPrioritiesSection(documentObject, data) {
   return section.element;
 }
 
-function createMateriaHighlightsSection(documentObject, data) {
+function createMateriaHighlightsSection(documentObject, data, studyStackSnapshot, studyStatus) {
   const section = createDashboardCard(documentObject, {
     title: 'Matérias que pedem avanço',
     className: 'dashboard-card--materias',
-    description: 'Matérias com assuntos, ordenadas do menor para o maior progresso.',
+    description: 'Matérias com assuntos, ordenadas pelo progresso sincronizado no Study Stack.',
   });
-  const highlights = selectMateriaProgressHighlights(data);
+
+  if (isBlockedStudyStatus(studyStatus)) {
+    section.body.append(
+      createInlineEmpty(documentObject, createSyncUnavailableMessage(studyStatus)),
+    );
+    return section.element;
+  }
+
+  const highlights = selectMateriaProgressHighlights(data, { studyStackSnapshot });
 
   if (highlights.length === 0) {
     section.body.append(
@@ -315,17 +343,25 @@ function createMateriaHighlightsSection(documentObject, data) {
   return section.element;
 }
 
-function createRecentStudiesSection(documentObject, data) {
+function createRecentStudiesSection(documentObject, data, studyStackSnapshot, studyStatus) {
   const section = createDashboardCard(documentObject, {
     title: 'Estudos recentes',
     className: 'dashboard-card--recent',
-    description: 'Últimas datas registradas nos assuntos.',
+    description: 'Últimas atividades publicadas pelo Study Stack.',
   });
-  const recent = selectRecentStudies(data);
+
+  if (isBlockedStudyStatus(studyStatus)) {
+    section.body.append(
+      createInlineEmpty(documentObject, createSyncUnavailableMessage(studyStatus)),
+    );
+    return section.element;
+  }
+
+  const recent = selectRecentStudies(data, { studyStackSnapshot });
 
   if (recent.length === 0) {
     section.body.append(
-      createInlineEmpty(documentObject, 'Nenhuma data de último estudo foi registrada ainda.'),
+      createInlineEmpty(documentObject, 'Nenhuma atividade do Study Stack foi registrada ainda.'),
     );
     return section.element;
   }
@@ -336,8 +372,8 @@ function createRecentStudiesSection(documentObject, data) {
     const item = createAssuntoItem(documentObject, entry, { showDifficulty: false });
     const date = documentObject.createElement('time');
     date.className = 'dashboard-item__date';
-    date.dateTime = entry.assunto.ultimoEstudoEm;
-    date.textContent = formatLocalDate(entry.assunto.ultimoEstudoEm);
+    date.dateTime = entry.lastActivityAt;
+    date.textContent = formatIsoDate(entry.lastActivityAt);
     item.append(date);
     list.append(item);
   }
@@ -395,8 +431,11 @@ function createAssuntoItem(documentObject, entry, { showDifficulty = true } = {}
   const title = documentObject.createElement('a');
   const context = documentObject.createElement('p');
   const badges = documentObject.createElement('div');
-  const progress = getProgressPresentation(entry.assunto);
+  const progress = getStudyStatusPresentation(entry.studyStatus);
   const difficulty = getDifficultyPresentation(entry.assunto.dificuldade);
+  const subject = entry.studyStackState?.subject;
+  const pendingCount =
+    (Number(subject?.pendingErrors) || 0) + (Number(subject?.pendingReviews) || 0);
 
   item.className = 'dashboard-item';
   content.className = 'dashboard-item__content';
@@ -406,9 +445,12 @@ function createAssuntoItem(documentObject, entry, { showDifficulty = true } = {}
   context.textContent = `${entry.materia.nome} · ${entry.tema.nome}`;
   badges.className = 'dashboard-item__badges';
   badges.append(createBadge(documentObject, progress));
-  if (entry.assunto.precisaReforco) {
+  if (pendingCount > 0) {
     badges.append(
-      createBadge(documentObject, { label: 'Precisa de reforço', tone: 'reinforcement' }),
+      createBadge(documentObject, {
+        label: `${pendingCount} ${pendingCount === 1 ? 'pendência' : 'pendências'}`,
+        tone: 'warning',
+      }),
     );
   }
   if (showDifficulty && entry.assunto.dificuldade !== DIFFICULTIES.NAO_DEFINIDA) {
@@ -437,6 +479,12 @@ function createStructureNote(documentObject, count, singular, plural) {
 }
 
 function createProgressTitle(summary) {
+  if (summary.studyStatus === 'update_required') {
+    return 'O Study Stack precisa ser atualizado';
+  }
+  if (summary.studyStatus === 'pending') {
+    return 'A sincronização do Study Stack está pendente';
+  }
   if (summary.assuntosCount === 0) return 'A estrutura está pronta para receber assuntos';
   if (summary.progress >= 75) return 'Seu mapa de estudos está avançando bem';
   if (summary.progress >= 40) return 'Você já construiu uma base de progresso';
@@ -444,14 +492,43 @@ function createProgressTitle(summary) {
 }
 
 function createProgressDescription(summary) {
+  if (summary.studyStatus === 'update_required') {
+    return 'O progresso legado não será usado. Atualize a integração para voltar a acompanhar os estudos.';
+  }
+  if (summary.studyStatus === 'pending') {
+    return 'Os dados antigos não serão usados como alternativa enquanto a sincronização não puder ser confirmada.';
+  }
   if (summary.assuntosCount === 0) {
     return 'Adicione assuntos aos temas para começar a calcular o progresso geral.';
   }
-
-  const active = summary.emAndamentoCount + summary.reforcoCount;
-  if (active === 0) {
-    return `${summary.assuntosCount} ${summary.assuntosCount === 1 ? 'assunto organizado' : 'assuntos organizados'}, sem itens em andamento ou marcados para reforço.`;
+  if (summary.atencaoCount === 0) {
+    return `${summary.assuntosCount} ${summary.assuntosCount === 1 ? 'assunto organizado' : 'assuntos organizados'}, sem estudos ativos ou pendências sincronizadas.`;
   }
 
-  return `${active} ${active === 1 ? 'assunto pede' : 'assuntos pedem'} acompanhamento neste momento.`;
+  return `${summary.atencaoCount} ${summary.atencaoCount === 1 ? 'assunto pede' : 'assuntos pedem'} acompanhamento neste momento.`;
+}
+
+function createProgressLabel(summary) {
+  if (summary.studyStatus === 'update_required') {
+    return 'Atualização necessária para ler o Study Stack';
+  }
+  if (summary.studyStatus === 'pending') {
+    return 'Sincronização pendente com o Study Stack';
+  }
+  if (summary.progress === null) return 'Sem assuntos avaliáveis';
+  return `${summary.points} de ${summary.totalPoints} pontos`;
+}
+
+function getStudyStatusPresentation(status) {
+  return STUDY_STATUS_PRESENTATION[status] ?? STUDY_STATUS_PRESENTATION.not_started;
+}
+
+function createSyncUnavailableMessage(status) {
+  return status === 'update_required'
+    ? 'Atualização necessária para ler os dados do Study Stack.'
+    : 'Sincronização pendente com o Study Stack.';
+}
+
+function isBlockedStudyStatus(status) {
+  return ['pending', 'update_required'].includes(status);
 }

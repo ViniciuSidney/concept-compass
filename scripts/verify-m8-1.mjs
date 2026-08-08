@@ -123,7 +123,9 @@ if (
 ) {
   throw new Error('As operações e a agregação de pontos produziram resultado inesperado.');
 }
-process.stdout.write('✓ soma ponderada, controles rápidos, conclusão e reinício verificados\n');
+process.stdout.write(
+  '✓ soma ponderada, controles rápidos, conclusão e reinício legados verificados\n',
+);
 
 const pageSource = await readFile(new URL('src/features/materias/materia-page.js', root), 'utf8');
 const dashboardSource = await readFile(
@@ -137,12 +139,16 @@ const searchSource = await readFile(
 if (
   !pageSource.includes('Desfazer') ||
   !pageSource.includes('createAssuntoProgressResetDialog') ||
-  !dashboardSource.includes('summarizeAssuntosProgress') ||
-  !searchSource.includes('getProgressPresentation')
+  !dashboardSource.includes('summarizeStudyStackProgress') ||
+  !searchSource.includes('getAssuntoStudyPresentation')
 ) {
-  throw new Error('A interface, o Dashboard ou a Pesquisa não estão conectados ao novo progresso.');
+  throw new Error(
+    'O legado do M8.1 ou a substituição do Dashboard/Pesquisa pelo Study Stack não estão preservados como esperado.',
+  );
 }
-process.stdout.write('✓ workspace, Visão Geral, Pesquisa e desfazer conectados aos pontos\n');
+process.stdout.write(
+  '✓ legado interno preservado e Dashboard/Pesquisa migrados para o Study Stack verificados\n',
+);
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 if (Object.keys(pkg.dependencies ?? {}).length) {

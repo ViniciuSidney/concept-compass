@@ -1,4 +1,4 @@
-import { DIFFICULTIES, PROGRESS_STATUS_LABELS, PROGRESS_STATUSES } from '../../domain/constants.js';
+import { DIFFICULTIES } from '../../domain/constants.js';
 import {
   selectAssuntosByMateria,
   selectAssuntosByTema,
@@ -6,31 +6,59 @@ import {
   selectTemaById,
   selectTemasByMateria,
 } from '../../domain/selectors/hierarchy-selectors.js';
+import { summarizeStudyStackProgress } from '../../integrations/study-stack-progress-aggregate.js';
 import {
-  deriveProgressStatus,
-  summarizeAssuntosProgress,
-} from '../../domain/services/progress-service.js';
+  STUDY_STACK_SUBJECT_STATES,
+  resolveStudyStackSubjectStatus,
+  selectStudyStackSubjectState,
+} from '../../integrations/study-stack-subject-state.js';
 
 const STATUS_ORDER = Object.freeze([
-  PROGRESS_STATUSES.NOT_STARTED,
-  PROGRESS_STATUSES.IN_PROGRESS,
-  PROGRESS_STATUSES.COMPLETE,
+  STUDY_STACK_SUBJECT_STATES.NOT_STARTED,
+  STUDY_STACK_SUBJECT_STATES.IN_PROGRESS,
+  STUDY_STACK_SUBJECT_STATES.CONSOLIDATED,
+  STUDY_STACK_SUBJECT_STATES.ARCHIVED,
 ]);
 
-export function selectDashboardSummary(data) {
-  const progressSummary = summarizeAssuntosProgress(data.assuntos);
-  const statusCounts = countProgressStatuses(data.assuntos);
+const STATUS_LABELS = Object.freeze({
+  [STUDY_STACK_SUBJECT_STATES.NOT_STARTED]: 'Não iniciado',
+  [STUDY_STACK_SUBJECT_STATES.IN_PROGRESS]: 'Em andamento',
+  [STUDY_STACK_SUBJECT_STATES.CONSOLIDATED]: 'Consolidado',
+  [STUDY_STACK_SUBJECT_STATES.ARCHIVED]: 'Arquivado',
+});
+
+export function selectDashboardSummary(data, studyStackSnapshot = null) {
+  const progressSummary = summarizeStudyStackProgress(data.assuntos, studyStackSnapshot);
+  const blocked = isBlockedStudyStatus(progressSummary.status);
+  const contexts = blocked
+    ? []
+    : data.assuntos
+        .map((assunto) => createAssuntoContext(data, assunto, studyStackSnapshot))
+        .filter(Boolean);
+  const statusCounts = countStudyStatuses(contexts);
+  const pendenciasCount = contexts.filter(
+    (entry) =>
+      entry.studyStatus !== STUDY_STACK_SUBJECT_STATES.ARCHIVED && getPendingCount(entry) > 0,
+  ).length;
+  const atencaoCount = contexts.filter(
+    (entry) =>
+      entry.studyStatus !== STUDY_STACK_SUBJECT_STATES.ARCHIVED &&
+      (entry.studyStatus === STUDY_STACK_SUBJECT_STATES.IN_PROGRESS || getPendingCount(entry) > 0),
+  ).length;
 
   return Object.freeze({
     materiasCount: data.materias.length,
     temasCount: data.temas.length,
     assuntosCount: data.assuntos.length,
-    progress: progressSummary?.percentage ?? null,
-    points: progressSummary?.points ?? 0,
-    totalPoints: progressSummary?.total ?? 0,
-    emAndamentoCount: statusCounts[PROGRESS_STATUSES.IN_PROGRESS],
-    reforcoCount: data.assuntos.filter(({ precisaReforco }) => precisaReforco).length,
-    concluidosCount: statusCounts[PROGRESS_STATUSES.COMPLETE],
+    studyStatus: progressSummary.status,
+    progress: progressSummary.percentage,
+    points: progressSummary.points,
+    totalPoints: progressSummary.total,
+    emAndamentoCount: statusCounts[STUDY_STACK_SUBJECT_STATES.IN_PROGRESS],
+    pendenciasCount,
+    atencaoCount,
+    consolidadosCount: statusCounts[STUDY_STACK_SUBJECT_STATES.CONSOLIDATED],
+    arquivadosCount: statusCounts[STUDY_STACK_SUBJECT_STATES.ARCHIVED],
     materiasSemTemasCount: data.materias.filter(
       ({ id }) => selectTemasByMateria(data, id).length === 0,
     ).length,
@@ -40,41 +68,56 @@ export function selectDashboardSummary(data) {
   });
 }
 
-export function selectProgressDistribution(data) {
+export function selectProgressDistribution(data, studyStackSnapshot = null) {
+  if (isBlockedSnapshot(studyStackSnapshot)) return [];
+
   const total = data.assuntos.length;
-  const counts = countProgressStatuses(data.assuntos);
+  const contexts = data.assuntos
+    .map((assunto) => createAssuntoContext(data, assunto, studyStackSnapshot))
+    .filter(Boolean);
+  const counts = countStudyStatuses(contexts);
+
   return STATUS_ORDER.map((status) =>
     Object.freeze({
       status,
-      label: PROGRESS_STATUS_LABELS[status],
+      label: STATUS_LABELS[status],
       count: counts[status],
       percentage: total === 0 ? 0 : (counts[status] / total) * 100,
     }),
   );
 }
 
-// Alias temporário para consumidores anteriores ao M8.1.
+// Alias preservado para consumidores anteriores ao M8.1.
 export const selectStateDistribution = selectProgressDistribution;
 
-export function selectStudyPriorities(data, { limit = 6 } = {}) {
+export function selectStudyPriorities(data, { limit = 6, studyStackSnapshot = null } = {}) {
+  if (isBlockedSnapshot(studyStackSnapshot)) return [];
+
   const candidates = data.assuntos
-    .map((assunto) => createAssuntoContext(data, assunto))
+    .map((assunto) => createAssuntoContext(data, assunto, studyStackSnapshot))
     .filter(Boolean)
-    .map((entry) => ({ ...entry, priority: getPriority(entry.assunto) }))
+    .map((entry) => ({ ...entry, priority: getPriority(entry) }))
     .filter(({ priority }) => priority !== null)
     .toSorted(comparePriorities)
     .slice(0, normalizeLimit(limit));
 
-  return candidates.map(({ priority: _priority, ...entry }) => Object.freeze(entry));
+  return candidates.map(({ priority, ...entry }) =>
+    Object.freeze({ ...entry, priorityReason: priority.reason }),
+  );
 }
 
-export function selectRecentStudies(data, { limit = 5 } = {}) {
+export function selectRecentStudies(data, { limit = 5, studyStackSnapshot = null } = {}) {
+  if (studyStackSnapshot?.status !== 'ready') return [];
+
   return data.assuntos
-    .filter(({ ultimoEstudoEm }) => Boolean(ultimoEstudoEm))
-    .map((assunto) => createAssuntoContext(data, assunto))
-    .filter(Boolean)
+    .map((assunto) => createAssuntoContext(data, assunto, studyStackSnapshot))
+    .filter((entry) => Boolean(entry?.studyStackState.subject?.lastActivityAt))
+    .map((entry) => ({
+      ...entry,
+      lastActivityAt: entry.studyStackState.subject.lastActivityAt,
+    }))
     .toSorted((left, right) => {
-      const byDate = right.assunto.ultimoEstudoEm.localeCompare(left.assunto.ultimoEstudoEm);
+      const byDate = right.lastActivityAt.localeCompare(left.lastActivityAt);
       if (byDate !== 0) return byDate;
       return right.assunto.atualizadoEm.localeCompare(left.assunto.atualizadoEm);
     })
@@ -82,71 +125,124 @@ export function selectRecentStudies(data, { limit = 5 } = {}) {
     .map((entry) => Object.freeze(entry));
 }
 
-export function selectMateriaProgressHighlights(data, { limit = 4 } = {}) {
+export function selectMateriaProgressHighlights(
+  data,
+  { limit = 4, studyStackSnapshot = null } = {},
+) {
   return data.materias
     .map((materia) => {
       const assuntos = selectAssuntosByMateria(data, materia.id);
-      const progressSummary = summarizeAssuntosProgress(assuntos);
+      const progressSummary = summarizeStudyStackProgress(assuntos, studyStackSnapshot);
       return Object.freeze({
         materia,
         assuntosCount: assuntos.length,
-        progress: progressSummary?.percentage ?? null,
+        progress: progressSummary.percentage,
         progressSummary,
       });
     })
     .filter(({ assuntosCount }) => assuntosCount > 0)
     .toSorted((left, right) => {
-      const leftProgress = left.progress ?? 0;
-      const rightProgress = right.progress ?? 0;
+      const leftProgress = left.progress ?? Number.POSITIVE_INFINITY;
+      const rightProgress = right.progress ?? Number.POSITIVE_INFINITY;
       if (leftProgress !== rightProgress) return leftProgress - rightProgress;
       return left.materia.ordem - right.materia.ordem;
     })
     .slice(0, normalizeLimit(limit));
 }
 
-function countProgressStatuses(assuntos) {
+function countStudyStatuses(contexts) {
   const counts = Object.fromEntries(STATUS_ORDER.map((status) => [status, 0]));
-  for (const assunto of assuntos) counts[deriveProgressStatus(assunto)] += 1;
+  for (const entry of contexts) {
+    if (Object.hasOwn(counts, entry.studyStatus)) counts[entry.studyStatus] += 1;
+  }
   return counts;
 }
 
-function createAssuntoContext(data, assunto) {
+function createAssuntoContext(data, assunto, studyStackSnapshot) {
   const tema = selectTemaById(data, assunto.temaId);
   if (!tema) return null;
   const materia = selectMateriaById(data, tema.materiaId);
   if (!materia) return null;
-  return { assunto, tema, materia };
+
+  const archiveContext = assunto.arquivado
+    ? 'assunto'
+    : tema.arquivado
+      ? 'tema'
+      : materia.arquivado
+        ? 'materia'
+        : null;
+  const studyStackState = selectStudyStackSubjectState(studyStackSnapshot, assunto.id);
+  const studyStatus = resolveStudyStackSubjectStatus(studyStackState, {
+    archived: Boolean(archiveContext),
+  });
+
+  return {
+    assunto,
+    tema,
+    materia,
+    archiveContext,
+    studyStackState,
+    studyStatus,
+  };
 }
 
-function getPriority(assunto) {
-  const status = deriveProgressStatus(assunto);
-  const ratio = assunto.pontosProgresso / assunto.metaPontosProgresso;
+function getPriority(entry) {
+  if (
+    entry.studyStatus === STUDY_STACK_SUBJECT_STATES.ARCHIVED ||
+    entry.studyStatus === STUDY_STACK_SUBJECT_STATES.CONSOLIDATED ||
+    entry.studyStatus === STUDY_STACK_SUBJECT_STATES.PENDING ||
+    entry.studyStatus === STUDY_STACK_SUBJECT_STATES.UPDATE_REQUIRED
+  ) {
+    return null;
+  }
 
-  if (assunto.precisaReforco) {
-    return Object.freeze({ rank: 0, reason: 'Reforço necessário' });
+  const pending = getPendingCount(entry);
+  if (pending > 0) {
+    return Object.freeze({ rank: 0, reason: 'Pendências no Study Stack' });
   }
-  if (status === PROGRESS_STATUSES.IN_PROGRESS) {
-    return Object.freeze({ rank: 1, reason: 'Progresso em andamento' });
+
+  if (entry.studyStatus === STUDY_STACK_SUBJECT_STATES.IN_PROGRESS) {
+    return Object.freeze({ rank: 1, reason: 'Estudo em andamento' });
   }
-  if (assunto.dificuldade === DIFFICULTIES.DIFICIL && status !== PROGRESS_STATUSES.COMPLETE) {
+
+  if (entry.assunto.dificuldade === DIFFICULTIES.DIFICIL) {
     return Object.freeze({ rank: 2, reason: 'Dificuldade alta' });
   }
-  if (ratio >= 0.8 && status !== PROGRESS_STATUSES.COMPLETE) {
-    return Object.freeze({ rank: 3, reason: 'Próximo da meta' });
+
+  const subject = entry.studyStackState.subject;
+  const maximum = Number(subject?.maxProgress) || 10;
+  const ratio = maximum > 0 ? (Number(subject?.progress) || 0) / maximum : 0;
+  if (ratio >= 0.8) {
+    return Object.freeze({ rank: 3, reason: 'Próximo da consolidação' });
   }
+
   return null;
+}
+
+function getPendingCount(entry) {
+  const subject = entry.studyStackState?.subject;
+  if (!subject) return 0;
+  return (Number(subject.pendingErrors) || 0) + (Number(subject.pendingReviews) || 0);
 }
 
 function comparePriorities(left, right) {
   if (left.priority.rank !== right.priority.rank) return left.priority.rank - right.priority.rank;
-  const leftDate = left.assunto.ultimoEstudoEm ?? '';
-  const rightDate = right.assunto.ultimoEstudoEm ?? '';
+  const leftDate = left.studyStackState.subject?.lastActivityAt ?? '';
+  const rightDate = right.studyStackState.subject?.lastActivityAt ?? '';
   if (leftDate !== rightDate) return leftDate.localeCompare(rightDate);
   const byMateria = left.materia.ordem - right.materia.ordem;
   if (byMateria !== 0) return byMateria;
   const byTema = left.tema.ordem - right.tema.ordem;
   if (byTema !== 0) return byTema;
   return left.assunto.ordem - right.assunto.ordem;
+}
+
+function isBlockedSnapshot(snapshot) {
+  return ['pending', 'update_required'].includes(snapshot?.status);
+}
+
+function isBlockedStudyStatus(status) {
+  return ['pending', 'update_required'].includes(status);
 }
 
 function normalizeLimit(limit) {

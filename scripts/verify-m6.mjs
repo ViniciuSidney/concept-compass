@@ -1,6 +1,6 @@
 import { access, readFile, readdir } from 'node:fs/promises';
 
-import { DIFFICULTIES, PROGRESS_STATUSES, createEmptyData } from '../src/domain/constants.js';
+import { DIFFICULTIES, createEmptyData } from '../src/domain/constants.js';
 import {
   selectDashboardSummary,
   selectProgressDistribution,
@@ -12,6 +12,7 @@ const root = new URL('../', import.meta.url);
 const requiredFiles = [
   'src/features/dashboard/dashboard-page.js',
   'src/features/dashboard/dashboard-selectors.js',
+  'src/integrations/study-stack-subject-state.js',
   'src/styles/pages/dashboard.css',
   'tests/unit/dashboard-page.test.js',
   'tests/unit/dashboard-selectors.test.js',
@@ -64,12 +65,12 @@ const data = {
       temaId: 'tema-1',
       nome: 'Equações',
       descricao: '',
-      pontosProgresso: 3,
+      pontosProgresso: 5,
       metaPontosProgresso: 5,
-      precisaReforco: true,
+      precisaReforco: false,
       dificuldade: DIFFICULTIES.DIFICIL,
       observacoes: '',
-      ultimoEstudoEm: '2026-07-24',
+      ultimoEstudoEm: '2025-01-01',
       ordem: 0,
       criadoEm: created,
       atualizadoEm: created,
@@ -79,35 +80,70 @@ const data = {
       temaId: 'tema-1',
       nome: 'Funções',
       descricao: '',
-      pontosProgresso: 5,
+      pontosProgresso: 0,
       metaPontosProgresso: 5,
-      precisaReforco: false,
+      precisaReforco: true,
       dificuldade: DIFFICULTIES.MEDIA,
       observacoes: '',
-      ultimoEstudoEm: '2026-07-25',
+      ultimoEstudoEm: '2025-01-02',
       ordem: 1,
       criadoEm: created,
       atualizadoEm: created,
     },
   ],
 };
+const studyStackSnapshot = {
+  status: 'ready',
+  receivedContractVersion: '1.0.0',
+  summary: {
+    updatedAt: '2026-08-08T05:00:00.000Z',
+    subjects: {
+      'assunto-1': {
+        subjectId: 'assunto-1',
+        status: 'in_progress',
+        progress: 4,
+        maxProgress: 10,
+        sourceArchived: false,
+        consolidated: false,
+        pendingErrors: 1,
+        pendingReviews: 0,
+        lastActivityAt: '2026-08-07T12:00:00.000Z',
+      },
+      'assunto-2': {
+        subjectId: 'assunto-2',
+        status: 'consolidated',
+        progress: 10,
+        maxProgress: 10,
+        sourceArchived: false,
+        consolidated: true,
+        pendingErrors: 0,
+        pendingReviews: 0,
+        lastActivityAt: '2026-08-08T12:00:00.000Z',
+      },
+    },
+  },
+};
 
-const summary = selectDashboardSummary(data);
-const distribution = selectProgressDistribution(data);
-const priorities = selectStudyPriorities(data);
-const recent = selectRecentStudies(data);
+const summary = selectDashboardSummary(data, studyStackSnapshot);
+const distribution = selectProgressDistribution(data, studyStackSnapshot);
+const priorities = selectStudyPriorities(data, { studyStackSnapshot });
+const recent = selectRecentStudies(data, { studyStackSnapshot });
 
 if (
-  summary.progress !== 80 ||
-  summary.points !== 8 ||
-  summary.reforcoCount !== 1 ||
-  distribution.find(({ status }) => status === PROGRESS_STATUSES.COMPLETE)?.count !== 1 ||
+  summary.progress !== 70 ||
+  summary.points !== 14 ||
+  summary.pendenciasCount !== 1 ||
+  distribution.find(({ status }) => status === 'consolidated')?.count !== 1 ||
   priorities[0]?.assunto.id !== 'assunto-1' ||
   recent[0]?.assunto.id !== 'assunto-2'
 ) {
-  throw new Error('A verificação funcional dos indicadores do M6 produziu resultado inesperado.');
+  throw new Error(
+    'A verificação funcional sincronizada dos indicadores do M6 produziu resultado inesperado.',
+  );
 }
-process.stdout.write('✓ pontos, distribuição, prioridades e estudos recentes verificados\n');
+process.stdout.write(
+  '✓ progresso, distribuição, prioridades e estudos recentes do Study Stack verificados\n',
+);
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 if (Object.keys(pkg.dependencies ?? {}).length) {

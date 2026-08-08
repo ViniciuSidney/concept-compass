@@ -1,3 +1,4 @@
+import { selectStudyStackSubjectState } from '../../integrations/study-stack-subject-state.js';
 import { normalizeSearchText } from '../../utils/text.js';
 
 export const SEARCH_TYPES = Object.freeze({
@@ -26,13 +27,16 @@ export function normalizeSearchType(value) {
   return SEARCH_TYPE_VALUES.includes(value) ? value : SEARCH_TYPES.ALL;
 }
 
-export function selectSearchResults(data, { query = '', type = SEARCH_TYPES.ALL } = {}) {
+export function selectSearchResults(
+  data,
+  { query = '', type = SEARCH_TYPES.ALL, studyStackSnapshot = null } = {},
+) {
   const normalizedQuery = normalizeSearchText(query);
   const normalizedType = normalizeSearchType(type);
 
   if (!normalizedQuery) return [];
 
-  return createSearchCatalog(data)
+  return createSearchCatalog(data, { studyStackSnapshot })
     .filter((result) => normalizedType === SEARCH_TYPES.ALL || result.type === normalizedType)
     .map((result) => ({ ...result, matchRank: calculateMatchRank(result, normalizedQuery) }))
     .filter(({ matchRank }) => Number.isFinite(matchRank))
@@ -60,7 +64,7 @@ export function selectSearchCounts(data, { query = '' } = {}) {
   return Object.freeze(counts);
 }
 
-export function createSearchCatalog(data) {
+export function createSearchCatalog(data, { studyStackSnapshot = null } = {}) {
   const materiasById = new Map(data.materias.map((materia) => [materia.id, materia]));
   const temasById = new Map(data.temas.map((tema) => [tema.id, tema]));
   const temasByMateria = groupBy(data.temas, (tema) => tema.materiaId);
@@ -120,6 +124,8 @@ export function createSearchCatalog(data) {
         materia,
         tema,
         assunto,
+        archiveContext: resolveArchiveContext(materia, tema, assunto),
+        studyStackState: selectStudyStackSubjectState(studyStackSnapshot, assunto.id),
         href: createMateriaDeepLink(materia.id, {
           temaId: tema.id,
           assuntoId: assunto.id,
@@ -147,6 +153,13 @@ function createMateriaDeepLink(materiaId, { temaId = null, assuntoId = null } = 
   if (assuntoId) params.set('assunto', assuntoId);
   const query = params.toString();
   return `#/materias/${encodeURIComponent(materiaId)}${query ? `?${query}` : ''}`;
+}
+
+function resolveArchiveContext(materia, tema, assunto) {
+  if (assunto.arquivado) return 'assunto';
+  if (tema.arquivado) return 'tema';
+  if (materia.arquivado) return 'materia';
+  return null;
 }
 
 function calculateMatchRank(result, query) {
