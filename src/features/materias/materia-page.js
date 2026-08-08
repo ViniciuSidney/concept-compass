@@ -740,6 +740,11 @@ export function createMateriaPage(documentObject, route, context) {
       location: windowObject.location,
     });
 
+    if (typeof windowObject.open === 'function') {
+      windowObject.open(destination, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
     if (typeof windowObject.location?.assign === 'function') {
       windowObject.location.assign(destination);
     } else if (windowObject.location) {

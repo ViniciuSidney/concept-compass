@@ -237,14 +237,15 @@ export function createAssuntoStudyDetail(
         }),
       );
     } else {
-      section.append(
-        createButtonLink(documentObject, {
-          label: presentation.actionLabel,
-          href: studyStackUrl,
-          icon: 'layers',
-          className: 'assunto-study__action',
-        }),
-      );
+      const studyStackLink = createButtonLink(documentObject, {
+        label: presentation.actionLabel,
+        href: studyStackUrl,
+        icon: 'layers',
+        className: 'assunto-study__action',
+      });
+      studyStackLink.target = '_blank';
+      studyStackLink.rel = 'noopener noreferrer';
+      section.append(studyStackLink);
     }
   }
 
