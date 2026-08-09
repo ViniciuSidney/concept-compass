@@ -21,6 +21,29 @@ function findButton(root, label) {
   );
 }
 
+function createTemaCallbacks() {
+  return {
+    onToggle: noop,
+    onAddAssunto: noop,
+    onEditTema: noop,
+    onDeleteTema: noop,
+    onArchiveTema: noop,
+    onRestoreTema: noop,
+    onMoveTema: noop,
+    onMoveTemaUp: noop,
+    onMoveTemaDown: noop,
+    onOpenAssunto: noop,
+    onOpenAssuntoInStudyStack: noop,
+    onEditAssunto: noop,
+    onDeleteAssunto: noop,
+    onArchiveAssunto: noop,
+    onRestoreAssunto: noop,
+    onMoveAssuntoTo: noop,
+    onMoveAssunto: noop,
+    overlayManager: null,
+  };
+}
+
 test('card de Matéria arquivada exibe restauração explícita', () => {
   const { documentObject } = createFakeDocument();
   let restored = 0;
@@ -62,32 +85,10 @@ test('Tema arquivado exibe restauração explícita e bloqueia novo Assunto', ()
     },
     expanded: true,
     materiaArchived: false,
-    onToggle: noop,
-    onAddAssunto: noop,
-    onEditTema: noop,
-    onDeleteTema: noop,
-    onArchiveTema: noop,
+    ...createTemaCallbacks(),
     onRestoreTema() {
       restored += 1;
     },
-    onMoveTema: noop,
-    onMoveTemaUp: noop,
-    onMoveTemaDown: noop,
-    onOpenAssunto: noop,
-    onOpenAssuntoInStudyStack: noop,
-    onEditAssunto: noop,
-    onDeleteAssunto: noop,
-    onArchiveAssunto: noop,
-    onRestoreAssunto: noop,
-    onMoveAssuntoTo: noop,
-    onMoveAssunto: noop,
-    onDecreaseAssuntoProgress: noop,
-    onIncreaseAssuntoProgress: noop,
-    onIncreaseAssuntoProgressTotal: noop,
-    onAdjustAssuntoProgress: noop,
-    onCompleteAssuntoProgress: noop,
-    onResetAssuntoProgress: noop,
-    overlayManager: null,
   });
 
   const restoreButton = findButton(element, 'Restaurar tema');
@@ -111,30 +112,7 @@ test('Matéria arquivada bloqueia Study Stack dos Assuntos descendentes', () => 
     },
     expanded: true,
     materiaArchived: true,
-    onToggle: noop,
-    onAddAssunto: noop,
-    onEditTema: noop,
-    onDeleteTema: noop,
-    onArchiveTema: noop,
-    onRestoreTema: noop,
-    onMoveTema: noop,
-    onMoveTemaUp: noop,
-    onMoveTemaDown: noop,
-    onOpenAssunto: noop,
-    onOpenAssuntoInStudyStack: noop,
-    onEditAssunto: noop,
-    onDeleteAssunto: noop,
-    onArchiveAssunto: noop,
-    onRestoreAssunto: noop,
-    onMoveAssuntoTo: noop,
-    onMoveAssunto: noop,
-    onDecreaseAssuntoProgress: noop,
-    onIncreaseAssuntoProgress: noop,
-    onIncreaseAssuntoProgressTotal: noop,
-    onAdjustAssuntoProgress: noop,
-    onCompleteAssuntoProgress: noop,
-    onResetAssuntoProgress: noop,
-    overlayManager: null,
+    ...createTemaCallbacks(),
   });
 
   assert.match(element.textContent, /Estudo arquivado/);

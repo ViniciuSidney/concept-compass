@@ -28,13 +28,16 @@ function dataWithMaterias() {
   });
 }
 
-test('resume contagens, pontos e progresso de cada matéria', () => {
+test('resume somente estrutura e Assuntos de cada Matéria', () => {
   const summaries = selectMateriaSummaries(dataWithMaterias());
   assert.equal(summaries[0].temasCount, 1);
   assert.equal(summaries[0].assuntosCount, 1);
-  assert.equal(summaries[0].progress, 100);
-  assert.deepEqual(summaries[0].progressSummary, { points: 5, total: 5, percentage: 100 });
-  assert.equal(summaries[1].progress, 0);
+  assert.deepEqual(
+    summaries[0].assuntos.map(({ id }) => id),
+    ['a1'],
+  );
+  assert.equal('progress' in summaries[0], false);
+  assert.equal('progressSummary' in summaries[0], false);
 });
 
 test('pesquisa matérias ignorando caixa e acentos', () => {

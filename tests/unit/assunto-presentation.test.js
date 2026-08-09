@@ -5,18 +5,9 @@ import { DIFFICULTIES } from '../../src/domain/constants.js';
 import {
   formatLocalDate,
   getDifficultyPresentation,
-  getProgressPresentation,
 } from '../../src/features/materias/assunto-presentation.js';
-import { assunto } from '../fixtures/data-builders.js';
 
-test('apresenta situação derivada, pontos e dificuldade', () => {
-  assert.deepEqual(getProgressPresentation(assunto({ pontosProgresso: 3 })), {
-    status: 'in_progress',
-    label: 'Em andamento',
-    tone: 'studying',
-    percentage: 60,
-    pointsLabel: '3 de 5 pontos',
-  });
+test('apresenta dificuldade sem calcular progresso local', () => {
   assert.deepEqual(getDifficultyPresentation(DIFFICULTIES.DIFICIL), {
     label: 'Difícil',
     tone: 'danger',

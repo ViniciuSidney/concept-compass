@@ -4,15 +4,10 @@ import test from 'node:test';
 import { createEmptyData } from '../../src/domain/constants.js';
 import {
   archiveAssunto,
-  changeAssuntoProgress,
-  completeAssuntoProgress,
   createAssunto,
   deleteAssunto,
-  increaseAssuntoProgressTotal,
   moveAssunto,
-  resetAssuntoProgress,
   restoreAssunto,
-  setAssuntoProgress,
   updateAssunto,
 } from '../../src/domain/services/assunto-service.js';
 import {
@@ -118,38 +113,6 @@ test('edições de tema e assunto preservam relações e progresso', () => {
   assert.equal(assuntoResult.assunto.pontosProgresso, 2);
   assert.equal(assuntoResult.assunto.metaPontosProgresso, 6);
   assert.equal(assuntoResult.assunto.precisaReforco, true);
-});
-
-test('operações rápidas de progresso respeitam limites e preservam o assunto', () => {
-  const { idFactory, nowFactory, laterFactory, todayFactory } = createFactories();
-  let data = createEmptyData();
-  ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
-  ({ data } = createTema(data, data.materias[0].id, { nome: 'T' }, { idFactory, nowFactory }));
-  ({ data } = createAssunto(
-    data,
-    data.temas[0].id,
-    { nome: 'S' },
-    { idFactory, nowFactory, todayFactory },
-  ));
-  const id = data.assuntos[0].id;
-
-  ({ data } = changeAssuntoProgress(data, id, 1, { nowFactory: laterFactory, todayFactory }));
-  assert.equal(data.assuntos[0].pontosProgresso, 1);
-  ({ data } = increaseAssuntoProgressTotal(data, id, { nowFactory: laterFactory, todayFactory }));
-  assert.equal(data.assuntos[0].metaPontosProgresso, 6);
-  ({ data } = completeAssuntoProgress(data, id, { nowFactory: laterFactory, todayFactory }));
-  assert.equal(data.assuntos[0].pontosProgresso, 6);
-  ({ data } = resetAssuntoProgress(data, id, { nowFactory: laterFactory, todayFactory }));
-  assert.equal(data.assuntos[0].pontosProgresso, 0);
-  ({ data } = setAssuntoProgress(
-    data,
-    id,
-    { pontosProgresso: 4, metaPontosProgresso: 8, precisaReforco: true },
-    { nowFactory: laterFactory, todayFactory },
-  ));
-  assert.equal(data.assuntos[0].pontosProgresso, 4);
-  assert.equal(data.assuntos[0].metaPontosProgresso, 8);
-  assert.equal(data.assuntos[0].precisaReforco, true);
 });
 
 test('arquiva e restaura matéria preservando hierarquia e IDs dos descendentes', () => {

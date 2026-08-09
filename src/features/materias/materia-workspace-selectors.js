@@ -4,21 +4,16 @@ import {
   selectTemaById,
   selectTemasByMateria,
 } from '../../domain/selectors/hierarchy-selectors.js';
-import { summarizeTemaProgress } from '../../domain/services/progress-service.js';
 
 export function selectTemaSections(data, materiaId) {
-  return selectTemasByMateria(data, materiaId).map((tema, index, temas) => {
-    const assuntos = selectAssuntosByTema(data, tema.id);
-    const progressSummary = summarizeTemaProgress(data, tema.id);
-    return Object.freeze({
+  return selectTemasByMateria(data, materiaId).map((tema, index, temas) =>
+    Object.freeze({
       tema,
-      assuntos,
-      progress: progressSummary?.percentage ?? null,
-      progressSummary,
+      assuntos: selectAssuntosByTema(data, tema.id),
       canMoveUp: index > 0,
       canMoveDown: index < temas.length - 1,
-    });
-  });
+    }),
+  );
 }
 
 export function selectTemaDeleteImpact(data, temaId) {

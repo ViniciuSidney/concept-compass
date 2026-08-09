@@ -7,22 +7,23 @@ import { assunto, tema } from '../fixtures/data-builders.js';
 
 const noop = () => {};
 
-test('cabeçalho do tema mantém o progresso visível mesmo com o acordeão fechado', () => {
+test('cabeçalho do tema mantém o progresso sincronizado visível mesmo com o acordeão fechado', () => {
   const { documentObject } = createFakeDocument();
   const element = createTemaAccordion(documentObject, {
     section: {
       tema: tema({ id: 't1', nome: 'Gramática' }),
       assuntos: [assunto({ id: 'a1', temaId: 't1', pontosProgresso: 3 })],
-      progress: 60,
-      progressSummary: { points: 3, total: 5, percentage: 60 },
       canMoveUp: false,
       canMoveDown: false,
     },
     expanded: false,
+    materiaArchived: false,
     onToggle: noop,
     onAddAssunto: noop,
     onEditTema: noop,
     onDeleteTema: noop,
+    onArchiveTema: noop,
+    onRestoreTema: noop,
     onMoveTema: noop,
     onMoveTemaUp: noop,
     onMoveTemaDown: noop,
@@ -30,14 +31,11 @@ test('cabeçalho do tema mantém o progresso visível mesmo com o acordeão fech
     onOpenAssuntoInStudyStack: noop,
     onEditAssunto: noop,
     onDeleteAssunto: noop,
+    onArchiveAssunto: noop,
+    onRestoreAssunto: noop,
     onMoveAssuntoTo: noop,
     onMoveAssunto: noop,
-    onDecreaseAssuntoProgress: noop,
-    onIncreaseAssuntoProgress: noop,
-    onIncreaseAssuntoProgressTotal: noop,
-    onAdjustAssuntoProgress: noop,
-    onCompleteAssuntoProgress: noop,
-    onResetAssuntoProgress: noop,
+    overlayManager: null,
   });
 
   const header = element.children[0];

@@ -1,4 +1,4 @@
-import {
+﻿import {
   selectAssuntoById,
   selectAssuntosByMateria,
   selectMateriaById,
@@ -15,8 +15,6 @@ import { createErrorState } from '../../ui/states/error-state.js';
 import { createAssuntoDeleteDialog } from './assunto-delete-dialog.js';
 import { createAssuntoDetailPanel } from './assunto-detail-panel.js';
 import { createAssuntoFormModal } from './assunto-form.js';
-import { createAssuntoProgressDialog } from './assunto-progress-dialog.js';
-import { createAssuntoProgressResetDialog } from './assunto-progress-reset-dialog.js';
 import { createMateriaDeleteDialog } from './materia-delete-dialog.js';
 import { createMateriaFormModal } from './materia-form.js';
 import { createMateriaWorkspaceController } from './materia-workspace-controller.js';
@@ -188,12 +186,6 @@ export function createMateriaPage(documentObject, route, context) {
             onRestoreAssunto: (assunto) => restoreAssuntoItem(assunto),
             onMoveAssuntoTo: (assunto) => openMoveAssunto(assunto),
             onMoveAssunto: (assunto, targetIndex) => moveAssunto(assunto, targetIndex),
-            onDecreaseAssuntoProgress: (assunto) => changeProgress(assunto, -1),
-            onIncreaseAssuntoProgress: (assunto) => changeProgress(assunto, 1),
-            onIncreaseAssuntoProgressTotal: (assunto) => increaseProgressTotal(assunto),
-            onAdjustAssuntoProgress: (assunto) => openAdjustProgress(assunto),
-            onCompleteAssuntoProgress: (assunto) => completeProgress(assunto),
-            onResetAssuntoProgress: (assunto) => resetProgress(assunto),
             overlayManager,
           }),
         );
@@ -542,89 +534,6 @@ export function createMateriaPage(documentObject, route, context) {
     }
   }
 
-  function openAdjustProgress(assunto) {
-    const current = selectAssuntoById(controller.getData(), assunto.id);
-    if (!current) return;
-
-    const dialog = createAssuntoProgressDialog(documentObject, {
-      assunto: current,
-      overlayManager,
-      windowObject,
-      async onSubmit(input) {
-        applyProgressUpdate(current, () => controller.adjustAssuntoProgress(current.id, input));
-      },
-    });
-    dialog.open();
-  }
-
-  function changeProgress(assunto, delta) {
-    const current = selectAssuntoById(controller.getData(), assunto.id);
-    if (!current) return;
-    applyProgressUpdate(current, () => controller.changeProgress(current.id, delta));
-  }
-
-  function increaseProgressTotal(assunto) {
-    const current = selectAssuntoById(controller.getData(), assunto.id);
-    if (!current) return;
-    applyProgressUpdate(current, () => controller.increaseProgressTotal(current.id));
-  }
-
-  function completeProgress(assunto) {
-    const current = selectAssuntoById(controller.getData(), assunto.id);
-    if (!current) return;
-    applyProgressUpdate(current, () => controller.completeProgress(current.id));
-  }
-
-  function resetProgress(assunto) {
-    const current = selectAssuntoById(controller.getData(), assunto.id);
-    if (!current || current.pontosProgresso === 0) return;
-
-    const dialog = createAssuntoProgressResetDialog(documentObject, {
-      assunto: current,
-      overlayManager,
-      async onConfirm() {
-        applyProgressUpdate(current, () => controller.resetProgress(current.id));
-      },
-    });
-    dialog.open();
-  }
-
-  function applyProgressUpdate(current, operation) {
-    const previous = {
-      pontosProgresso: current.pontosProgresso,
-      metaPontosProgresso: current.metaPontosProgresso,
-      precisaReforco: current.precisaReforco,
-    };
-
-    try {
-      const updated = operation();
-      expandedTemaIds.add(updated.temaId);
-      render();
-      const percentage = Math.round((updated.pontosProgresso / updated.metaPontosProgresso) * 100);
-      appShell.showToast({
-        tone: 'success',
-        title: 'Progresso atualizado',
-        message: `${updated.nome}: ${updated.pontosProgresso}/${updated.metaPontosProgresso} pontos · ${percentage}%.`,
-        actionLabel: 'Desfazer',
-        onAction() {
-          try {
-            controller.adjustAssuntoProgress(updated.id, previous);
-            expandedTemaIds.add(updated.temaId);
-            render();
-            appShell.announce(`Alteração de progresso de ${updated.nome} desfeita.`);
-          } catch (error) {
-            showOperationError('Não foi possível desfazer a alteração', error);
-          }
-        },
-      });
-      appShell.announce(
-        `Progresso de ${updated.nome} atualizado para ${updated.pontosProgresso} de ${updated.metaPontosProgresso} pontos.`,
-      );
-    } catch (error) {
-      showOperationError('Não foi possível atualizar o progresso', error);
-    }
-  }
-
   function openDeleteAssunto(assunto) {
     const current = selectAssuntoById(controller.getData(), assunto.id);
     if (!current) return;
@@ -774,10 +683,6 @@ export function createMateriaPage(documentObject, route, context) {
       onDelete: () => openDeleteAssunto(details.assunto),
       onArchive: () => archiveAssuntoItem(details.assunto),
       onRestore: () => restoreAssuntoItem(details.assunto),
-      onDecreaseProgress: () => changeProgress(details.assunto, -1),
-      onIncreaseProgress: () => changeProgress(details.assunto, 1),
-      onIncreaseProgressTotal: () => increaseProgressTotal(details.assunto),
-      onAdjustProgress: () => openAdjustProgress(details.assunto),
     });
     panel.open();
   }

@@ -1,14 +1,4 @@
-import { DIFFICULTIES, DIFFICULTY_LABELS, PROGRESS_STATUS_LABELS } from '../../domain/constants.js';
-import {
-  calculateAssuntoProgress,
-  deriveProgressStatus,
-} from '../../domain/services/progress-service.js';
-
-const STATUS_TONES = Object.freeze({
-  not_started: 'not-started',
-  in_progress: 'studying',
-  complete: 'consolidated',
-});
+import { DIFFICULTIES, DIFFICULTY_LABELS } from '../../domain/constants.js';
 
 const DIFFICULTY_TONES = Object.freeze({
   [DIFFICULTIES.NAO_DEFINIDA]: 'neutral',
@@ -16,17 +6,6 @@ const DIFFICULTY_TONES = Object.freeze({
   [DIFFICULTIES.MEDIA]: 'warning',
   [DIFFICULTIES.DIFICIL]: 'danger',
 });
-
-export function getProgressPresentation(assunto) {
-  const status = deriveProgressStatus(assunto);
-  return Object.freeze({
-    status,
-    label: PROGRESS_STATUS_LABELS[status],
-    tone: STATUS_TONES[status] ?? 'neutral',
-    percentage: calculateAssuntoProgress(assunto),
-    pointsLabel: `${assunto.pontosProgresso} de ${assunto.metaPontosProgresso} pontos`,
-  });
-}
 
 export function getDifficultyPresentation(difficulty) {
   return Object.freeze({

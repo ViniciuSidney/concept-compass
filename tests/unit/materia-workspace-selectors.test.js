@@ -8,7 +8,7 @@ import {
 } from '../../src/features/materias/materia-workspace-selectors.js';
 import { assunto, materia, tema, validData } from '../fixtures/data-builders.js';
 
-test('monta seções de tema com assuntos, progresso e limites de reordenação', () => {
+test('monta seções de tema com Assuntos e limites de reordenação', () => {
   const data = validData({
     materias: [materia()],
     temas: [tema({ id: 't1', ordem: 0 }), tema({ id: 't2', ordem: 1, nome: 'Geometria' })],
@@ -21,11 +21,10 @@ test('monta seções de tema com assuntos, progresso e limites de reordenação'
   const sections = selectTemaSections(data, 'materia-1');
   assert.equal(sections.length, 2);
   assert.equal(sections[0].assuntos.length, 2);
-  assert.equal(sections[0].progress, 80);
-  assert.deepEqual(sections[0].progressSummary, { points: 8, total: 10, percentage: 80 });
+  assert.equal('progress' in sections[0], false);
+  assert.equal('progressSummary' in sections[0], false);
   assert.equal(sections[0].canMoveUp, false);
   assert.equal(sections[0].canMoveDown, true);
-  assert.equal(sections[1].progress, null);
   assert.equal(sections[1].canMoveDown, false);
 });
 

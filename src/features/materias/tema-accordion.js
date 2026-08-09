@@ -1,4 +1,4 @@
-import { readStudyStackProgressAggregate } from '../../integrations/study-stack-progress-aggregate.js';
+﻿import { readStudyStackProgressAggregate } from '../../integrations/study-stack-progress-aggregate.js';
 import { createActionMenu } from '../../ui/components/action-menu.js';
 import { createBadge } from '../../ui/components/badge.js';
 import { createButton } from '../../ui/components/button.js';
@@ -33,12 +33,6 @@ export function createTemaAccordion(
     onRestoreAssunto,
     onMoveAssuntoTo,
     onMoveAssunto,
-    onDecreaseAssuntoProgress,
-    onIncreaseAssuntoProgress,
-    onIncreaseAssuntoProgressTotal,
-    onAdjustAssuntoProgress,
-    onCompleteAssuntoProgress,
-    onResetAssuntoProgress,
     overlayManager,
   },
 ) {
@@ -175,12 +169,6 @@ export function createTemaAccordion(
           onMove: () => onMoveAssuntoTo(assunto),
           onMoveUp: () => onMoveAssunto(assunto, index - 1),
           onMoveDown: () => onMoveAssunto(assunto, index + 1),
-          onDecreaseProgress: () => onDecreaseAssuntoProgress(assunto),
-          onIncreaseProgress: () => onIncreaseAssuntoProgress(assunto),
-          onIncreaseProgressTotal: () => onIncreaseAssuntoProgressTotal(assunto),
-          onAdjustProgress: () => onAdjustAssuntoProgress(assunto),
-          onCompleteProgress: () => onCompleteAssuntoProgress(assunto),
-          onResetProgress: () => onResetAssuntoProgress(assunto),
           archiveContext: assunto.arquivado
             ? 'assunto'
             : archived
@@ -233,7 +221,7 @@ function createInlineEmptyState(documentObject, temaNome, onAddAssunto, archived
   title.textContent = `Nenhum assunto em ${temaNome}`;
   description.textContent = archived
     ? 'Restaure este conteúdo para voltar a adicionar Assuntos.'
-    : 'Adicione conteúdos específicos para acompanhar pontos e dificuldade.';
+    : 'Adicione conteúdos específicos para organizar o estudo e acompanhar a dificuldade.';
   text.append(title, description);
   state.append(text, button);
   return state;

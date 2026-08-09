@@ -58,7 +58,7 @@ test('cria, edita e reordena temas com persistência', () => {
   assert.deepEqual(repository.loadData().data, store.getState().data);
 });
 
-test('cria, edita, ajusta progresso, reordena e remove assuntos com persistência', () => {
+test('cria, edita, reordena e remove assuntos com persistência sem progresso manual', () => {
   const { controller, repository, store } = createHarness();
   const tema = controller.addTema(
     'materia-1',
@@ -72,7 +72,7 @@ test('cria, edita, ajusta progresso, reordena e remove assuntos com persistênci
   );
   const funcao = controller.addAssunto(
     tema.id,
-    { nome: 'Função', pontosProgresso: 1 },
+    { nome: 'Função' },
     { idFactory: () => 'assunto-b', nowFactory: secondTime, todayFactory: today },
   );
 
@@ -81,16 +81,11 @@ test('cria, edita, ajusta progresso, reordena e remove assuntos com persistênci
     {
       nome: 'Equação do primeiro grau',
       descricao: 'Base algébrica',
-      pontosProgresso: 3,
-      metaPontosProgresso: 6,
-      precisaReforco: true,
       dificuldade: 'media',
       observacoes: 'Revisar problemas',
-      ultimoEstudoEm: '2026-07-23',
     },
     { nowFactory: secondTime, todayFactory: today },
   );
-  controller.changeProgress(equacao.id, 1, { nowFactory: secondTime, todayFactory: today });
   controller.reorderAssunto(funcao.id, 0, { today: '2026-07-24' });
 
   assert.deepEqual(
@@ -98,9 +93,9 @@ test('cria, edita, ajusta progresso, reordena e remove assuntos com persistênci
     ['assunto-b', 'assunto-a'],
   );
   const edited = selectAssuntosByTema(store.getState().data, tema.id)[1];
-  assert.equal(edited.pontosProgresso, 4);
-  assert.equal(edited.metaPontosProgresso, 6);
-  assert.equal(edited.precisaReforco, true);
+  assert.equal(edited.nome, 'Equação do primeiro grau');
+  assert.equal(edited.dificuldade, 'media');
+  assert.equal(edited.observacoes, 'Revisar problemas');
   assert.deepEqual(repository.loadData().data, store.getState().data);
 
   controller.removeAssunto(funcao.id, { today: '2026-07-24' });

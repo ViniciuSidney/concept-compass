@@ -28,7 +28,7 @@ const requiredFiles = [
   'docs/validacao-m5.md',
 ];
 
-for (const path of requiredFiles) await access(new URL(path, root));
+for (const item of requiredFiles) await access(new URL(item, root));
 process.stdout.write('✓ módulos, estilos, documentação e roteiro do M5 encontrados\n');
 
 const html = await readFile(new URL('index.html', root), 'utf8');
@@ -51,6 +51,7 @@ let data = createEmptyData();
     nowFactory: () => '2026-07-24T12:00:00.000Z',
   },
 ));
+
 const storage = createMemoryStorageAdapter();
 const repository = createAppRepository({ storageAdapter: storage });
 const store = createStore({
@@ -60,6 +61,7 @@ const store = createStore({
   status: { saving: false, lastError: null },
 });
 const controller = createMateriaWorkspaceController({ store, repository });
+
 const tema = controller.addTema(
   'materia-1',
   { nome: 'Álgebra', descricao: 'Fundamentos' },
@@ -68,15 +70,12 @@ const tema = controller.addTema(
     nowFactory: () => '2026-07-24T12:10:00.000Z',
   },
 );
+
 const assunto = controller.addAssunto(
   tema.id,
   {
     nome: 'Equação do primeiro grau',
-    pontosProgresso: 1,
-    metaPontosProgresso: 5,
-    precisaReforco: false,
     dificuldade: 'media',
-    ultimoEstudoEm: '2026-07-24',
   },
   {
     idFactory: () => 'assunto-1',
@@ -84,17 +83,14 @@ const assunto = controller.addAssunto(
     todayFactory: () => '2026-07-24',
   },
 );
+
 controller.editAssunto(
   assunto.id,
   {
     nome: assunto.nome,
     descricao: 'Resolução de sentenças lineares',
-    pontosProgresso: 3,
-    metaPontosProgresso: 5,
-    precisaReforco: false,
     dificuldade: 'media',
     observacoes: 'Revisar problemas contextualizados',
-    ultimoEstudoEm: '2026-07-24',
   },
   {
     nowFactory: () => '2026-07-24T12:30:00.000Z',
@@ -107,7 +103,9 @@ const sections = selectTemaSections(saved, 'materia-1');
 if (
   selectTemasByMateria(saved, 'materia-1').length !== 1 ||
   selectAssuntosByTema(saved, tema.id).length !== 1 ||
-  sections[0].progress !== 60
+  sections[0].assuntos[0]?.id !== assunto.id ||
+  'progress' in sections[0] ||
+  'progressSummary' in sections[0]
 ) {
   throw new Error('A verificação funcional da hierarquia produziu resultado inesperado.');
 }
@@ -117,7 +115,7 @@ controller.removeTema(tema.id);
 if (store.getState().data.temas.length || store.getState().data.assuntos.length) {
   throw new Error('As exclusões persistentes do M5 falharam.');
 }
-process.stdout.write('✓ CRUD, progresso, reordenação e persistência da hierarquia verificados\n');
+process.stdout.write('✓ CRUD, estrutura, reordenação e persistência da hierarquia verificados\n');
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 if (Object.keys(pkg.dependencies ?? {}).length) {

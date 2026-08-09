@@ -2,7 +2,6 @@ import {
   selectAssuntosByMateria,
   selectTemasByMateria,
 } from '../../domain/selectors/hierarchy-selectors.js';
-import { summarizeMateriaProgress } from '../../domain/services/progress-service.js';
 import { normalizeSearchText } from '../../utils/text.js';
 
 export const MATERIAS_SORT_MODES = Object.freeze({
@@ -18,16 +17,11 @@ export function selectMateriaSummaries(
   const normalizedQuery = normalizeSearchText(query);
   const summaries = data.materias.map((materia) => {
     const assuntos = selectAssuntosByMateria(data, materia.id);
-    const progressSummary = summarizeMateriaProgress(data, materia.id);
     return {
       materia,
       temasCount: selectTemasByMateria(data, materia.id).length,
       assuntosCount: assuntos.length,
       assuntos,
-      // Compatibilidade temporária: estes campos legados permanecem no seletor,
-      // mas a interface de progresso já não os utiliza.
-      progress: progressSummary?.percentage ?? null,
-      progressSummary,
     };
   });
   const filtered = normalizedQuery

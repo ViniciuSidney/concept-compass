@@ -1,34 +1,16 @@
 import { access, readFile } from 'node:fs/promises';
 
 import { migrateData } from '../src/data/migrations/data-migrations.js';
-import { PROGRESS_STATUSES, createEmptyData } from '../src/domain/constants.js';
-import {
-  changeAssuntoProgress,
-  completeAssuntoProgress,
-  increaseAssuntoProgressTotal,
-  resetAssuntoProgress,
-  createAssunto,
-} from '../src/domain/services/assunto-service.js';
-import {
-  deriveProgressStatus,
-  summarizeAssuntosProgress,
-} from '../src/domain/services/progress-service.js';
-import { createMateria } from '../src/domain/services/materia-service.js';
-import { createTema } from '../src/domain/services/tema-service.js';
 
 const root = new URL('../', import.meta.url);
 const requiredFiles = [
-  'src/ui/components/segmented-progress.js',
-  'src/features/materias/assunto-progress-control.js',
-  'src/features/materias/assunto-progress-dialog.js',
-  'src/features/materias/assunto-progress-reset-dialog.js',
   'tests/unit/data-migrations.test.js',
   'tests/manual/m8-1.md',
   'docs/validacao-m8-1.md',
 ];
 
-for (const path of requiredFiles) await access(new URL(path, root));
-process.stdout.write('✓ componentes, migração, testes e roteiro do M8.1 encontrados\n');
+for (const item of requiredFiles) await access(new URL(item, root));
+process.stdout.write('✓ migração, testes e roteiro histórico do M8.1 encontrados\n');
 
 const created = '2026-07-29T12:00:00.000Z';
 const migrated = migrateData({
@@ -79,55 +61,34 @@ if (
   migrated.assuntos[0]?.precisaReforco !== true ||
   'estado' in migrated.assuntos[0]
 ) {
-  throw new Error('A migração dos estados antigos para pontos produziu resultado inesperado.');
+  throw new Error('A compatibilidade histórica do M8.1 produziu resultado inesperado.');
 }
-process.stdout.write('✓ migração v1 → v2 preserva dados e converte os estados oficiais\n');
+process.stdout.write('✓ migração histórica continua preservada para backups anteriores\n');
 
-const ids = ['m1', 't1', 'a1', 'a2'];
-const options = {
-  idFactory: () => ids.shift(),
-  nowFactory: () => created,
-  todayFactory: () => '2026-07-29',
-};
-let data = createEmptyData();
-({ data } = createMateria(data, { nome: 'Matemática', corId: 'roxo' }, options));
-({ data } = createTema(data, 'm1', { nome: 'Álgebra' }, options));
-({ data } = createAssunto(
-  data,
-  't1',
-  { nome: 'Equação', pontosProgresso: 3, metaPontosProgresso: 5 },
-  options,
-));
-({ data } = createAssunto(
-  data,
-  't1',
-  { nome: 'Funções', pontosProgresso: 2, metaPontosProgresso: 10 },
-  options,
-));
+const removedFiles = [
+  'src/features/materias/assunto-progress-control.js',
+  'src/features/materias/assunto-progress-dialog.js',
+  'src/features/materias/assunto-progress-reset-dialog.js',
+];
 
-const summary = summarizeAssuntosProgress(data.assuntos);
-let updated = changeAssuntoProgress(data, 'a1', 1, options).data;
-updated = increaseAssuntoProgressTotal(updated, 'a1', options).data;
-updated = completeAssuntoProgress(updated, 'a1', options).data;
-const completed = updated.assuntos.find(({ id }) => id === 'a1');
-updated = resetAssuntoProgress(updated, 'a1', options).data;
-const reset = updated.assuntos.find(({ id }) => id === 'a1');
-
-if (
-  summary?.points !== 5 ||
-  summary?.total !== 15 ||
-  completed?.pontosProgresso !== 6 ||
-  deriveProgressStatus(completed) !== PROGRESS_STATUSES.COMPLETE ||
-  reset?.pontosProgresso !== 0 ||
-  reset?.metaPontosProgresso !== 6
-) {
-  throw new Error('As operações e a agregação de pontos produziram resultado inesperado.');
+for (const relativePath of removedFiles) {
+  try {
+    await access(new URL(relativePath, root));
+    throw new Error(`Módulo manual legado ainda existe: ${relativePath}`);
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error;
+  }
 }
-process.stdout.write(
-  '✓ soma ponderada, controles rápidos, conclusão e reinício legados verificados\n',
-);
 
 const pageSource = await readFile(new URL('src/features/materias/materia-page.js', root), 'utf8');
+const controllerSource = await readFile(
+  new URL('src/features/materias/materia-workspace-controller.js', root),
+  'utf8',
+);
+const serviceSource = await readFile(
+  new URL('src/domain/services/assunto-service.js', root),
+  'utf8',
+);
 const dashboardSource = await readFile(
   new URL('src/features/dashboard/dashboard-selectors.js', root),
   'utf8',
@@ -136,18 +97,35 @@ const searchSource = await readFile(
   new URL('src/features/pesquisa/pesquisa-result-card.js', root),
   'utf8',
 );
+
+const forbidden = [
+  'createAssuntoProgressDialog',
+  'createAssuntoProgressResetDialog',
+  'setAssuntoProgress',
+  'changeAssuntoProgress',
+  'increaseAssuntoProgressTotal',
+  'completeAssuntoProgress',
+  'resetAssuntoProgress',
+];
+
+if (forbidden.some((token) => pageSource.includes(token))) {
+  throw new Error('A página da Matéria ainda referencia controles manuais de progresso.');
+}
+if (forbidden.some((token) => controllerSource.includes(token))) {
+  throw new Error('O controller ainda expõe operações manuais de progresso.');
+}
+if (forbidden.some((token) => serviceSource.includes(token))) {
+  throw new Error('O serviço de Assunto ainda expõe operações manuais de progresso.');
+}
 if (
-  !pageSource.includes('Desfazer') ||
-  !pageSource.includes('createAssuntoProgressResetDialog') ||
   !dashboardSource.includes('summarizeStudyStackProgress') ||
   !searchSource.includes('getAssuntoStudyPresentation')
 ) {
-  throw new Error(
-    'O legado do M8.1 ou a substituição do Dashboard/Pesquisa pelo Study Stack não estão preservados como esperado.',
-  );
+  throw new Error('Dashboard ou Pesquisa deixaram de usar o Study Stack como fonte de progresso.');
 }
+
 process.stdout.write(
-  '✓ legado interno preservado e Dashboard/Pesquisa migrados para o Study Stack verificados\n',
+  '✓ controles manuais removidos e Study Stack mantido como fonte exclusiva da interface\n',
 );
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
