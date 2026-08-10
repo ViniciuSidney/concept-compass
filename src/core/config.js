@@ -1,14 +1,14 @@
 export const APP_CONFIG = Object.freeze({
   name: 'Concept Compass',
   shortName: 'Compass',
-  version: '0.1.1',
-  productVersion: 'v0.1.1',
+  version: '0.2.0',
+  productVersion: 'v0.2.0',
   author: 'Vinícius Sidney',
   defaultTitle: 'Visão Geral',
   tagline: 'Mapeie, organize e acompanhe seu conhecimento.',
   technicalId: 'organizador-de-conteudos',
   legacyNames: Object.freeze(['Organizador de Conteúdos']),
-  backupCompatibleVersions: Object.freeze(['v0.1', 'v0.1.0', 'v0.1.1']),
+  backupCompatibleVersions: Object.freeze(['v0.1', 'v0.1.0', 'v0.1.1', 'v0.2.0']),
   integrations: Object.freeze({
     studyStack: Object.freeze({
       url: 'https://viniciusidney.github.io/study-stack/',

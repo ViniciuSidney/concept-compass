@@ -278,10 +278,6 @@
   line-height: 1.5;
 }
 
-.assunto-form__tracking-grid--points {
-  grid-template-columns: minmax(0, 18rem);
-}
-
 .assunto-form__study-note {
   margin: 0;
   padding: var(--space-3) var(--space-4);
@@ -369,10 +365,6 @@
 
   .assunto-study__activity {
     grid-column: 1 / -1;
-  }
-
-  .assunto-form__tracking-grid--points {
-    grid-template-columns: 1fr;
   }
 }
 

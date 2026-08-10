@@ -12,10 +12,7 @@ test('monta seções de tema com Assuntos e limites de reordenação', () => {
   const data = validData({
     materias: [materia()],
     temas: [tema({ id: 't1', ordem: 0 }), tema({ id: 't2', ordem: 1, nome: 'Geometria' })],
-    assuntos: [
-      assunto({ id: 'a1', temaId: 't1', pontosProgresso: 3, metaPontosProgresso: 5 }),
-      assunto({ id: 'a2', temaId: 't1', ordem: 1, pontosProgresso: 5, metaPontosProgresso: 5 }),
-    ],
+    assuntos: [assunto({ id: 'a1', temaId: 't1' }), assunto({ id: 'a2', temaId: 't1', ordem: 1 })],
   });
 
   const sections = selectTemaSections(data, 'materia-1');

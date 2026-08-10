@@ -190,6 +190,22 @@ test('arquivamento local preserva o resumo sincronizado mas remove a ação do S
   assert.equal(view.actionVisible, false);
 });
 
+test('restauração local prevalece sobre resumo arquivado ainda não republicado pelo Study Stack', () => {
+  const documentObject = setupWithSummary(subject({ status: 'archived', sourceArchived: true }));
+  const state = readAssuntoStudyStackState(documentObject, 'assunto-1');
+  const view = createAssuntoStudyStatus(documentObject, {
+    assunto: { ...assunto(), arquivado: false },
+    studyStackState: state,
+    onOpenStudyStack() {},
+  });
+
+  assert.match(view.element.textContent, /Estudo em andamento/);
+  assert.match(view.element.textContent, /4\/10/);
+  assert.equal(view.actionLabel, 'Continuar estudo no Study Stack');
+  assert.equal(view.actionVisible, true);
+  assert.doesNotMatch(view.element.textContent, /Restaure o Assunto/);
+});
+
 test('carrossel começa no aviso recomendado e navega circularmente', () => {
   const documentObject = setupWithSummary();
   const state = readAssuntoStudyStackState(documentObject, 'assunto-1');

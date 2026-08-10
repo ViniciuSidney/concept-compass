@@ -4,7 +4,6 @@ import {
   DIFFICULTY_LABELS,
   DIFFICULTY_VALUES,
   FIELD_LIMITS,
-  PROGRESS_POINTS,
 } from '../../domain/constants.js';
 import { createButton } from '../../ui/components/button.js';
 import { createComponentId } from '../../ui/components/component-utils.js';
@@ -73,7 +72,7 @@ export function createAssuntoFormModal(
   generalError.setAttribute('role', 'alert');
   generalError.hidden = true;
   contentGrid.className = 'assunto-form__grid assunto-form__content-grid';
-  trackingGrid.className = 'assunto-form__tracking-grid assunto-form__tracking-grid--points';
+  trackingGrid.className = 'assunto-form__tracking-grid';
   studyNote.className = 'assunto-form__study-note';
   studyNote.textContent =
     'Progresso, etapas e evidências são registrados automaticamente pelo Study Stack.';
@@ -112,12 +111,6 @@ export function createAssuntoFormModal(
         descricao: descriptionField.control.value,
         dificuldade: difficultyField.control.value,
         observacoes: observationsField.control.value,
-        // Compatibilidade temporária: os campos legados permanecem preservados
-        // no registro, mas não podem mais ser editados pela interface.
-        pontosProgresso: assunto?.pontosProgresso ?? PROGRESS_POINTS.MIN_CURRENT,
-        metaPontosProgresso: assunto?.metaPontosProgresso ?? PROGRESS_POINTS.DEFAULT_TOTAL,
-        precisaReforco: assunto?.precisaReforco ?? false,
-        ultimoEstudoEm: assunto?.ultimoEstudoEm ?? null,
       });
       modal.close('saved');
     } catch (error) {

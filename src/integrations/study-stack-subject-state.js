@@ -96,10 +96,6 @@ export function resolveStudyStackSubjectStatus(studyStackState, { archived = fal
   const subject = studyStackState?.subject ?? null;
   if (!subject) return STUDY_STACK_SUBJECT_STATES.NOT_STARTED;
 
-  if (subject.status === STUDY_STACK_SUBJECT_STATES.ARCHIVED || subject.sourceArchived) {
-    return STUDY_STACK_SUBJECT_STATES.ARCHIVED;
-  }
-
   if (subject.status === STUDY_STACK_SUBJECT_STATES.CONSOLIDATED || subject.consolidated) {
     return STUDY_STACK_SUBJECT_STATES.CONSOLIDATED;
   }

@@ -1,31 +1,10 @@
-export const DATA_SCHEMA_VERSION = 2;
+export const DATA_SCHEMA_VERSION = 3;
 export const PREFERENCES_SCHEMA_VERSION = 1;
 
 export const STORAGE_KEYS = Object.freeze({
   data: 'organizador-conteudos:data',
   preferences: 'organizador-conteudos:preferences',
   ui: 'organizador-conteudos:ui',
-});
-
-export const PROGRESS_POINTS = Object.freeze({
-  MIN_CURRENT: 0,
-  MIN_TOTAL: 1,
-  DEFAULT_TOTAL: 5,
-  MAX_TOTAL: 20,
-  MAX_VISIBLE_SEGMENTS: 10,
-});
-
-export const PROGRESS_STATUSES = Object.freeze({
-  NOT_STARTED: 'not_started',
-  IN_PROGRESS: 'in_progress',
-  COMPLETE: 'complete',
-});
-
-export const PROGRESS_STATUS_VALUES = Object.freeze(Object.values(PROGRESS_STATUSES));
-export const PROGRESS_STATUS_LABELS = Object.freeze({
-  [PROGRESS_STATUSES.NOT_STARTED]: 'Não iniciado',
-  [PROGRESS_STATUSES.IN_PROGRESS]: 'Em andamento',
-  [PROGRESS_STATUSES.COMPLETE]: 'Meta concluída',
 });
 
 export const DIFFICULTIES = Object.freeze({

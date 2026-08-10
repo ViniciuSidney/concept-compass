@@ -178,8 +178,7 @@ html {
   }
 
   .progress__fill,
-  .dashboard-state-row__fill,
-  .segmented-progress__segment.is-filled {
+  .dashboard-state-row__fill {
     background: Highlight;
   }
 }

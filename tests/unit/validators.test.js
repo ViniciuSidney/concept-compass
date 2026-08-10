@@ -26,43 +26,61 @@ test('rejeita matéria sem nome, cor inválida e limites excedidos', () => {
   );
 });
 
-test('assunto aplica padrões oficiais de progresso', () => {
-  const normalized = normalizeAssuntoInput({ nome: 'Razão', ultimoEstudoEm: null });
+test('assunto aplica somente padrões estruturais do schema v3', () => {
+  const normalized = normalizeAssuntoInput({ nome: 'Razão' });
 
-  assert.equal(normalized.pontosProgresso, 0);
-  assert.equal(normalized.metaPontosProgresso, 5);
-  assert.equal(normalized.precisaReforco, false);
   assert.equal(normalized.dificuldade, 'nao_definida');
+  assert.equal(normalized.arquivado, false);
   assert.equal(normalized.descricao, '');
   assert.equal(normalized.observacoes, '');
+  assert.equal('pontosProgresso' in normalized, false);
+  assert.equal('metaPontosProgresso' in normalized, false);
+  assert.equal('precisaReforco' in normalized, false);
+  assert.equal('ultimoEstudoEm' in normalized, false);
 });
 
-test('rejeita pontos inválidos, dificuldade e data futura', () => {
+test('ignora campos de progresso legado e continua validando dificuldade', () => {
   assert.throws(
     () =>
-      normalizeAssuntoInput(
-        {
-          nome: 'Razão',
-          pontosProgresso: 8,
-          metaPontosProgresso: 5,
-          dificuldade: 'extrema',
-          ultimoEstudoEm: '2026-07-25',
-        },
-        { today: '2026-07-24' },
-      ),
+      normalizeAssuntoInput({
+        nome: 'Razão',
+        pontosProgresso: 999,
+        metaPontosProgresso: -1,
+        precisaReforco: 'sim',
+        ultimoEstudoEm: '2099-01-01',
+        dificuldade: 'extrema',
+      }),
     (error) =>
       error instanceof ValidationError &&
-      error.issues.some(({ code }) => code === 'progress_over_total') &&
-      error.issues.some(({ field }) => field === 'dificuldade') &&
-      error.issues.some(({ field }) => field === 'ultimoEstudoEm'),
+      error.issues.length === 1 &&
+      error.issues[0].field === 'dificuldade',
   );
+
+  const sanitized = normalizeAssuntoInput({
+    nome: 'Razão',
+    pontosProgresso: 999,
+    metaPontosProgresso: -1,
+    precisaReforco: 'sim',
+    ultimoEstudoEm: '2099-01-01',
+  });
+  assert.equal('pontosProgresso' in sanitized, false);
+  assert.equal('ultimoEstudoEm' in sanitized, false);
 });
 
-test('rejeita meta fora da faixa e reforço não booleano', () => {
-  assert.throws(
-    () => normalizeAssuntoInput({ nome: 'Razão', metaPontosProgresso: 21, precisaReforco: 'sim' }),
-    (error) => error instanceof ValidationError && error.issues.length >= 2,
-  );
+test('campos legados extras não voltam ao registro normalizado', () => {
+  const normalized = normalizeAssuntoInput({
+    nome: 'Razão',
+    metaPontosProgresso: 21,
+    precisaReforco: 'sim',
+  });
+
+  assert.deepEqual(normalized, {
+    nome: 'Razão',
+    descricao: '',
+    arquivado: false,
+    dificuldade: 'nao_definida',
+    observacoes: '',
+  });
 });
 
 test('estrutura válida é sanitizada e aceita', () => {

@@ -71,10 +71,6 @@ test('Pesquisa Geral sem termo apresenta orientação e contagens dos filtros', 
 test('Pesquisa Geral renderiza situação e progresso sincronizados do Assunto', () => {
   const data = validData();
   data.assuntos[0].descricao = 'Problemas e operações';
-  data.assuntos[0].pontosProgresso = 5;
-  data.assuntos[0].metaPontosProgresso = 5;
-  data.assuntos[0].precisaReforco = true;
-  data.assuntos[0].ultimoEstudoEm = '2025-01-01';
   const subjectId = data.assuntos[0].id;
   const { documentObject, context } = createContext(data, readySnapshot(subjectId));
   const page = createPesquisaPage(documentObject, { query: { q: 'equação' } }, context);

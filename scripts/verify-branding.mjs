@@ -2,9 +2,9 @@ import { access, readFile } from 'node:fs/promises';
 
 const root = new URL('../', import.meta.url);
 const requiredFiles = [
-  'docs/release-v0.1.1.md',
-  'docs/validacao-v0.1.1.md',
-  'tests/manual/v0.1.1.md',
+  'docs/release-v0.2.0.md',
+  'docs/validacao-v0.2.0.md',
+  'tests/manual/integracao-study-stack-final.md',
   'tests/unit/backup-service.test.js',
   'tests/unit/release-metadata.test.js',
 ];
@@ -17,8 +17,8 @@ const lock = JSON.parse(await readFile(new URL('package-lock.json', root), 'utf8
 if (pkg.name !== 'organizador-de-conteudos') {
   throw new Error('O nome técnico do pacote não deve mudar nesta atualização.');
 }
-if (pkg.version !== '0.1.1' || lock.version !== '0.1.1') {
-  throw new Error('Pacote e lockfile precisam usar a versão 0.1.1.');
+if (pkg.version !== '0.2.0' || lock.version !== '0.2.0') {
+  throw new Error('Pacote e lockfile precisam usar a versão 0.2.0.');
 }
 
 const config = await readFile(new URL('src/core/config.js', root), 'utf8');
@@ -74,5 +74,8 @@ if (!readme.startsWith('# Concept Compass') || !readme.includes('Compatibilidade
 if (!changelog.includes('## [0.1.1] - 2026-07-30')) {
   throw new Error('O CHANGELOG não contém a atualização v0.1.1.');
 }
+if (!changelog.includes('## [0.2.0] - 2026-08-09')) {
+  throw new Error('O CHANGELOG não contém a integração v0.2.0.');
+}
 process.stdout.write('✓ documentação atualizada para Concept Compass\n');
-process.stdout.write('Identidade v0.1.1 verificada com sucesso.\n');
+process.stdout.write('Identidade e release v0.2.0 verificadas com sucesso.\n');

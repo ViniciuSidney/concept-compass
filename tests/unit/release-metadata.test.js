@@ -7,15 +7,15 @@ import { APP_CONFIG } from '../../src/core/config.js';
 
 const root = new URL('../../', import.meta.url);
 
-test('release usa versão técnica 0.1.1 e identidade Concept Compass', async () => {
+test('release usa versão técnica 0.2.0 e identidade Concept Compass', async () => {
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   const lock = JSON.parse(await readFile(new URL('package-lock.json', root), 'utf8'));
 
-  assert.equal(pkg.version, '0.1.1');
-  assert.equal(lock.version, '0.1.1');
+  assert.equal(pkg.version, '0.2.0');
+  assert.equal(lock.version, '0.2.0');
   assert.equal(APP_CONFIG.name, 'Concept Compass');
-  assert.equal(APP_CONFIG.version, '0.1.1');
-  assert.equal(APP_CONFIG.productVersion, 'v0.1.1');
+  assert.equal(APP_CONFIG.version, '0.2.0');
+  assert.equal(APP_CONFIG.productVersion, 'v0.2.0');
   assert.deepEqual(APP_CONFIG.legacyNames, ['Organizador de Conteúdos']);
 });
 
@@ -36,7 +36,7 @@ test('manifesto final usa caminhos relativos e ícones oficiais', async () => {
   );
 });
 
-test('service worker permanece conscientemente sem registro na v0.1.1', async () => {
+test('service worker permanece conscientemente sem registro na v0.2.0', async () => {
   const index = await readFile(new URL('index.html', root), 'utf8');
   const main = await readFile(new URL('src/main.js', root), 'utf8');
   const reserved = await readFile(new URL('service-worker.js', root), 'utf8');

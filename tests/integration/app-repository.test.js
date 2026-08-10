@@ -28,7 +28,7 @@ test('salva e recarrega um retrato completo validado', () => {
   assert.equal(loaded.status, 'ready');
 });
 
-test('carrega estrutura v1 como v2 e sinaliza migração sem apagar a origem', () => {
+test('carrega estrutura v1 como v3 e sinaliza migração sem apagar a origem', () => {
   const created = '2026-07-24T12:00:00.000Z';
   const legacy = {
     schemaVersion: 1,
@@ -77,11 +77,13 @@ test('carrega estrutura v1 como v2 e sinaliza migração sem apagar a origem', (
 
   assert.equal(result.status, 'ready');
   assert.equal(result.migrated, true);
-  assert.equal(result.data.schemaVersion, 2);
-  assert.equal(result.data.assuntos[0].pontosProgresso, 3);
-  assert.equal(result.data.assuntos[0].metaPontosProgresso, 5);
-  assert.equal(result.data.assuntos[0].precisaReforco, true);
+  assert.equal(result.data.schemaVersion, 3);
   assert.equal(result.data.assuntos[0].observacoes, 'Preservar');
+  assert.equal('estado' in result.data.assuntos[0], false);
+  assert.equal('pontosProgresso' in result.data.assuntos[0], false);
+  assert.equal('metaPontosProgresso' in result.data.assuntos[0], false);
+  assert.equal('precisaReforco' in result.data.assuntos[0], false);
+  assert.equal('ultimoEstudoEm' in result.data.assuntos[0], false);
   assert.equal(storage.dump()[STORAGE_KEYS.data], rawData);
 });
 
@@ -173,9 +175,11 @@ test('substitui dados e preferências somente depois de validar o retrato comple
     { today: '2026-07-29' },
   );
 
-  assert.deepEqual(restored.data, validData());
+  assert.equal(restored.data.schemaVersion, 3);
+  assert.equal(restored.data.assuntos.length, 1);
+  assert.equal('pontosProgresso' in restored.data.assuntos[0], false);
   assert.deepEqual(restored.preferences, nextPreferences);
-  assert.deepEqual(JSON.parse(storage.dump()[STORAGE_KEYS.data]), validData());
+  assert.deepEqual(JSON.parse(storage.dump()[STORAGE_KEYS.data]), restored.data);
   assert.deepEqual(JSON.parse(storage.dump()[STORAGE_KEYS.preferences]), nextPreferences);
 });
 

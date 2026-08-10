@@ -1,14 +1,6 @@
 import { DATA_SCHEMA_VERSION, DIFFICULTIES, MATERIA_COLORS } from '../../src/domain/constants.js';
 
 const CREATED_AT = '2026-07-20T12:00:00.000Z';
-const STUDY_DATES = Object.freeze([
-  null,
-  '2026-07-01',
-  '2026-07-05',
-  '2026-07-10',
-  '2026-07-15',
-  '2026-07-20',
-]);
 const DIFFICULTY_CYCLE = Object.freeze([
   DIFFICULTIES.NAO_DEFINIDA,
   DIFFICULTIES.FACIL,
@@ -54,21 +46,15 @@ export function createLargeData({
           materiaIndex * temasPerMateria * assuntosPerTema +
           temaIndex * assuntosPerTema +
           assuntoIndex;
-        const metaPontosProgresso = 5 + (globalIndex % 6);
-        const pontosProgresso = globalIndex % (metaPontosProgresso + 1);
         const marker = globalIndex % 97 === 0 ? ' revisão estratégica' : '';
 
         assuntos.push({
           id: `assunto-ampliado-${materiaIndex}-${temaIndex}-${assuntoIndex}`,
           temaId,
           nome: `Assunto ${String(assuntoIndex + 1).padStart(2, '0')} do tema ${temaIndex + 1}${marker}`,
-          descricao: `Descrição fictícia para testar textos, pesquisa, progresso e listagens extensas${marker}.`,
-          pontosProgresso,
-          metaPontosProgresso,
-          precisaReforco: globalIndex % 11 === 0,
+          descricao: `Descrição fictícia para testar textos, pesquisa e listagens extensas${marker}.`,
           dificuldade: DIFFICULTY_CYCLE[globalIndex % DIFFICULTY_CYCLE.length],
           observacoes: `Observação fictícia ${globalIndex + 1}. Nenhum dado pessoal está presente nesta massa.`,
-          ultimoEstudoEm: STUDY_DATES[globalIndex % STUDY_DATES.length],
           ordem: assuntoIndex,
           criadoEm: CREATED_AT,
           atualizadoEm: CREATED_AT,

@@ -6,7 +6,6 @@ import { createButton, createButtonLink } from '../../src/ui/components/button.j
 import { createFilterChip } from '../../src/ui/components/filter-chip.js';
 import { clampProgress, createProgressBar } from '../../src/ui/components/progress-bar.js';
 import { createSearchField } from '../../src/ui/components/search-field.js';
-import { createSegmentedProgress } from '../../src/ui/components/segmented-progress.js';
 import { createFakeDocument } from '../helpers/fake-dom.js';
 test('botão aplica variante tamanho ícone e rótulo', () => {
   const { documentObject } = createFakeDocument();
@@ -81,26 +80,6 @@ test('campo de pesquisa limpa valor', () => {
   assert.deepEqual(values, ['Álgebra', '']);
 });
 
-test('progresso segmentado usa pontos reais até dez e normaliza metas maiores', () => {
-  const { documentObject } = createFakeDocument();
-  const direct = createSegmentedProgress(documentObject, { current: 3, total: 5 });
-  const normalized = createSegmentedProgress(documentObject, { current: 12, total: 20 });
-
-  assert.equal(direct.children[0].children.length, 5);
-  assert.equal(
-    direct.children[0].children.filter(({ classList }) => classList.contains('is-filled')).length,
-    3,
-  );
-  assert.equal(direct.getAttribute('aria-valuetext'), '3 de 5 pontos, 60%');
-  assert.equal(normalized.children[0].children.length, 10);
-  assert.equal(
-    normalized.children[0].children.filter(({ classList }) => classList.contains('is-filled'))
-      .length,
-    6,
-  );
-  assert.equal(normalized.children[1].textContent, '12/20 · 60%');
-});
-
 test('menu de ações rola a janela quando abre abaixo da área visível', () => {
   const { documentObject, windowObject } = createFakeDocument();
   const scrollCalls = [];
@@ -108,7 +87,7 @@ test('menu de ações rola a janela quando abre abaixo da área visível', () =>
   windowObject.scrollBy = (options) => scrollCalls.push(options);
 
   const actionMenu = createActionMenu(documentObject, {
-    items: [{ label: 'Ajustar progresso' }, { label: 'Concluir meta' }],
+    items: [{ label: 'Editar' }, { label: 'Excluir' }],
   });
   actionMenu.menu.querySelectorAll = () => actionMenu.menu.children;
   actionMenu.menu.getBoundingClientRect = () => ({ top: 560, bottom: 720 });

@@ -1,5 +1,7 @@
 # Preparação para validação do M8.1 — Sistema de Pontos de Progresso
 
+> **Documento histórico.** Este arquivo registra o M8.1 original, quando o Concept Compass ainda possuía pontos manuais. Esse mecanismo foi removido. A arquitetura atual usa schema v3 e o Study Stack como fonte única do progresso. Consulte `docs/integracao-study-stack.md` para as regras vigentes.
+
 ## Objetivo
 
 Substituir os estados de progresso escolhidos manualmente por um acompanhamento gradual, flexível e consistente em toda a hierarquia, antes da implementação de backup e importação do M9.

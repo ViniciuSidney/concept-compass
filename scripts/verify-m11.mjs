@@ -11,10 +11,12 @@ const requiredFiles = [
   'assets/icons/apple-touch-icon.png',
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',
-  'docs/backlog-v0.2.md',
+  'docs/backlog-v0.3.md',
   'docs/manual-do-usuario.md',
   'docs/publicacao-github-pages.md',
   'docs/release-v0.1.0.md',
+  'docs/release-v0.2.0.md',
+  'docs/validacao-v0.2.0.md',
   'docs/validacao-m11.md',
   'scripts/generate-large-fixture.mjs',
   'tests/fixtures/large-data-builder.js',
@@ -28,8 +30,8 @@ process.stdout.write('✓ arquivos de release, documentação, ícones e testes 
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 const lock = JSON.parse(await readFile(new URL('package-lock.json', root), 'utf8'));
-if (!/^0\.1\.\d+$/.test(pkg.version) || lock.version !== pkg.version) {
-  throw new Error('A versão técnica precisa pertencer à linha 0.1.x e coincidir com o lockfile.');
+if (pkg.version !== '0.2.0' || lock.version !== pkg.version) {
+  throw new Error('A versão técnica precisa ser 0.2.0 e coincidir com o lockfile.');
 }
 if (Object.keys(pkg.dependencies ?? {}).length !== 0) {
   throw new Error('Uma dependência de execução foi adicionada à release.');
@@ -44,7 +46,7 @@ for (const script of [
   if (!pkg.scripts?.[script]) throw new Error(`O script ${script} não foi registrado.`);
 }
 process.stdout.write(
-  '✓ linha 0.1.x, scripts de release e zero dependências de execução verificados\n',
+  '✓ versão 0.2.0, scripts de release e zero dependências de execução verificados\n',
 );
 
 const config = await readFile(new URL('src/core/config.js', root), 'utf8');
@@ -79,7 +81,7 @@ if (!index.includes('apple-touch-icon') || !index.includes('manifest.webmanifest
   throw new Error('O documento principal não referencia os metadados finais de instalação.');
 }
 if (/serviceWorker\s*\.\s*register|navigator\s*\.\s*serviceWorker/.test(`${index}\n${main}`)) {
-  throw new Error('O service worker foi registrado apesar da decisão oficial da v0.1.0.');
+  throw new Error('O service worker foi registrado apesar da decisão oficial da release.');
 }
 if (!serviceWorker.includes('service worker não ativado')) {
   throw new Error('A decisão sobre cache offline não está registrada no arquivo reservado.');
@@ -90,8 +92,8 @@ process.stdout.write(
 
 const readme = await readFile(new URL('README.md', root), 'utf8');
 const changelog = await readFile(new URL('CHANGELOG.md', root), 'utf8');
-const releaseNotes = await readFile(new URL('docs/release-v0.1.0.md', root), 'utf8');
-const backlog = await readFile(new URL('docs/backlog-v0.2.md', root), 'utf8');
+const releaseNotes = await readFile(new URL('docs/release-v0.2.0.md', root), 'utf8');
+const backlog = await readFile(new URL('docs/backlog-v0.3.md', root), 'utf8');
 if (!readme.includes('Concept Compass') || !readme.includes('release:check')) {
   throw new Error('O README não descreve corretamente a identidade e o portão da release.');
 }
@@ -101,8 +103,8 @@ if (
 ) {
   throw new Error('O CHANGELOG não preserva a v0.1.0 e a atualização v0.1.1.');
 }
-if (!releaseNotes.includes('tag planejada: `v0.1.0`') || !backlog.includes('metacognitivos')) {
-  throw new Error('As notas da release ou o backlog da v0.2 estão incompletos.');
+if (!releaseNotes.includes('tag planejada: `v0.2.0`') || !backlog.includes('metacognitivos')) {
+  throw new Error('As notas da release ou o backlog da v0.3 estão incompletos.');
 }
 process.stdout.write('✓ README, changelog, release e backlog coerentes com o produto\n');
 

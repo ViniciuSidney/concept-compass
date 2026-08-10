@@ -41,10 +41,6 @@
   width: min(38rem, 100%);
 }
 
-.modal--progress-adjust {
-  width: min(36rem, 100%);
-}
-
 .modal__header,
 .side-panel__header {
   display: flex;

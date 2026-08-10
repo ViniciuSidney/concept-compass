@@ -139,8 +139,7 @@
 
   .modal--assunto-form,
   .modal--backup-import,
-  .modal--structure-move,
-  .modal--progress-adjust {
+  .modal--structure-move {
     height: 100dvh;
     max-height: 100dvh;
     border-top: 0;

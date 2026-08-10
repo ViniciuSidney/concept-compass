@@ -57,3 +57,32 @@ test('arquivamento local prevalece e leitura insegura vira sincronização pende
     STUDY_STACK_SUBJECT_STATES.ARCHIVED,
   );
 });
+
+test('resumo residual não mantém o conteúdo restaurado como arquivado', () => {
+  const state = selectStudyStackSubjectState(
+    {
+      status: 'ready',
+      receivedContractVersion: '1.0.0',
+      summary: {
+        updatedAt: '2026-08-09T12:00:00.000Z',
+        subjects: {
+          a1: {
+            subjectId: 'a1',
+            status: 'archived',
+            progress: 4,
+            maxProgress: 10,
+            sourceArchived: true,
+            consolidated: false,
+            lastActivityAt: '2026-08-09T11:00:00.000Z',
+          },
+        },
+      },
+    },
+    'a1',
+  );
+
+  assert.equal(
+    resolveStudyStackSubjectStatus(state, { archived: false }),
+    STUDY_STACK_SUBJECT_STATES.IN_PROGRESS,
+  );
+});

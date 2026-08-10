@@ -11,8 +11,8 @@ test('o projeto não possui dependências de execução', async () => {
   assert.deepEqual(packageFile.dependencies, {});
 });
 
-test('a versão técnica está preparada para a release v0.1.1', async () => {
+test('a versão técnica está preparada para a release v0.2.0', async () => {
   const packageFile = JSON.parse(await readFile(packageUrl, 'utf8'));
 
-  assert.equal(packageFile.version, '0.1.1');
+  assert.equal(packageFile.version, '0.2.0');
 });

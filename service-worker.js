@@ -1,5 +1,5 @@
 /*
- * Decisão mantida na v0.1.1: service worker não ativado.
+ * Decisão mantida na v0.2.0: service worker não ativado.
  *
  * A aplicação já é publicável como site estático no GitHub Pages. O cache offline foi
  * adiado para uma versão posterior porque ainda não há um fluxo visual de atualização

@@ -91,18 +91,28 @@ export function getAssuntoStudyPresentation(
     });
   }
 
-  const archived = subject.status === 'archived' || subject.sourceArchived;
   const consolidated = subject.status === 'consolidated' || subject.consolidated;
-
-  if (archived) {
-    return createArchivedPresentation('assunto', true);
-  }
 
   if (consolidated) {
     return Object.freeze({
       state: 'consolidated',
       title: 'Estudo consolidado',
       actionLabel: 'Ver estudo no Study Stack',
+      actionVisible: true,
+      actionDisabled: false,
+      synchronized: true,
+    });
+  }
+
+  if (
+    (subject.status === 'archived' || subject.sourceArchived) &&
+    Number(subject.progress) <= 0 &&
+    !subject.lastActivityAt
+  ) {
+    return Object.freeze({
+      state: 'not_started',
+      title: 'Estudo ainda não iniciado',
+      actionLabel: 'Iniciar estudo no Study Stack',
       actionVisible: true,
       actionDisabled: false,
       synchronized: true,

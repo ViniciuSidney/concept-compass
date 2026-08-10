@@ -44,7 +44,7 @@ test('Configurações apresenta as quatro seções oficiais e informações Sobr
     'Dados',
     'Sobre a aplicação',
     'Concept Compass',
-    'v0.1.1',
+    'v0.2.0',
     'Vinícius Sidney',
     'LocalStorage',
     'Matéria → Tema → Assunto',

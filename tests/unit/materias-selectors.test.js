@@ -21,10 +21,7 @@ function dataWithMaterias() {
       }),
     ],
     temas: [tema({ id: 't1', materiaId: 'm1' }), tema({ id: 't2', materiaId: 'm2' })],
-    assuntos: [
-      assunto({ id: 'a1', temaId: 't1', pontosProgresso: 5 }),
-      assunto({ id: 'a2', temaId: 't2', pontosProgresso: 0 }),
-    ],
+    assuntos: [assunto({ id: 'a1', temaId: 't1' }), assunto({ id: 'a2', temaId: 't2' })],
   });
 }
 

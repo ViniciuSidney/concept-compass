@@ -55,7 +55,7 @@ test('cria e edita matéria preservando ID e criação', () => {
   assert.equal(updated.materia.atualizadoEm, '2026-07-24T13:00:00.000Z');
 });
 
-test('constrói hierarquia completa e aplica padrões do assunto', () => {
+test('constrói hierarquia completa e aplica padrões estruturais do assunto', () => {
   const { idFactory, nowFactory, todayFactory } = createFactories();
   let data = createEmptyData();
   ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
@@ -69,15 +69,17 @@ test('constrói hierarquia completa e aplica padrões do assunto', () => {
 
   assert.equal(data.materias[0].arquivado, false);
   assert.equal(data.temas[0].arquivado, false);
-  assert.equal(result.assunto.pontosProgresso, 0);
-  assert.equal(result.assunto.metaPontosProgresso, 5);
-  assert.equal(result.assunto.precisaReforco, false);
   assert.equal(result.assunto.arquivado, false);
   assert.equal(result.assunto.dificuldade, 'nao_definida');
-  assert.equal(result.assunto.ultimoEstudoEm, null);
+  assert.equal(result.assunto.descricao, '');
+  assert.equal(result.assunto.observacoes, '');
+  assert.equal('pontosProgresso' in result.assunto, false);
+  assert.equal('metaPontosProgresso' in result.assunto, false);
+  assert.equal('precisaReforco' in result.assunto, false);
+  assert.equal('ultimoEstudoEm' in result.assunto, false);
 });
 
-test('edições de tema e assunto preservam relações e progresso', () => {
+test('edições de tema e assunto preservam relações e ignoram progresso legado', () => {
   const { idFactory, nowFactory, laterFactory, todayFactory } = createFactories();
   let data = createEmptyData();
   ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
@@ -100,6 +102,9 @@ test('edições de tema e assunto preservam relações e progresso', () => {
     data.assuntos[0].id,
     {
       nome: 'S2',
+      descricao: 'Descrição atualizada',
+      dificuldade: 'media',
+      observacoes: 'Preservar conteúdo',
       pontosProgresso: 2,
       metaPontosProgresso: 6,
       precisaReforco: true,
@@ -110,9 +115,11 @@ test('edições de tema e assunto preservam relações e progresso', () => {
 
   assert.equal(temaResult.tema.materiaId, data.materias[0].id);
   assert.equal(assuntoResult.assunto.temaId, data.temas[0].id);
-  assert.equal(assuntoResult.assunto.pontosProgresso, 2);
-  assert.equal(assuntoResult.assunto.metaPontosProgresso, 6);
-  assert.equal(assuntoResult.assunto.precisaReforco, true);
+  assert.equal(assuntoResult.assunto.nome, 'S2');
+  assert.equal(assuntoResult.assunto.dificuldade, 'media');
+  assert.equal(assuntoResult.assunto.observacoes, 'Preservar conteúdo');
+  assert.equal('pontosProgresso' in assuntoResult.assunto, false);
+  assert.equal('ultimoEstudoEm' in assuntoResult.assunto, false);
 });
 
 test('arquiva e restaura matéria preservando hierarquia e IDs dos descendentes', () => {
@@ -163,7 +170,7 @@ test('arquiva e restaura tema sem alterar estado próprio dos Assuntos', () => {
   assert.equal(restored.data.assuntos[0].arquivado, false);
 });
 
-test('arquiva e restaura assunto preservando vínculo, conteúdo e dados legados', () => {
+test('arquiva e restaura assunto preservando vínculo e conteúdo estrutural', () => {
   const { idFactory, nowFactory, laterFactory, todayFactory } = createFactories();
   let data = createEmptyData();
   ({ data } = createMateria(data, { nome: 'A', corId: 'azul' }, { idFactory, nowFactory }));
@@ -173,9 +180,7 @@ test('arquiva e restaura assunto preservando vínculo, conteúdo e dados legados
     data.temas[0].id,
     {
       nome: 'S',
-      pontosProgresso: 3,
-      metaPontosProgresso: 7,
-      precisaReforco: true,
+      dificuldade: 'dificil',
       observacoes: 'Preservar',
     },
     { idFactory, nowFactory, todayFactory },
@@ -190,12 +195,11 @@ test('arquiva e restaura assunto preservando vínculo, conteúdo e dados legados
   assert.equal(archived.assunto.id, original.id);
   assert.equal(archived.assunto.temaId, original.temaId);
   assert.equal(archived.assunto.nome, original.nome);
-  assert.equal(archived.assunto.pontosProgresso, 3);
-  assert.equal(archived.assunto.metaPontosProgresso, 7);
-  assert.equal(archived.assunto.precisaReforco, true);
+  assert.equal(archived.assunto.dificuldade, 'dificil');
   assert.equal(archived.assunto.observacoes, 'Preservar');
   assert.equal(archived.assunto.arquivado, true);
   assert.equal(archived.assunto.atualizadoEm, '2026-07-24T13:00:00.000Z');
+  assert.equal('pontosProgresso' in archived.assunto, false);
 
   const restored = restoreAssunto(archived.data, original.id, {
     nowFactory,

@@ -29,14 +29,19 @@ function validBackup(overrides = {}) {
   };
 }
 
-test('gera backup oficial com metadados, dados e preferências permitidas', () => {
+test('gera backup oficial com schema v3 e sem progresso local legado', () => {
   const backup = validBackup();
 
   assert.equal(backup.app, BACKUP_APP_NAME);
-  assert.equal(backup.appVersion, 'v0.1.1');
+  assert.equal(backup.appVersion, 'v0.2.0');
   assert.equal(backup.formatVersion, BACKUP_FORMAT_VERSION);
   assert.equal(backup.exportedAt, NOW.toISOString());
-  assert.deepEqual(backup.data, validData());
+  assert.equal(backup.data.schemaVersion, 3);
+  assert.equal(backup.data.assuntos.length, 1);
+  assert.equal('pontosProgresso' in backup.data.assuntos[0], false);
+  assert.equal('metaPontosProgresso' in backup.data.assuntos[0], false);
+  assert.equal('precisaReforco' in backup.data.assuntos[0], false);
+  assert.equal('ultimoEstudoEm' in backup.data.assuntos[0], false);
   assert.deepEqual(backup.preferences, createDefaultPreferences());
   assert.equal('ui' in backup, false);
   assert.equal('status' in backup, false);
@@ -68,8 +73,9 @@ test('aceita backups da marca anterior e os normaliza para Concept Compass', () 
   const parsed = parseBackupText(JSON.stringify(legacyBackup), { today: '2026-07-29' });
 
   assert.equal(parsed.app, BACKUP_APP_NAME);
-  assert.equal(parsed.appVersion, 'v0.1.1');
-  assert.deepEqual(parsed.data, validData());
+  assert.equal(parsed.appVersion, 'v0.2.0');
+  assert.equal(parsed.data.schemaVersion, 3);
+  assert.equal(parsed.data.assuntos.length, 1);
 });
 
 test('rejeita JSON malformado sem tentar recuperar parcialmente', () => {
@@ -115,7 +121,7 @@ test('rejeita relações quebradas e preserva a causa como conteúdo inválido',
   );
 });
 
-test('migra dados antigos válidos antes de concluir a importação', () => {
+test('migra backup v1 até o schema v3 antes de concluir a importação', () => {
   const backup = validBackup();
   const assunto = backup.data.assuntos[0];
   backup.data = {
@@ -130,7 +136,7 @@ test('migra dados antigos válidos antes de concluir a importação', () => {
         estado: 'consolidado',
         dificuldade: assunto.dificuldade,
         observacoes: assunto.observacoes,
-        ultimoEstudoEm: assunto.ultimoEstudoEm,
+        ultimoEstudoEm: '2026-07-29',
         ordem: assunto.ordem,
         criadoEm: assunto.criadoEm,
         atualizadoEm: assunto.atualizadoEm,
@@ -139,6 +145,35 @@ test('migra dados antigos válidos antes de concluir a importação', () => {
   };
 
   const parsed = parseBackupText(JSON.stringify(backup), { today: '2026-07-29' });
-  assert.equal(parsed.data.schemaVersion, 2);
-  assert.equal(parsed.data.assuntos[0].pontosProgresso, 5);
+  assert.equal(parsed.data.schemaVersion, 3);
+  assert.equal(parsed.data.assuntos[0].id, assunto.id);
+  assert.equal('estado' in parsed.data.assuntos[0], false);
+  assert.equal('pontosProgresso' in parsed.data.assuntos[0], false);
+  assert.equal('ultimoEstudoEm' in parsed.data.assuntos[0], false);
+});
+
+test('migra backup v2 removendo campos de progresso sem perder conteúdo', () => {
+  const backup = validBackup();
+  const assunto = backup.data.assuntos[0];
+  backup.data = {
+    ...backup.data,
+    schemaVersion: 2,
+    assuntos: [
+      {
+        ...assunto,
+        pontosProgresso: 4,
+        metaPontosProgresso: 8,
+        precisaReforco: true,
+        ultimoEstudoEm: '2026-07-29',
+      },
+    ],
+  };
+
+  const parsed = parseBackupText(JSON.stringify(backup), { today: '2026-07-29' });
+  assert.equal(parsed.data.schemaVersion, 3);
+  assert.equal(parsed.data.assuntos[0].nome, assunto.nome);
+  assert.equal('pontosProgresso' in parsed.data.assuntos[0], false);
+  assert.equal('metaPontosProgresso' in parsed.data.assuntos[0], false);
+  assert.equal('precisaReforco' in parsed.data.assuntos[0], false);
+  assert.equal('ultimoEstudoEm' in parsed.data.assuntos[0], false);
 });

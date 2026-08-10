@@ -1,5 +1,7 @@
 # Validação concluída do M2 — Domínio, validação e persistência
 
+> **Documento histórico.** O M2 descreve a primeira arquitetura de domínio. O progresso local citado abaixo foi removido na integração posterior; o schema atual é v3 e o Study Stack é a fonte única do progresso.
+
 ## Status
 
 **Aprovado pelo usuário.** Os testes manuais do M2 foram concluídos com resultado OK e o avanço ao M3 foi autorizado.

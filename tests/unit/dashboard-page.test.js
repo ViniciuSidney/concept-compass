@@ -43,11 +43,7 @@ test('Visão Geral preenchida apresenta progresso, pendências e atividade do St
       assunto({
         id: 'a1',
         temaId: 't1',
-        pontosProgresso: 3,
-        metaPontosProgresso: 5,
-        precisaReforco: true,
         dificuldade: DIFFICULTIES.DIFICIL,
-        ultimoEstudoEm: '2025-01-01',
       }),
     ],
   };

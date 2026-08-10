@@ -5,7 +5,7 @@ import { createAssuntoFormModal } from '../../src/features/materias/assunto-form
 import { assunto } from '../fixtures/data-builders.js';
 import { createFakeDocument } from '../helpers/fake-dom.js';
 
-test('formulário do assunto remove acompanhamento manual e preserva dados legados ao editar', async () => {
+test('formulário do assunto não exibe nem reenvia acompanhamento manual legado', async () => {
   const { documentObject, windowObject } = createFakeDocument();
   const current = assunto({
     pontosProgresso: 3,
@@ -35,10 +35,12 @@ test('formulário do assunto remove acompanhamento manual e preserva dados legad
   form.dispatch('submit');
   await new Promise((resolve) => setTimeout(resolve, 0));
 
-  assert.equal(submitted.pontosProgresso, 3);
-  assert.equal(submitted.metaPontosProgresso, 8);
-  assert.equal(submitted.precisaReforco, true);
-  assert.equal(submitted.ultimoEstudoEm, '2026-08-01');
+  assert.equal(submitted.nome, current.nome);
+  assert.equal(submitted.dificuldade, current.dificuldade);
+  assert.equal('pontosProgresso' in submitted, false);
+  assert.equal('metaPontosProgresso' in submitted, false);
+  assert.equal('precisaReforco' in submitted, false);
+  assert.equal('ultimoEstudoEm' in submitted, false);
 });
 
 function findElement(root, predicate) {

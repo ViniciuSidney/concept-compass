@@ -30,41 +30,28 @@ function dashboardData() {
         temaId: 't1',
         nome: 'Equações',
         ordem: 0,
-        pontosProgresso: 5,
-        metaPontosProgresso: 5,
         dificuldade: DIFFICULTIES.MEDIA,
-        ultimoEstudoEm: '2025-01-01',
       }),
       assunto({
         id: 'a2',
         temaId: 't1',
         nome: 'Funções',
         ordem: 1,
-        pontosProgresso: 0,
-        metaPontosProgresso: 5,
-        precisaReforco: true,
         dificuldade: DIFFICULTIES.DIFICIL,
-        ultimoEstudoEm: '2025-01-02',
       }),
       assunto({
         id: 'a3',
         temaId: 't2',
         nome: 'Brasil Colônia',
         ordem: 0,
-        pontosProgresso: 0,
-        metaPontosProgresso: 5,
         dificuldade: DIFFICULTIES.FACIL,
-        ultimoEstudoEm: null,
       }),
       assunto({
         id: 'a4',
         temaId: 't3',
         nome: 'Revolução Francesa',
         ordem: 0,
-        pontosProgresso: 5,
-        metaPontosProgresso: 5,
         dificuldade: DIFFICULTIES.DIFICIL,
-        ultimoEstudoEm: '2025-01-03',
       }),
     ],
   };
@@ -167,7 +154,9 @@ test('prioridades usam pendências e andamento sincronizados antes da dificuldad
 });
 
 test('estudos recentes usam lastActivityAt do Study Stack e ignoram ultimoEstudoEm legado', () => {
-  const recent = selectRecentStudies(dashboardData(), {
+  const data = dashboardData();
+  data.assuntos[0].ultimoEstudoEm = '2025-01-01';
+  const recent = selectRecentStudies(data, {
     studyStackSnapshot: readySnapshot(),
   });
 
@@ -195,6 +184,12 @@ test('destaques de matérias usam agregação objetiva de dez pontos por Assunto
 
 test('sincronização pendente bloqueia indicadores sem recorrer ao progresso legado', () => {
   const data = dashboardData();
+  Object.assign(data.assuntos[0], {
+    pontosProgresso: 5,
+    metaPontosProgresso: 5,
+    precisaReforco: true,
+    ultimoEstudoEm: '2025-01-01',
+  });
   const pending = { status: 'pending', summary: null };
   const summary = selectDashboardSummary(data, pending);
 

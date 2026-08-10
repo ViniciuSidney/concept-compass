@@ -4,17 +4,53 @@ Todas as mudanças relevantes do Concept Compass serão registradas neste arquiv
 
 ## [Não lançado]
 
+## [0.2.0] - 2026-08-09
+
 ### Adicionado
 
-- ação **Abrir no Study Stack** no menu e no painel de detalhes de cada Assunto;
-- contrato de integração `1.0.0` com Matéria, Tema, Assunto e URL de retorno profundo;
+- integração bidirecional com o Study Stack por IDs estáveis;
+- leitura do resumo de progresso `study-stack:integration:progress:v1`;
+- progresso objetivo `0–10`, etapas, pendências, avisos, próxima ação e última atividade na interface;
+- atualização automática ao retornar para a aba, recuperar visibilidade ou receber evento `storage`;
+- arquivamento próprio de Matéria, Tema e Assunto com bloqueio hierárquico da ação de estudo;
+- exclusão permanente vinculada por fila `prepared → ready`;
+- contrato de exclusão `1.0.0` e chaves dedicadas para comandos e confirmações;
+- testes de fronteira para impedir a reintrodução do progresso manual no runtime;
 - nova identidade visual baseada em uma bússola conectada a pontos de conhecimento;
 - favicon, marca lateral e ícones PWA atualizados.
 
+### Alterado
+
+- o Study Stack passou a ser a **fonte única do progresso de estudo**;
+- Visão Geral e Pesquisa Geral passaram a consumir exclusivamente o resumo sincronizado;
+- ações de Assunto passaram a usar **Iniciar**, **Continuar** ou **Ver estudo no Study Stack**;
+- abertura do Study Stack passou a ocorrer em uma **nova aba**;
+- progresso agregado de Tema, Matéria e aplicação passou a usar a capacidade objetiva de dez pontos por Assunto;
+- schema estrutural elevado para `v3`;
+- backups v1/v2 passam pela cadeia de migração até o schema v3;
+- documentação de uso, integração e backlog atualizada para a nova divisão de responsabilidades.
+
+### Removido
+
+- controles de aumentar, diminuir, ajustar, concluir e reiniciar progresso no Concept Compass;
+- campos atuais de pontos, meta, reforço e último estudo do registro de Assunto;
+- serviço de progresso manual e componente segmentado associados ao modelo antigo;
+- fallback para progresso legado quando a sincronização com o Study Stack falha.
+
+### Compatibilidade
+
+- backups antigos válidos continuam importáveis;
+- campos de progresso dos schemas v1/v2 são descartados na migração e não geram progresso artificial no Study Stack;
+- IDs, textos, dificuldade, observações, hierarquia, arquivamento e ordem são preservados;
+- chaves históricas `organizador-conteudos:*` do `localStorage` continuam preservadas;
+- versões `v0.1`, `v0.1.0` e `v0.1.1` continuam aceitas na importação de backups compatíveis.
+
 ### Validação
 
-- testes automatizados do contrato, do retorno profundo e da navegação para o Study Stack;
-- verificação dos ícones SVG e PNG nas superfícies oficiais da aplicação.
+- testes automatizados dos contratos, estados de sincronização, agregação, arquivamento e exclusão vinculada;
+- teste estrutural que proíbe campos e módulos legados fora da migração histórica;
+- `npm run release:check` como portão técnico;
+- roteiro de regressão compartilhada em `tests/manual/integracao-study-stack-final.md`.
 
 ## [0.1.1] - 2026-07-30
 

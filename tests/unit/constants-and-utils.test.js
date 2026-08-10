@@ -3,8 +3,6 @@ import test from 'node:test';
 
 import {
   DATA_SCHEMA_VERSION,
-  PROGRESS_POINTS,
-  PROGRESS_STATUS_LABELS,
   createDefaultPreferences,
   createEmptyData,
 } from '../../src/domain/constants.js';
@@ -22,21 +20,6 @@ test('estrutura vazia e preferências padrão retornam novas instâncias', () =>
   assert.equal(firstData.schemaVersion, DATA_SCHEMA_VERSION);
   assert.equal(firstPreferences.theme, 'system');
   assert.equal(firstPreferences.viewMode, 'cards');
-});
-
-test('pontos de progresso seguem os limites oficiais', () => {
-  assert.deepEqual(PROGRESS_POINTS, {
-    MIN_CURRENT: 0,
-    MIN_TOTAL: 1,
-    DEFAULT_TOTAL: 5,
-    MAX_TOTAL: 20,
-    MAX_VISIBLE_SEGMENTS: 10,
-  });
-  assert.deepEqual(PROGRESS_STATUS_LABELS, {
-    not_started: 'Não iniciado',
-    in_progress: 'Em andamento',
-    complete: 'Meta concluída',
-  });
 });
 
 test('data local não depende de corte de ISO UTC', () => {

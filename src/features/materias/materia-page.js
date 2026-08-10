@@ -132,7 +132,7 @@ export function createMateriaPage(documentObject, route, context) {
     workspaceTitle.textContent = 'Temas da matéria';
     workspaceDescription.textContent = materiaArchived
       ? 'Esta Matéria está arquivada. Restaure-a para voltar a adicionar conteúdos e acessar o Study Stack.'
-      : 'Expanda um tema para organizar seus assuntos e acompanhar o progresso.';
+      : 'Expanda um tema para organizar seus assuntos e acompanhar o estudo sincronizado.';
     workspaceHeading.append(workspaceTitle, workspaceDescription);
     workspaceHeader.append(workspaceHeading);
     workspace.append(workspaceHeader);

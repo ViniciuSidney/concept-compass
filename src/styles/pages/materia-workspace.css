@@ -1,5 +1,4 @@
-.form-field select,
-.form-field input[type='date'] {
+.form-field select {
   width: 100%;
   min-height: var(--control-height-md);
   padding: 0.72rem 0.85rem;
@@ -14,8 +13,7 @@
     background-color var(--transition-fast);
 }
 
-.form-field select:focus,
-.form-field input[type='date']:focus {
+.form-field select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 17%, transparent);
 }
@@ -38,7 +36,7 @@
 }
 
 .assunto-form__tracking-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 
@@ -542,115 +540,6 @@
   border-radius: var(--radius-small);
 }
 
-.assunto-form__tracking-grid--points {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.form-field--checkbox {
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface-soft);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-small);
-}
-
-.form-checkbox {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  cursor: pointer;
-}
-
-.form-checkbox input {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: var(--color-primary);
-}
-
-.segmented-progress {
-  display: grid;
-  min-width: 0;
-  gap: var(--space-2);
-}
-
-.segmented-progress__segments {
-  display: grid;
-  grid-auto-columns: minmax(0.55rem, 1fr);
-  grid-auto-flow: column;
-  gap: 0.22rem;
-  min-width: 7rem;
-}
-
-.segmented-progress__segment {
-  height: 0.7rem;
-  background: var(--color-surface-muted);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 0.18rem;
-}
-
-.segmented-progress__segment.is-filled {
-  background: var(--color-success);
-  border-color: color-mix(in srgb, var(--color-success) 70%, var(--color-border));
-}
-
-.segmented-progress__text {
-  color: var(--color-muted-strong);
-  font-size: var(--font-size-xs);
-  font-weight: 750;
-  white-space: nowrap;
-}
-
-.segmented-progress--compact {
-  grid-template-columns: minmax(7rem, 12rem) auto;
-  align-items: center;
-}
-
-.assunto-progress-control {
-  display: grid;
-  grid-template-columns: auto minmax(8rem, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-small);
-}
-
-.assunto-progress-control--compact {
-  width: min(100%, 29rem);
-  padding: var(--space-2);
-}
-
-.progress-adjust-form__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-}
-
-.modal--progress-adjust {
-  width: min(36rem, 100%);
-}
-
-@media (max-width: 62rem) {
-  .assunto-form__tracking-grid--points {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 42rem) {
-  .assunto-form__tracking-grid--points,
-  .progress-adjust-form__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .assunto-progress-control {
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
-  }
-
-  .segmented-progress--compact {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* M10 — adaptação estrutural do workspace */
 @media (max-width: 54rem) {
   .materia-workspace__header {
@@ -688,21 +577,6 @@
   }
 
   .assunto-row__open {
-    width: 100%;
-  }
-}
-
-@media (max-width: 34rem) {
-  .assunto-progress-control {
-    grid-template-columns: repeat(3, auto);
-  }
-
-  .assunto-progress-control .segmented-progress {
-    grid-column: 1 / -1;
-    grid-row: 1;
-  }
-
-  .assunto-progress-control > .icon-button {
     width: 100%;
   }
 }

@@ -1,8 +1,9 @@
 import { MigrationError } from '../../core/errors.js';
-import { DATA_SCHEMA_VERSION, PROGRESS_POINTS } from '../../domain/constants.js';
+import { DATA_SCHEMA_VERSION } from '../../domain/constants.js';
 import { cloneValue } from '../../utils/clone.js';
 import { isPlainObject } from '../../utils/object.js';
 
+const LEGACY_PROGRESS_TOTAL = 5;
 const LEGACY_STUDY_STATES = Object.freeze({
   NAO_INICIADO: 'nao_iniciado',
   EM_ESTUDO: 'em_estudo',
@@ -50,21 +51,58 @@ function migrateV1ToV2(data) {
   };
 }
 
-export function convertLegacyState(state) {
-  const total = PROGRESS_POINTS.DEFAULT_TOTAL;
-  if (state === LEGACY_STUDY_STATES.EM_ESTUDO) {
-    return { pontosProgresso: 1, metaPontosProgresso: total, precisaReforco: false };
-  }
-  if (state === LEGACY_STUDY_STATES.ESTUDADO) {
-    return { pontosProgresso: 3, metaPontosProgresso: total, precisaReforco: false };
-  }
-  if (state === LEGACY_STUDY_STATES.PRECISA_REFORCO) {
-    return { pontosProgresso: 3, metaPontosProgresso: total, precisaReforco: true };
-  }
-  if (state === LEGACY_STUDY_STATES.CONSOLIDADO) {
-    return { pontosProgresso: total, metaPontosProgresso: total, precisaReforco: false };
-  }
-  return { pontosProgresso: 0, metaPontosProgresso: total, precisaReforco: false };
+function migrateV2ToV3(data) {
+  return {
+    ...data,
+    schemaVersion: 3,
+    assuntos: data.assuntos.map((assunto) => {
+      const preserved = { ...assunto };
+      delete preserved.pontosProgresso;
+      delete preserved.metaPontosProgresso;
+      delete preserved.precisaReforco;
+      delete preserved.ultimoEstudoEm;
+      return preserved;
+    }),
+  };
 }
 
-const DATA_MIGRATIONS = new Map([[1, migrateV1ToV2]]);
+export function convertLegacyState(state) {
+  if (state === LEGACY_STUDY_STATES.EM_ESTUDO) {
+    return {
+      pontosProgresso: 1,
+      metaPontosProgresso: LEGACY_PROGRESS_TOTAL,
+      precisaReforco: false,
+    };
+  }
+  if (state === LEGACY_STUDY_STATES.ESTUDADO) {
+    return {
+      pontosProgresso: 3,
+      metaPontosProgresso: LEGACY_PROGRESS_TOTAL,
+      precisaReforco: false,
+    };
+  }
+  if (state === LEGACY_STUDY_STATES.PRECISA_REFORCO) {
+    return {
+      pontosProgresso: 3,
+      metaPontosProgresso: LEGACY_PROGRESS_TOTAL,
+      precisaReforco: true,
+    };
+  }
+  if (state === LEGACY_STUDY_STATES.CONSOLIDADO) {
+    return {
+      pontosProgresso: LEGACY_PROGRESS_TOTAL,
+      metaPontosProgresso: LEGACY_PROGRESS_TOTAL,
+      precisaReforco: false,
+    };
+  }
+  return {
+    pontosProgresso: 0,
+    metaPontosProgresso: LEGACY_PROGRESS_TOTAL,
+    precisaReforco: false,
+  };
+}
+
+const DATA_MIGRATIONS = new Map([
+  [1, migrateV1ToV2],
+  [2, migrateV2ToV3],
+]);

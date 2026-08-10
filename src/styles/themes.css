@@ -36,10 +36,6 @@
   background-color: var(--color-surface);
 }
 
-:root[data-resolved-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator {
-  opacity: 0.82;
-}
-
 :root[data-resolved-theme='dark'] .toast {
   border-color: var(--color-border-strong);
 }

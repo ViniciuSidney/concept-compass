@@ -12,7 +12,7 @@ test('cabeçalho do tema mantém o progresso sincronizado visível mesmo com o a
   const element = createTemaAccordion(documentObject, {
     section: {
       tema: tema({ id: 't1', nome: 'Gramática' }),
-      assuntos: [assunto({ id: 'a1', temaId: 't1', pontosProgresso: 3 })],
+      assuntos: [assunto({ id: 'a1', temaId: 't1' })],
       canMoveUp: false,
       canMoveDown: false,
     },

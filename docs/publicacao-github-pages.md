@@ -1,56 +1,64 @@
-# Publicação no GitHub Pages — v0.1.1
+# Publicação no GitHub Pages — v0.2.0
 
-## Estratégia escolhida
+## Estratégia
 
-A aplicação é estática e não possui etapa de build. A publicação usa:
+A aplicação é estática e não possui etapa de build. A publicação usa a branch `main`, a pasta `/(root)` e a opção **Deploy from a branch**.
 
-- branch: `main`;
-- pasta: `/(root)`;
-- fonte: **Deploy from a branch**.
-
-O arquivo `.nojekyll` evita processamento desnecessário. Todos os caminhos são relativos e as rotas usam fragmentos (`#`), mantendo compatibilidade com subpastas do GitHub Pages.
+O arquivo `.nojekyll`, os caminhos relativos e as rotas por fragmento preservam o funcionamento em subpasta.
 
 ## Antes de publicar
 
+Execute nos dois projetos:
+
 ```bash
 npm ci
-npm run release:check
+npm run release:check # Concept Compass
+npm run check         # Study Stack
+git diff --check
 git status
 ```
 
-Nenhuma alteração pendente deve existir.
+Não inclua backups reais, massa gerada, relatórios ou dependências instaladas no Git.
 
 ## Integração da versão
 
-Depois que a atualização estiver aprovada:
+Depois da revisão dos commits em `dev`, integre cada repositório separadamente:
 
 ```bash
 git switch main
-git merge --no-ff feat/renomeacao-concept-compass
-git tag -a v0.1.1 -m "Concept Compass v0.1.1"
+git merge --no-ff dev
+git tag -a v0.2.0 -m "v0.2.0"
 git push origin main
-git push origin v0.1.1
+git push origin v0.2.0
 ```
 
-A tag deve apontar para o mesmo commit publicado em `main`.
+Em cada repositório, `main`, tag, GitHub Release e GitHub Pages devem apontar para o mesmo commit publicado.
 
-## Testes na versão publicada
+## Smoke test público integrado
 
-Execute pelo menos:
+Use as URLs oficiais, que compartilham a mesma origem:
 
-- confirmar **Concept Compass** na interface, título e manifesto;
-- conferir que dados anteriores continuam disponíveis;
-- criar Matéria, Tema e Assunto fictícios;
-- ajustar progresso e pesquisar;
-- exportar um backup com o novo nome;
-- importar um backup antigo do Organizador de Conteúdos;
-- alternar aparência;
-- testar em desktop e celular;
-- verificar console e manifesto.
+```text
+https://viniciusidney.github.io/concept-compass/
+https://viniciusidney.github.io/study-stack/
+```
+
+Confirme:
+
+- versão `v0.2.0` nas duas aplicações;
+- abertura contextual do Study Stack em nova aba;
+- publicação e leitura do progresso oficial;
+- arquivamento e restauração ao vivo;
+- renomeação e movimentação sem F5;
+- exclusão vinculada e estado **Assunto não disponível**;
+- retorno profundo ao Concept Compass em nova aba;
+- criação e importação de backups próprios;
+- importação de backup antigo compatível no Concept Compass;
+- temas, responsividade, Console e recursos estáticos sem erro.
 
 ## Service worker
 
-A v0.1.1 não registra service worker. A decisão evita cache persistente sem uma interface de atualização validada.
+A v0.2.0 não registra service worker. A decisão evita cache persistente sem uma interface de atualização validada.
 
 ## Dados reais
 
