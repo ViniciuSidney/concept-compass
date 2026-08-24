@@ -22,6 +22,21 @@ function resolveLocationHref(location) {
   return FALLBACK_LOCATION;
 }
 
+function resolveStudyStackDestination({ location, destinationUrl }) {
+  if (typeof destinationUrl === 'string' && destinationUrl.trim()) {
+    return destinationUrl;
+  }
+
+  const currentUrl = new URL(resolveLocationHref(location));
+  const localHosts = new Set(['localhost', '127.0.0.1']);
+
+  if (localHosts.has(currentUrl.hostname)) {
+    return new URL('/study-stack/', currentUrl.origin).href;
+  }
+
+  return APP_CONFIG.integrations.studyStack.url;
+}
+
 export function createConceptCompassReturnUrl({ location, materiaId, temaId, assuntoId }) {
   const returnUrl = new URL(resolveLocationHref(location));
   const query = new URLSearchParams({ tema: temaId, assunto: assuntoId });
@@ -72,7 +87,7 @@ export function createStudyStackUrl({
   assunto,
   location,
   sentAt = new Date().toISOString(),
-  destinationUrl = APP_CONFIG.integrations.studyStack.url,
+  destinationUrl,
 }) {
   const returnUrl = createConceptCompassReturnUrl({
     location,
@@ -87,7 +102,9 @@ export function createStudyStackUrl({
     returnUrl,
     sentAt,
   });
-  const destination = new URL(destinationUrl);
+  const destination = new URL(
+    resolveStudyStackDestination({ location, destinationUrl }),
+  );
 
   destination.searchParams.set('subjectContext', JSON.stringify(context));
   destination.hash = APP_CONFIG.integrations.studyStack.route;
