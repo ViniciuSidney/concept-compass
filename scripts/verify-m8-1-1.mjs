@@ -3,8 +3,6 @@ import { access, readFile } from 'node:fs/promises';
 const root = new URL('../', import.meta.url);
 const requiredFiles = [
   'tests/unit/tema-accordion-layout.test.js',
-  'tests/manual/m8-1-1.md',
-  'docs/validacao-m8-1-1.md',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));

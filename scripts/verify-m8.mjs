@@ -15,12 +15,10 @@ const requiredFiles = [
   'tests/integration/structure-movement-controller.test.js',
   'tests/unit/structure-move-dialog.test.js',
   'tests/unit/structure-move-selectors.test.js',
-  'tests/manual/m8.md',
-  'docs/validacao-m8.md',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));
-process.stdout.write('✓ módulos, testes, documentação e roteiro do M8 encontrados\n');
+process.stdout.write('✓ módulos e testes do M8 encontrados\n');
 
 const created = '2026-07-29T12:00:00.000Z';
 const data = {

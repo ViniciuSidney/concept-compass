@@ -13,8 +13,6 @@ const requiredFiles = [
   'tests/unit/backup-service.test.js',
   'tests/unit/configuracoes-page.test.js',
   'tests/unit/recuperacao-page.test.js',
-  'tests/manual/m9.md',
-  'docs/validacao-m9.md',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));

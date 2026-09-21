@@ -26,7 +26,7 @@ Cada Assunto possui uma ação contextual para o Study Stack:
 - **Continuar estudo no Study Stack** — existe estudo em andamento;
 - **Ver estudo no Study Stack** — o estudo está consolidado.
 
-A ação abre o Study Stack em uma **nova aba**, mantendo o Concept Compass aberto na aba original.
+A ação abre o Study Stack na **mesma aba**. O retorno ao Concept Compass pode ser feito pelo fluxo de navegação ou pelo histórico do navegador.
 
 Ao retornar ao Concept Compass, não é necessário atualizar a página manualmente: a aplicação verifica novamente o resumo do Study Stack quando recupera o foco ou a visibilidade.
 

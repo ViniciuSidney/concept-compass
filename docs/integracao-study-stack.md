@@ -35,7 +35,7 @@ O Study Stack pode ser aberto:
 - pela ação principal da linha do Assunto;
 - pelo painel de detalhes do Assunto.
 
-A navegação ocorre em uma **nova aba**. A aba original do Concept Compass permanece aberta para receber a atualização quando o usuário voltar.
+A navegação ocorre na **mesma aba**. O contexto e a URL de retorno continuam sendo enviados ao Study Stack para preservar o fluxo entre as aplicações.
 
 Os rótulos são contextuais:
 

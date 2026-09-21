@@ -4,6 +4,17 @@ Todas as mudanças relevantes do Concept Compass serão registradas neste arquiv
 
 ## [Não lançado]
 
+### Corrigido
+
+- integração local passa a resolver o Study Stack na mesma origem em `localhost` e `127.0.0.1`;
+- navegação contextual para o Study Stack passa a ocorrer na mesma aba.
+
+### Manutenção
+
+- backup compactado antigo removido da raiz;
+- documentação operacional e roteiros manuais movidos para arquivo interno fora do repositório público;
+- verificações técnicas desacopladas da documentação interna.
+
 ## [0.2.0] - 2026-08-09
 
 ### Adicionado

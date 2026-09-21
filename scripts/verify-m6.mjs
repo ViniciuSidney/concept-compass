@@ -16,12 +16,10 @@ const requiredFiles = [
   'src/styles/pages/dashboard.css',
   'tests/unit/dashboard-page.test.js',
   'tests/unit/dashboard-selectors.test.js',
-  'tests/manual/m6.md',
-  'docs/validacao-m6.md',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));
-process.stdout.write('✓ módulos, estilos, testes e roteiro do M6 encontrados\n');
+process.stdout.write('✓ módulos, estilos e testes do M6 encontrados\n');
 
 const html = await readFile(new URL('index.html', root), 'utf8');
 if (!html.includes('pages/dashboard.css')) {

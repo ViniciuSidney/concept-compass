@@ -11,22 +11,15 @@ const requiredFiles = [
   'assets/icons/apple-touch-icon.png',
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',
-  'docs/backlog-v0.3.md',
   'docs/manual-do-usuario.md',
-  'docs/publicacao-github-pages.md',
-  'docs/release-v0.1.0.md',
-  'docs/release-v0.2.0.md',
-  'docs/validacao-v0.2.0.md',
-  'docs/validacao-m11.md',
   'scripts/generate-large-fixture.mjs',
   'tests/fixtures/large-data-builder.js',
-  'tests/manual/m11.md',
   'tests/unit/release-metadata.test.js',
   'tests/unit/release-performance.test.js',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));
-process.stdout.write('✓ arquivos de release, documentação, ícones e testes encontrados\n');
+process.stdout.write('✓ arquivos públicos, ícones e testes encontrados\n');
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 const lock = JSON.parse(await readFile(new URL('package-lock.json', root), 'utf8'));
@@ -92,8 +85,6 @@ process.stdout.write(
 
 const readme = await readFile(new URL('README.md', root), 'utf8');
 const changelog = await readFile(new URL('CHANGELOG.md', root), 'utf8');
-const releaseNotes = await readFile(new URL('docs/release-v0.2.0.md', root), 'utf8');
-const backlog = await readFile(new URL('docs/backlog-v0.3.md', root), 'utf8');
 if (!readme.includes('Concept Compass') || !readme.includes('release:check')) {
   throw new Error('O README não descreve corretamente a identidade e o portão da release.');
 }
@@ -103,10 +94,7 @@ if (
 ) {
   throw new Error('O CHANGELOG não preserva a v0.1.0 e a atualização v0.1.1.');
 }
-if (!releaseNotes.includes('tag planejada: `v0.2.0`') || !backlog.includes('metacognitivos')) {
-  throw new Error('As notas da release ou o backlog da v0.3 estão incompletos.');
-}
-process.stdout.write('✓ README, changelog, release e backlog coerentes com o produto\n');
+process.stdout.write('✓ README e changelog coerentes com o produto\n');
 
 const { stdout: trackedFiles } = await execFileAsync('git', ['ls-files'], {
   cwd: new URL('.', root),

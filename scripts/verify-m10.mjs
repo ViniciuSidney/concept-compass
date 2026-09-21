@@ -11,8 +11,6 @@ const requiredFiles = [
   'src/styles/themes.css',
   'src/styles/tokens.css',
   'tests/unit/m10-accessibility.test.js',
-  'tests/manual/m10.md',
-  'docs/validacao-m10.md',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));

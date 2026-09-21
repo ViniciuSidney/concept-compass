@@ -24,12 +24,10 @@ const requiredFiles = [
   'src/features/materias/assunto-detail-panel.js',
   'src/features/materias/assunto-delete-dialog.js',
   'src/styles/pages/materia-workspace.css',
-  'tests/manual/m5.md',
-  'docs/validacao-m5.md',
 ];
 
 for (const item of requiredFiles) await access(new URL(item, root));
-process.stdout.write('✓ módulos, estilos, documentação e roteiro do M5 encontrados\n');
+process.stdout.write('✓ módulos e estilos do M5 encontrados\n');
 
 const html = await readFile(new URL('index.html', root), 'utf8');
 if (!html.includes('pages/materia-workspace.css')) {

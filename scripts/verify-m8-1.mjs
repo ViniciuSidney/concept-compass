@@ -6,15 +6,11 @@ const root = new URL('../', import.meta.url);
 const requiredFiles = [
   'tests/unit/data-migrations.test.js',
   'tests/unit/legacy-progress-boundary.test.js',
-  'tests/manual/m8-1.md',
-  'tests/manual/integracao-study-stack-final.md',
-  'docs/validacao-m8-1.md',
   'docs/integracao-study-stack.md',
-  'docs/validacao-integracao-study-stack.md',
 ];
 
 for (const item of requiredFiles) await access(new URL(item, root));
-process.stdout.write('✓ migração, fronteiras, documentação e roteiros de integração encontrados\n');
+process.stdout.write('✓ migração, fronteiras e integração encontradas\n');
 
 const created = '2026-07-29T12:00:00.000Z';
 const migrated = migrateData({
@@ -162,13 +158,8 @@ process.stdout.write(
 const readme = await readFile(new URL('README.md', root), 'utf8');
 const manual = await readFile(new URL('docs/manual-do-usuario.md', root), 'utf8');
 const integration = await readFile(new URL('docs/integracao-study-stack.md', root), 'utf8');
-const validationDoc = await readFile(
-  new URL('docs/validacao-integracao-study-stack.md', root),
-  'utf8',
-);
-const backlog = await readFile(new URL('docs/backlog-v0.3.md', root), 'utf8');
 const changelog = await readFile(new URL('CHANGELOG.md', root), 'utf8');
-const currentDocs = `${readme}\n${manual}\n${integration}\n${validationDoc}\n${backlog}`;
+const currentDocs = `${readme}\n${manual}\n${integration}`;
 
 for (const staleInstruction of [
   '**Retirar ponto**',
@@ -177,7 +168,6 @@ for (const staleInstruction of [
   '**Ajustar progresso**',
   '**Concluir meta**',
   '**Reiniciar progresso**',
-  'Ambas as ações abrem o Study Stack na mesma aba',
 ]) {
   if (
     currentDocs.toLocaleLowerCase('pt-BR').includes(staleInstruction.toLocaleLowerCase('pt-BR'))
@@ -189,7 +179,7 @@ for (const staleInstruction of [
 for (const requiredText of [
   'fonte única',
   'schema v3',
-  'nova aba',
+  'mesma aba',
   'study-stack:integration:progress:v1',
   'study-stack:integration:deletion-commands:v1',
   'http://localhost:4173/concept-compass/',
@@ -208,7 +198,7 @@ if (
 }
 
 process.stdout.write(
-  '✓ documentação atual e changelog refletem a arquitetura final da integração\n',
+  '✓ documentação pública e changelog refletem a arquitetura final da integração\n',
 );
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));

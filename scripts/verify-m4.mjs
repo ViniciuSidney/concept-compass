@@ -21,11 +21,10 @@ const requiredFiles = [
   'src/features/materias/materias-controller.js',
   'src/features/materias/materias-selectors.js',
   'src/styles/pages/materias.css',
-  'tests/manual/m4.md',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));
-process.stdout.write('✓ módulos, estilos e roteiro do M4 encontrados\n');
+process.stdout.write('✓ módulos e estilos do M4 encontrados\n');
 
 const html = await readFile(new URL('index.html', root), 'utf8');
 if (!html.includes('pages/materias.css'))

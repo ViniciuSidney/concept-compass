@@ -4,9 +4,9 @@
 
 O **Concept Compass** é uma aplicação web local-first para organizar conteúdos em **Matéria → Tema → Assunto**. O aplicativo mantém a estrutura do que estudar; o **Study Stack é a fonte única do progresso de estudo**.
 
-> Versão candidata atual: **v0.2.0**
+> Versão publicada atual: **v0.2.0**
 
-Esta versão consolida a integração bidirecional com o Study Stack e encerra a Etapa 8. A publicação no GitHub Pages e o smoke test público ainda fazem parte da consolidação da release.
+A v0.2.0 consolidou a integração bidirecional com o Study Stack. A aplicação está publicada no GitHub Pages; a branch `main` também contém correções posteriores à release.
 
 ## Responsabilidades das aplicações
 
@@ -37,7 +37,7 @@ O Concept Compass **não calcula, edita nem inventa progresso próprio**.
 
 - criação, edição, exclusão, arquivamento e restauração de Matérias, Temas e Assuntos;
 - reordenação e movimentação de Temas entre Matérias e de Assuntos entre Temas;
-- acesso contextual ao Study Stack em uma **nova aba**;
+- acesso contextual ao Study Stack na **mesma aba** na versão atual;
 - leitura do progresso publicado pelo Study Stack;
 - progresso agregado por Tema, Matéria e aplicação a partir da escala oficial de `0–10` por Assunto;
 - Visão Geral com distribuição, prioridades e estudos recentes sincronizados;
@@ -190,26 +190,22 @@ npm run serve                   # servidor isolado do Concept Compass
 
 ## Publicação
 
-O projeto usa arquivos estáticos e caminhos relativos. A publicação recomendada é pelo branch `main`, pasta raiz, conforme `docs/publicacao-github-pages.md`.
+O projeto usa arquivos estáticos e caminhos relativos e está publicado pelo GitHub Pages a partir da branch `main`, pasta raiz.
+
+Aplicação: `https://viniciusidney.github.io/concept-compass/`
 
 O service worker continua inativo na versão técnica atual para evitar que cache antigo esconda atualizações sem um fluxo visual de renovação validado.
 
 ## Documentação
 
 - `docs/manual-do-usuario.md` — uso atual da aplicação;
-- `docs/integracao-study-stack.md` — contrato, sincronização, exclusão e ambiente compartilhado;
-- `docs/validacao-integracao-study-stack.md` — portão automatizado e estado da regressão final;
-- `tests/manual/integracao-study-stack-final.md` — regressão manual final da integração;
-- `docs/publicacao-github-pages.md` — publicação e testes de produção;
-- `docs/release-v0.2.0.md` — notas da versão candidata atual;
-- `docs/validacao-v0.2.0.md` — validação técnica e manual da versão;
-- `docs/backlog-v0.3.md` — possibilidades para o próximo ciclo.
+- `docs/integracao-study-stack.md` — contrato, sincronização, exclusão e ambiente compartilhado.
 
-Documentos de marcos antigos permanecem no repositório como histórico e podem descrever comportamentos que já foram substituídos.
+Documentos internos de planejamento, release, validação e testes manuais são mantidos fora do repositório público.
 
 ## Próxima evolução
 
-Depois da publicação da v0.2.0, a evolução deverá ser escolhida com base no uso real. A **Ficha do Assunto** e os **registros metacognitivos** permanecem como possibilidades para a v0.3.0, mantendo o Study Stack como responsável exclusivo pelo progresso de estudo.
+Após a publicação da v0.2.0, a evolução deverá ser escolhida com base no uso real. A **Ficha do Assunto** e os **registros metacognitivos** permanecem como possibilidades para a v0.3.0, mantendo o Study Stack como responsável exclusivo pelo progresso de estudo.
 
 ## Autor
 

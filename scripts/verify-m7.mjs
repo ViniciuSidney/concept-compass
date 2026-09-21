@@ -16,12 +16,10 @@ const requiredFiles = [
   'src/styles/pages/pesquisa.css',
   'tests/unit/pesquisa-page.test.js',
   'tests/unit/pesquisa-selectors.test.js',
-  'tests/manual/m7.md',
-  'docs/validacao-m7.md',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));
-process.stdout.write('✓ módulos, estilos, testes e roteiro do M7 encontrados\n');
+process.stdout.write('✓ módulos, estilos e testes do M7 encontrados\n');
 
 const html = await readFile(new URL('index.html', root), 'utf8');
 if (!html.includes('pages/pesquisa.css')) {

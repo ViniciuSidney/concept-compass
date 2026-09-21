@@ -2,15 +2,12 @@ import { access, readFile } from 'node:fs/promises';
 
 const root = new URL('../', import.meta.url);
 const requiredFiles = [
-  'docs/release-v0.2.0.md',
-  'docs/validacao-v0.2.0.md',
-  'tests/manual/integracao-study-stack-final.md',
   'tests/unit/backup-service.test.js',
   'tests/unit/release-metadata.test.js',
 ];
 
 for (const path of requiredFiles) await access(new URL(path, root));
-process.stdout.write('✓ documentação e testes da identidade encontrados\n');
+process.stdout.write('✓ testes e arquivos da identidade encontrados\n');
 
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 const lock = JSON.parse(await readFile(new URL('package-lock.json', root), 'utf8'));
