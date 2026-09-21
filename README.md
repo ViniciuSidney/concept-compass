@@ -1,54 +1,54 @@
-# Concept Compass
+# Concept Compass 🧭
 
-**Mapeie, organize e acompanhe seu conhecimento.**
+**Organize o que estudar. Enxergue onde está. Continue pelo próximo passo.**
 
-O **Concept Compass** é uma aplicação web local-first para organizar conteúdos em **Matéria → Tema → Assunto**. O aplicativo mantém a estrutura do que estudar; o **Study Stack é a fonte única do progresso de estudo**.
+O **Concept Compass** é uma aplicação web local-first para organizar conteúdos em **Matéria → Tema → Assunto** e acompanhar, de forma integrada, o progresso registrado no **Study Stack**.
 
-> Versão publicada atual: **v0.2.0**
+> **Versão publicada:** `v0.2.0`  
+> **Aplicação:** https://viniciusidney.github.io/concept-compass/
 
-A v0.2.0 consolidou a integração bidirecional com o Study Stack. A aplicação está publicada no GitHub Pages; a branch `main` também contém correções posteriores à release.
+![Visão geral do Concept Compass](assets/images/concept-compass-desktop.png)
 
-## Responsabilidades das aplicações
+## Visão geral
 
-### Concept Compass
+O Concept Compass funciona como o mapa estrutural do ecossistema de estudos. Ele mantém a organização dos conteúdos, enquanto o **Study Stack é a fonte única do progresso de estudo**.
 
-Mantém:
+A aplicação permite estruturar Matérias, Temas e Assuntos, navegar pela hierarquia, pesquisar conteúdos, arquivar ou reorganizar itens e abrir o contexto correspondente no Study Stack pela **mesma aba**.
 
-- Matérias, Temas e Assuntos;
-- IDs estáveis e relações hierárquicas;
-- nomes, descrições, dificuldade e observações;
-- ordem, movimentação e arquivamento;
-- backup, importação e recuperação dos dados estruturais.
+O projeto é totalmente local-first: os dados ficam no navegador, sem necessidade de conta, servidor ou banco de dados remoto.
 
-### Study Stack
+## Principais recursos
 
-Mantém:
+- organização hierárquica em **Matéria → Tema → Assunto**;
+- criação, edição, exclusão, arquivamento e restauração;
+- reordenação de conteúdos e movimentação entre estruturas;
+- Visão Geral com progresso, prioridades e atividade recente;
+- Pesquisa Geral com contexto de estudo e estado sincronizado;
+- integração bidirecional com o Study Stack;
+- backup JSON, importação validada e recuperação de dados;
+- temas Claro, Escuro e Seguir sistema;
+- interface responsiva e navegável por teclado;
+- armazenamento local com compatibilidade entre versões anteriores.
 
-- progresso objetivo de `0` a `10`;
-- etapas **Base, Prática, Análise, Revisão e Consolidação**;
-- pendências de erros e revisões;
-- próxima ação recomendada;
-- última atividade;
-- estado consolidado.
+## Integração com o Study Stack
 
-O Concept Compass **não calcula, edita nem inventa progresso próprio**.
+O Concept Compass envia ao Study Stack o contexto da Matéria, Tema e Assunto utilizando o contrato `1.0.0`.
 
-## Funcionalidades
+O progresso oficial é publicado pelo Study Stack em:
 
-- criação, edição, exclusão, arquivamento e restauração de Matérias, Temas e Assuntos;
-- reordenação e movimentação de Temas entre Matérias e de Assuntos entre Temas;
-- acesso contextual ao Study Stack na **mesma aba** na versão atual;
-- leitura do progresso publicado pelo Study Stack;
-- progresso agregado por Tema, Matéria e aplicação a partir da escala oficial de `0–10` por Assunto;
-- Visão Geral com distribuição, prioridades e estudos recentes sincronizados;
-- Pesquisa Geral com situação, etapa, pendências e última atividade do Study Stack;
-- exclusão permanente vinculada ao Study Stack por IDs estáveis;
-- aparência Claro, Escuro ou Seguir sistema;
-- backup JSON, importação validada, exclusão protegida e recuperação de dados;
-- funcionamento responsivo e acessível por teclado;
-- armazenamento local, sem conta ou servidor de dados acadêmicos.
+```text
+study-stack:integration:progress:v1
+```
 
-## Fluxo oficial de estudo
+A exclusão vinculada utiliza:
+
+```text
+study-stack:integration:deletion-commands:v1
+```
+
+O Concept Compass apenas lê e apresenta esse estado. Ele não cria um progresso paralelo nem usa progresso local como fallback.
+
+### Fluxo
 
 ```text
 Concept Compass
@@ -59,154 +59,101 @@ Study Stack
       ↓
 0–10 + etapas + pendências + atividade
       ↓
-Concept Compass apenas lê e apresenta
+Concept Compass apresenta o resultado
 ```
 
-Em um Assunto, a ação varia conforme o estado sincronizado:
+## Estrutura dos dados
 
-- **Iniciar estudo no Study Stack** — ainda não existem registros;
-- **Continuar estudo no Study Stack** — estudo em andamento;
-- **Ver estudo no Study Stack** — estudo consolidado.
+O schema estrutural atual é o **schema v3**.
 
-Assuntos arquivados, ou descendentes de Tema/Matéria arquivados, preservam o histórico sincronizado, mas não podem abrir o Study Stack até a restauração.
-
-## Integração com o Study Stack
-
-O envio de contexto usa o contrato `1.0.0`, com os IDs e nomes da Matéria, do Tema e do Assunto, além da URL de retorno profundo.
-
-O resumo de progresso é lido da chave:
+A aplicação preserva IDs estáveis e mantém compatibilidade com backups antigos válidos. Dados das versões anteriores passam pela cadeia de migração até o formato atual, enquanto campos antigos de progresso são descartados sem gerar registros artificiais no Study Stack.
 
 ```text
-study-stack:integration:progress:v1
+schema v1
+   ↓
+schema v2
+   ↓
+schema v3
 ```
 
-A interface se atualiza ao carregar e também quando detecta mudanças relevantes por `storage`, retorno de foco ou recuperação de visibilidade. Se o resumo estiver inválido, a interface exibe **Sincronização pendente**. Se a versão do contrato for incompatível, exibe **Atualização necessária**. Não existe fallback para o antigo progresso manual.
+## Tecnologias
 
-A exclusão permanente usa uma fila em duas fases (`prepared` → `ready`) para permitir a remoção vinculada no Study Stack sem apagar a estrutura local antes da preparação do comando.
+O projeto utiliza **HTML5, CSS3 e JavaScript com ES Modules**, sem dependências de execução.
 
-A especificação completa está em `docs/integracao-study-stack.md`.
+A persistência é feita com `localStorage`, e o projeto inclui testes automatizados, ESLint, Prettier e verificações próprias de release.
 
-## Regra de mesma origem
+## Executar localmente
 
-A sincronização usa `localStorage`, portanto os dois aplicativos precisam compartilhar **protocolo, host e porta**.
+Requisitos:
 
-Em produção, os caminhos oficiais compartilham a origem:
+- Node.js `20` ou superior;
+- npm.
 
-```text
-https://viniciusidney.github.io/concept-compass/
-https://viniciusidney.github.io/study-stack/
+```bash
+npm ci
+npm run serve
 ```
 
-Para teste integrado local, use um único servidor a partir da pasta pai dos projetos:
+Depois, acesse o endereço informado pelo servidor local.
 
-```powershell
-cd C:\Projetos
-npx http-server . -p 4173 -c-1
+Para executar o portão técnico completo:
+
+```bash
+npm run release:check
 ```
 
-Abra somente:
+## Desenvolvimento integrado
+
+Como a sincronização entre Concept Compass e Study Stack usa `localStorage`, os dois aplicativos precisam compartilhar protocolo, host e porta.
+
+Uma configuração local possível é:
 
 ```text
 http://localhost:4173/concept-compass/
 http://localhost:4173/study-stack/
 ```
 
-Não misture `localhost`, `127.0.0.1`, IP da rede, GitHub Pages ou portas diferentes durante um teste de integração.
+Durante testes integrados, evite misturar `localhost`, `127.0.0.1`, IP local, GitHub Pages ou portas diferentes.
 
-O comando `npm run serve` continua útil para desenvolver e testar o Concept Compass isoladamente, mas duas aplicações em origens diferentes não compartilham `localStorage`.
+## Qualidade e validação
 
-## Dados, schema e backups
+O projeto possui testes automatizados para domínio, migrações, integração, navegação, compatibilidade, identidade, desempenho e fronteiras contra a reintrodução de progresso manual.
 
-O schema estrutural atual é o **v3**. O registro atual de Assunto não contém mais os antigos campos de pontos, meta, reforço ou último estudo.
+O comando:
 
-A migração preserva compatibilidade:
-
-```text
-schema v1 (estados antigos)
-        ↓
-schema v2 (pontos antigos)
-        ↓
-schema v3 (estrutura do conteúdo)
+```bash
+npm run release:check
 ```
 
-Backups v1/v2 válidos continuam importáveis. Os campos de progresso antigos são descartados durante a migração e **não são convertidos em progresso do Study Stack**, evitando criar evidências de estudo falsas.
-
-O backup do Concept Compass contém somente os dados pertencentes ao Concept Compass. Dados de estudo armazenados pelo Study Stack não fazem parte desse arquivo.
-
-As chaves históricas `organizador-conteudos:*` do `localStorage` continuam preservadas por compatibilidade com instalações anteriores.
+executa o conjunto de testes, análise estática, conferência de formatação e verificações estruturais do projeto.
 
 ## Compatibilidade da renomeação
 
-A identidade **Concept Compass** continua separada da identidade técnica histórica. Por isso:
+O nome atual do produto é **Concept Compass**, mas parte da identidade técnica histórica foi preservada para evitar quebra de dados existentes.
 
-- o pacote e o repositório mantêm o identificador `organizador-de-conteudos`;
-- as chaves `organizador-conteudos:*` não são renomeadas;
-- backups identificados como **Organizador de Conteúdos** continuam aceitos quando compatíveis;
-- rotas e IDs existentes não são recriados por causa da mudança de marca.
+Por isso:
 
-## Executar localmente
+- o pacote continua usando o identificador `organizador-de-conteudos`;
+- as chaves históricas `organizador-conteudos:*` permanecem compatíveis;
+- backups antigos compatíveis continuam importáveis;
+- IDs e relações existentes não são recriados por causa da mudança de marca.
 
-Requisitos: Node.js `20` ou superior e npm.
+## Documentação pública
 
-```bash
-npm ci
-npm run release:check
-npm run serve
-```
+A documentação mantida no repositório é voltada para entendimento e uso do produto:
 
-## Dados e segurança
+- `docs/manual-do-usuario.md`
+- `docs/integracao-study-stack.md`
 
-Os dados ficam no `localStorage` do navegador. Eles não acompanham automaticamente outro navegador, perfil ou computador.
+Documentos internos de planejamento, publicação, validação e testes manuais são mantidos separadamente do repositório público.
 
-Antes de trocar de dispositivo, limpar dados do navegador ou testar operações destrutivas:
+## Estado atual
 
-1. abra **Configurações**;
-2. use **Exportar backup**;
-3. guarde o JSON em local seguro;
-4. preserve também os dados do Study Stack pelo mecanismo próprio dele, quando necessário;
-5. importe o backup do Concept Compass no ambiente de destino.
+A `v0.2.0` consolidou a integração com o Study Stack. A branch `main` inclui correções posteriores à release, como navegação na mesma aba e resolução do Study Stack na mesma origem durante desenvolvimento local.
 
-## Rotas
-
-- `#/` — Visão Geral;
-- `#/materias` — Matérias;
-- `#/materias/:materiaId` — workspace da Matéria;
-- `#/pesquisa?q=:termo&tipo=:tipo` — Pesquisa Geral;
-- `#/configuracoes` — aparência, backup, dados e Sobre;
-- `#/recuperacao` — recuperação de armazenamento inválido.
-
-## Comandos
-
-```bash
-npm run test                    # testes automatizados
-npm run lint                    # análise estática
-npm run format:check            # conferência de formatação
-npm run check                   # testes + lint + formatação
-npm run verify:all              # verificações estruturais e de integração
-npm run release:check           # portão técnico completo
-npm run generate:large-fixture  # gera massa fictícia em reports/
-npm run serve                   # servidor isolado do Concept Compass
-```
-
-## Publicação
-
-O projeto usa arquivos estáticos e caminhos relativos e está publicado pelo GitHub Pages a partir da branch `main`, pasta raiz.
-
-Aplicação: `https://viniciusidney.github.io/concept-compass/`
-
-O service worker continua inativo na versão técnica atual para evitar que cache antigo esconda atualizações sem um fluxo visual de renovação validado.
-
-## Documentação
-
-- `docs/manual-do-usuario.md` — uso atual da aplicação;
-- `docs/integracao-study-stack.md` — contrato, sincronização, exclusão e ambiente compartilhado.
-
-Documentos internos de planejamento, release, validação e testes manuais são mantidos fora do repositório público.
-
-## Próxima evolução
-
-Após a publicação da v0.2.0, a evolução deverá ser escolhida com base no uso real. A **Ficha do Assunto** e os **registros metacognitivos** permanecem como possibilidades para a v0.3.0, mantendo o Study Stack como responsável exclusivo pelo progresso de estudo.
+O service worker permanece sem registro na versão atual, evitando cache persistente sem um fluxo de atualização previamente validado.
 
 ## Autor
 
-Vinícius Sidney
+**Vinícius Sidney**  
+Estudante de Informática e desenvolvedor web em formação.
