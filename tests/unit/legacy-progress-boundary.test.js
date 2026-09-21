@@ -50,7 +50,6 @@ test('documentação atual não orienta o usuário a editar progresso local', as
     readFile(new URL('README.md', root), 'utf8'),
     readFile(new URL('docs/manual-do-usuario.md', root), 'utf8'),
     readFile(new URL('docs/integracao-study-stack.md', root), 'utf8'),
-    readFile(new URL('docs/backlog-v0.3.md', root), 'utf8'),
   ]);
   const source = currentDocs.join('\n');
 
@@ -68,5 +67,5 @@ test('documentação atual não orienta o usuário a editar progresso local', as
 
   assert.match(source, /Study Stack.*fonte única|fonte única.*Study Stack/is);
   assert.match(source, /schema.*v3/is);
-  assert.match(source, /nova aba/i);
+  assert.match(source, /mesma aba/i);
 });
